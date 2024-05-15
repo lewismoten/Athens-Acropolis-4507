@@ -54,7 +54,7 @@ One thing of note here is the citiscape. I found a New York webcam online that s
 - Link Exchange is static for offline viewing.
 - LPage Guestbook. Host no longer available.
 - Book of Dreamers Guesbook - was hosted at home. An archive is here at [book_of_dreamers.html]
-- Marquee Applet - doesn't display in top frame. Should show a list of floating/wavey messages found in [dreamers.txt]
+- Marquee Applet - doesn't display in top frame. Should show a list of floating/wavey messages found in [dreamers.txt](dreamers.txt)
 - Link to Lycos. They no longer use `cgi-bin` for their queries.
 - Shoomi's Dreams Form Broken
 - Email form doesn't work. The `moonhalo` account on GeoCities is no longer active, and I don't have access to my email at `mindless.com`.
