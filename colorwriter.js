@@ -26,12 +26,18 @@
       top: 24,
       width: 456,
       height: 314
-    }
+    },
+    browserRect: {
+      left: 500,
+      top: 54
+    },
+    previewBackground: "FFFFFF",
+    zIndexSeed: 3
   };
 
   mount.innerHTML = [
     '<div id="cw-desktop" style="position:relative; min-height:100vh; overflow:hidden;">',
-    '  <div id="cw-window" style="position:absolute; left:24px; top:24px; width:456px; height:314px; min-width:430px; min-height:290px; resize:both; overflow:hidden; font:12px \'MS Sans Serif\', Geneva, sans-serif; color:#000000; border:2px solid #d4d0c8; border-right-color:#000000; border-bottom-color:#000000; background:#d4d0c8; box-sizing:border-box;">',
+    '  <div id="cw-window" style="position:absolute; left:24px; top:24px; width:456px; height:314px; min-width:430px; min-height:290px; resize:both; overflow:hidden; z-index:2; font:12px \'MS Sans Serif\', Geneva, sans-serif; color:#000000; border:2px solid #d4d0c8; border-right-color:#000000; border-bottom-color:#000000; background:#d4d0c8; box-sizing:border-box;">',
     '    <div id="cw-titlebar" style="height:20px; background:linear-gradient(90deg, #0000aa, #2e58ff); color:#ffffff; display:flex; align-items:center; justify-content:space-between; padding:0 3px 0 6px; box-sizing:border-box; cursor:move; user-select:none;">',
     '      <span style="display:flex; align-items:center; gap:4px; font-weight:bold;">',
     '        <span style="width:14px; height:14px; border:1px solid #ffffff; border-right-color:#333333; border-bottom-color:#333333; background:linear-gradient(135deg, #ffffff 0 28%, #cc0000 28% 52%, #0000cc 52% 100%); box-sizing:border-box;"></span>',
@@ -78,6 +84,37 @@
     "      </div>",
     "    </div>",
     "  </div>",
+    '  <div id="cw-browser-window" style="position:absolute; left:500px; top:54px; width:366px; height:282px; min-width:250px; min-height:180px; overflow:hidden; z-index:1; font:12px \'MS Sans Serif\', Geneva, sans-serif; color:#000000; border:2px solid #d4d0c8; border-right-color:#000000; border-bottom-color:#000000; background:#d4d0c8; box-sizing:border-box;">',
+    '    <div id="cw-browser-titlebar" style="height:20px; background:linear-gradient(90deg, #7c0000, #d95700); color:#ffffff; display:flex; align-items:center; justify-content:space-between; padding:0 3px 0 6px; box-sizing:border-box; cursor:move; user-select:none;">',
+    '      <span style="display:flex; align-items:center; gap:4px; font-weight:bold;">',
+    '        <span style="width:14px; height:14px; border:1px solid #ffffff; border-right-color:#333333; border-bottom-color:#333333; background:linear-gradient(180deg, #d7ecff 0 56%, #0b4fbf 56% 100%); box-sizing:border-box; position:relative;"><span style="position:absolute; left:2px; top:2px; width:8px; height:4px; border:1px solid #0b4fbf; background:#ffffff; box-sizing:border-box;"></span></span>',
+    '        <span>Preview Browser</span>',
+    "      </span>",
+    '      <span style="display:flex; gap:2px;">',
+    '        <button type="button" id="cw-browser-close" style="width:16px; height:14px; padding:0; text-align:center; line-height:12px; border:1px solid #ffffff; border-right-color:#555555; border-bottom-color:#555555; background:#d4d0c8; color:#000000; font:11px \'MS Sans Serif\', Geneva, sans-serif;">X</button>',
+    "      </span>",
+    "    </div>",
+    '    <div style="height:calc(100% - 20px); display:flex; flex-direction:column; box-sizing:border-box;">',
+    '      <div style="padding:4px; border-bottom:1px solid #808080; background:#d4d0c8;">',
+    '        <div style="display:flex; align-items:center; gap:4px; margin-bottom:4px; white-space:nowrap;">',
+    '          <span>BG</span>',
+    '          <button type="button" class="cw-browser-swatch" data-color="FFFFFF" title="White" style="width:16px; height:16px; padding:0; border:2px outset #d4d0c8; background:#ffffff;"></button>',
+    '          <button type="button" class="cw-browser-swatch" data-color="000000" title="Black" style="width:16px; height:16px; padding:0; border:2px outset #d4d0c8; background:#000000;"></button>',
+    '          <button type="button" class="cw-browser-swatch" data-color="004F7C" title="Site Blue" style="width:16px; height:16px; padding:0; border:2px outset #d4d0c8; background:#004f7c;"></button>',
+    '          <button type="button" class="cw-browser-swatch" data-color="400040" title="Purple" style="width:16px; height:16px; padding:0; border:2px outset #d4d0c8; background:#400040;"></button>',
+    '          <button type="button" class="cw-browser-swatch" data-color="C0C0C0" title="Silver" style="width:16px; height:16px; padding:0; border:2px outset #d4d0c8; background:#c0c0c0;"></button>',
+    "        </div>",
+    '        <div style="display:flex; gap:4px; align-items:center;">',
+    '          <span>Address</span>',
+    '          <input id="cw-browser-address" type="text" readonly value="about:font-preview" style="flex:1; min-width:0; border:2px inset #d4d0c8; padding:1px 4px; box-sizing:border-box; background:#ffffff;">',
+    "        </div>",
+    "      </div>",
+    '      <div style="flex:1; min-height:0; background:#808080; padding:3px; box-sizing:border-box;">',
+    '        <iframe id="cw-browser-frame" title="Color Writer Preview" style="display:block; width:100%; height:100%; border:2px inset #d4d0c8; background:#ffffff; box-sizing:border-box;"></iframe>',
+    "      </div>",
+    '      <div id="cw-browser-status" style="height:18px; border-top:1px solid #808080; padding:2px 6px; box-sizing:border-box; background:#d4d0c8; white-space:nowrap; overflow:hidden;">Rendering old-school HTML...</div>',
+    "    </div>",
+    "  </div>",
     '  <div id="cw-minimized" style="display:none; position:absolute; left:8px; bottom:8px; width:220px; border:2px solid #d4d0c8; border-right-color:#000000; border-bottom-color:#000000; background:#d4d0c8; box-sizing:border-box;">',
     '    <div id="cw-minimized-titlebar" style="height:20px; background:linear-gradient(90deg, #0000aa, #2e58ff); color:#ffffff; display:flex; align-items:center; justify-content:space-between; padding:0 3px 0 6px; box-sizing:border-box;">',
     '      <span style="display:flex; align-items:center; gap:4px; font-weight:bold;">',
@@ -96,6 +133,12 @@
   var desktop = document.getElementById("cw-desktop");
   var windowEl = document.getElementById("cw-window");
   var titlebar = document.getElementById("cw-titlebar");
+  var browserWindowEl = document.getElementById("cw-browser-window");
+  var browserTitlebar = document.getElementById("cw-browser-titlebar");
+  var browserFrame = document.getElementById("cw-browser-frame");
+  var browserStatus = document.getElementById("cw-browser-status");
+  var browserCloseButton = document.getElementById("cw-browser-close");
+  var browserSwatches = document.getElementsByClassName("cw-browser-swatch");
   var minimizedEl = document.getElementById("cw-minimized");
   var paletteCanvas = document.getElementById("cw-palette");
   var paletteContext = paletteCanvas.getContext("2d");
@@ -131,12 +174,27 @@
   minimizeButton.addEventListener("click", minimizeWindow);
   maximizeButton.addEventListener("click", toggleMaximize);
   restoreButton.addEventListener("click", restoreWindow);
-  titlebar.addEventListener("mousedown", startDrag);
+  browserCloseButton.addEventListener("click", function () {
+    browserWindowEl.style.display = "none";
+  });
+  for (radioIndex = 0; radioIndex < browserSwatches.length; radioIndex += 1) {
+    browserSwatches[radioIndex].addEventListener("click", onPreviewBackgroundPick);
+  }
+  titlebar.addEventListener("mousedown", startEditorDrag);
+  browserTitlebar.addEventListener("mousedown", startBrowserDrag);
+  windowEl.addEventListener("mousedown", function () {
+    bringToFront(windowEl);
+  });
+  browserWindowEl.addEventListener("mousedown", function () {
+    bringToFront(browserWindowEl);
+  });
   document.addEventListener("mousemove", dragWindow);
   document.addEventListener("mouseup", stopDrag);
   textInput.addEventListener("input", onTextChange);
   hexInput.addEventListener("input", onHexInput);
 
+  browserWindowEl.style.left = state.browserRect.left + "px";
+  browserWindowEl.style.top = state.browserRect.top + "px";
   drawPalette();
   refreshUi();
 
@@ -245,6 +303,7 @@
     var text = textInput.value;
     var currentLetter = text.charAt(state.currentIndex) || "";
     var drawableCount = countDrawableLetters(text);
+    var htmlOutput = state.output.join("");
 
     totalInput.value = String(drawableCount);
     letterNumberInput.value = currentLetter ? String(countDrawableLetters(text.slice(0, state.currentIndex)) + 1) : "0";
@@ -253,25 +312,48 @@
     swatch.style.background = "#" + state.currentColor;
     livePreview.style.color = "#0000cc";
     livePreview.textContent = "shoomi@mindless.com";
-    outputArea.value = state.output.join("");
+    outputArea.value = htmlOutput;
     startButton.textContent = state.editing ? "Stop Editing" : "Start Editing";
     maximizeButton.textContent = state.windowMode === "maximized" ? "❐" : "[]";
+    browserStatus.textContent = htmlOutput ? "Showing rendered <FONT> output" : "Waiting for colored text...";
+    refreshBrowserSwatches();
+    renderBrowserPreview(htmlOutput, text);
   }
 
-  function startDrag(event) {
+  function onPreviewBackgroundPick(event) {
+    state.previewBackground = event.currentTarget.getAttribute("data-color") || state.previewBackground;
+    refreshUi();
+  }
+
+  function startEditorDrag(event) {
     if (state.windowMode !== "normal") {
       return;
     }
 
-    if (event.target.tagName === "BUTTON") {
+    startDrag(event, windowEl, null);
+  }
+
+  function startBrowserDrag(event) {
+    startDrag(event, browserWindowEl, function (left, top) {
+      state.browserRect.left = left;
+      state.browserRect.top = top;
+    });
+  }
+
+  function startDrag(event, element, onMove) {
+    bringToFront(element);
+
+    if (event.target.tagName === "BUTTON" || event.target.tagName === "INPUT") {
       return;
     }
 
     dragState = {
       startX: event.clientX,
       startY: event.clientY,
-      left: windowEl.offsetLeft,
-      top: windowEl.offsetTop
+      left: element.offsetLeft,
+      top: element.offsetTop,
+      element: element,
+      onMove: onMove
     };
   }
 
@@ -285,13 +367,19 @@
       return;
     }
 
-    maxLeft = Math.max(0, desktop.clientWidth - windowEl.offsetWidth);
-    maxTop = Math.max(0, desktop.clientHeight - windowEl.offsetHeight);
+    maxLeft = Math.max(0, desktop.clientWidth - dragState.element.offsetWidth);
+    maxTop = Math.max(0, desktop.clientHeight - dragState.element.offsetHeight);
     nextLeft = dragState.left + (event.clientX - dragState.startX);
     nextTop = dragState.top + (event.clientY - dragState.startY);
 
-    windowEl.style.left = Math.max(0, Math.min(maxLeft, nextLeft)) + "px";
-    windowEl.style.top = Math.max(0, Math.min(maxTop, nextTop)) + "px";
+    nextLeft = Math.max(0, Math.min(maxLeft, nextLeft));
+    nextTop = Math.max(0, Math.min(maxTop, nextTop));
+
+    dragState.element.style.left = nextLeft + "px";
+    dragState.element.style.top = nextTop + "px";
+    if (dragState.onMove) {
+      dragState.onMove(nextLeft, nextTop);
+    }
   }
 
   function stopDrag() {
@@ -353,6 +441,53 @@
     windowEl.style.top = state.restoreRect.top + "px";
     windowEl.style.width = state.restoreRect.width + "px";
     windowEl.style.height = state.restoreRect.height + "px";
+  }
+
+  function bringToFront(element) {
+    state.zIndexSeed += 1;
+    element.style.zIndex = String(state.zIndexSeed);
+  }
+
+  function renderBrowserPreview(htmlOutput, text) {
+    var previewBody = htmlOutput || escapePreviewText(text);
+    var frameDocument = browserFrame.contentWindow.document;
+    var textColor = pickPreviewTextColor(state.previewBackground);
+
+    frameDocument.open();
+    frameDocument.write(
+      "<!DOCTYPE html>" +
+      "<html><head><title>Preview</title></head>" +
+      '<body bgcolor="#' + state.previewBackground + '" text="#' + textColor + '" style="margin:12px; font:16px \'Times New Roman\', serif;">' +
+      previewBody +
+      "</body></html>"
+    );
+    frameDocument.close();
+  }
+
+  function refreshBrowserSwatches() {
+    var index;
+    var color;
+
+    for (index = 0; index < browserSwatches.length; index += 1) {
+      color = browserSwatches[index].getAttribute("data-color");
+      browserSwatches[index].style.borderStyle = color === state.previewBackground ? "inset" : "outset";
+    }
+  }
+
+  function pickPreviewTextColor(background) {
+    var red = parseInt(background.slice(0, 2), 16);
+    var green = parseInt(background.slice(2, 4), 16);
+    var blue = parseInt(background.slice(4, 6), 16);
+    var brightness = (red * 299) + (green * 587) + (blue * 114);
+
+    return brightness >= 140000 ? "000000" : "FFFFFF";
+  }
+
+  function escapePreviewText(text) {
+    return String(text)
+      .replace(/&/g, "&amp;")
+      .replace(/</g, "&lt;")
+      .replace(/>/g, "&gt;");
   }
 
   function drawPalette() {
