@@ -8,6 +8,8 @@
   var context = canvas.getContext("2d");
   var backgroundColor = "#000033";
   var dotColor = "#9999ff";
+  var originalWidth = 500;
+  var originalHeight = 78;
   var displayFrames = 100;
   var dotCount = 50;
   var waveHeight = 8;
@@ -31,7 +33,6 @@
   };
 
   resizeCanvas();
-  window.addEventListener("resize", resizeCanvas);
   requestAnimationFrame(tick);
 
   function tick(timestamp) {
@@ -68,22 +69,28 @@
   }
 
   function drawDots() {
-    var speed = 0.35;
+    var speed = 0.18;
 
-    context.fillStyle = dotColor;
     for (var index = 0; index < state.dots.length; index += 1) {
       var dot = state.dots[index];
-      dot.x -= dot.speed * speed;
+      var drift = dot.speed * speed;
+      var twinkle = 0.45 + (0.35 * (0.5 + (Math.sin((state.entryFrame / 10) + dot.phase) / 2)));
+      var shimmerY = Math.sin((state.entryFrame / 18) + dot.phase) * dot.wobble;
+
+      dot.x -= drift;
 
       if (dot.x < -dot.radius) {
-        dot.x = canvas.width + dot.radius;
-        dot.y = Math.random() * canvas.height;
+        resetDot(dot, true);
       }
 
+      context.fillStyle = dot.color;
+      context.globalAlpha = twinkle;
       context.beginPath();
-      context.arc(dot.x, dot.y, dot.radius, 0, Math.PI * 2, false);
+      context.arc(dot.x, dot.y + shimmerY, dot.radius, 0, Math.PI * 2, false);
       context.fill();
     }
+
+    context.globalAlpha = 1;
   }
 
   function drawText(entry, metrics, baseX, baseY) {
@@ -215,22 +222,41 @@
     var dots = [];
 
     for (var index = 0; index < count; index += 1) {
-      dots.push({
-        x: Math.random() * canvas.width,
-        y: Math.random() * canvas.height,
-        radius: (Math.random() * 1.8) + 0.5,
-        speed: (Math.random() * 2.5) + 0.4
-      });
+      dots.push(makeDot(false));
     }
 
     return dots;
   }
 
   function resizeCanvas() {
-    var bodyWidth = document.body.clientWidth || 500;
-    canvas.width = Math.max(500, Math.min(bodyWidth - 16, 1400));
-    canvas.height = 78;
+    canvas.width = originalWidth;
+    canvas.height = originalHeight;
     context.font = "italic 29px Times New Roman, Times, serif";
+  }
+
+  function makeDot(spawnOffscreen) {
+    var dot = {
+      x: 0,
+      y: 0,
+      radius: (Math.random() * 1.35) + 0.45,
+      speed: (Math.random() * 1.2) + 0.6,
+      wobble: Math.random() * 0.6,
+      phase: Math.random() * Math.PI * 2,
+      color: dotColor
+    };
+
+    resetDot(dot, spawnOffscreen);
+    return dot;
+  }
+
+  function resetDot(dot, spawnOffscreen) {
+    if (spawnOffscreen) {
+      dot.x = canvas.width + dot.radius + (Math.random() * (canvas.width * 0.35));
+    } else {
+      dot.x = Math.random() * canvas.width;
+    }
+
+    dot.y = (Math.random() * (canvas.height - 10)) + 5;
   }
 
   function lerp(start, end, progress) {
