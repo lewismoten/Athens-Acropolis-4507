@@ -21,13 +21,7 @@
     ["<<,>>", "sweet dreams!", "0000ff|0000ee|0000dd|0000cc|0000bb|0000aa|000099|000088|000088|000099|0000aa|0000bb|0000cc|0000dd|0000ee|0000ff|0000ee|0000dd|0000cc|"]
   ]);
 
-  entries.unshift({
-    start: ">>",
-    end: ">>",
-    text: "Shoomi's HomePage",
-    colors: parseColorList("0000ff|0000ee|0000dd|0000cc|0000bb|0000aa|000099|000088|000000|000088|000099|0000aa|0000bb|0000cc|0000dd|0000ee|0000ff|0000ee|"),
-    holdFrames: displayFrames
-  });
+  entries.unshift(createEntry(">>,>>", "Shoomi's HomePage", "0000ff|0000ee|0000dd|0000cc|0000bb|0000aa|000099|000088|000000|000088|000099|0000aa|0000bb|0000cc|0000dd|0000ee|0000ff|0000ee|"));
 
   var state = {
     currentIndex: 0,
@@ -181,25 +175,27 @@
     var results = [];
 
     for (var index = 0; index < rawEntries.length; index += 1) {
-      var item = rawEntries[index];
-      var actions = item[0].split(",");
-      var text = item[1];
-      var colors = parseColorList(item[2]);
-      var travel = Math.max(35, Math.round(text.length * 1.6));
-
-      results.push({
-        start: actions[0] || "<>",
-        end: actions[1] || "<>",
-        text: text,
-        colors: colors.length ? colors : defaultColors,
-        holdFrames: displayFrames,
-        transitionFrames: travel,
-        holdStartFrame: travel + displayFrames,
-        durationFrames: (travel * 2) + displayFrames
-      });
+      results.push(createEntry(rawEntries[index][0], rawEntries[index][1], rawEntries[index][2]));
     }
 
     return results;
+  }
+
+  function createEntry(actionText, text, colorText) {
+    var actions = actionText.split(",");
+    var colors = parseColorList(colorText);
+    var travel = Math.max(35, Math.round(text.length * 1.6));
+
+    return {
+      start: actions[0] || "<>",
+      end: actions[1] || "<>",
+      text: text,
+      colors: colors.length ? colors : defaultColors,
+      holdFrames: displayFrames,
+      transitionFrames: travel,
+      holdStartFrame: travel + displayFrames,
+      durationFrames: (travel * 2) + displayFrames
+    };
   }
 
   function parseColorList(rawValue) {
