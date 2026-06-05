@@ -4,7 +4,7 @@
 
 I got a GeoCities web page in the 90's. This was my first web page. My account was `moonhalo`, and I went by `Shoomi` as the online persona.
 
-![Screenshot of GeoCities Athens/Acropolis/4507](screenshot.png)
+![Screenshot of GeoCities Athens/Acropolis/4507](screenshot-ani.gif)
 
 I had archived a few of my web sites and made a CD Resume in 1999. Some of the content had been changed to support an offline version for viewing without an internet connection.
 
