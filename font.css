@@ -1,0 +1,12 @@
+@font-face {
+  font-family: "Burton's Nightmare";
+  src: url("nitemare.TTF") format("truetype");
+  font-display: swap;
+}
+
+font[face="Burton's Nightmare"],
+font[face="Burton's Nightmare"] *,
+[face="Burton's Nightmare"],
+[face="Burton's Nightmare"] * {
+  font-family: "Burton's Nightmare", fantasy;
+}
