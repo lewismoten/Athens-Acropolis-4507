@@ -5,20 +5,23 @@
 </HEAD>
 <BODY BGCOLOR="000033" TEXT="FFFFFF">
 <CENTER>
-<CANVAS ID="dream-marquee" WIDTH="500" HEIGHT="78">
+<DIV STYLE="position:relative; width:500px; height:78px;">
+<CANVAS ID="dream-marquee" WIDTH="500" HEIGHT="78" STYLE="display:block;">
 Shoomi's HomePage
 </CANVAS>
-<BR>
-<FONT SIZE="-1" COLOR="#9999FF">
-Soundtrack:
-<AUDIO CONTROLS AUTOPLAY LOOP PRELOAD="AUTO">
-<SOURCE SRC="midi_song_newage.mp3" TYPE="audio/mpeg">
-</AUDIO>
+<BUTTON ID="sound-toggle" TYPE="BUTTON" TITLE="Play or pause the soundtrack"
+STYLE="position:absolute; top:8px; right:10px; width:26px; height:26px; padding:0; border:1px solid #9999ff; background:#000066; color:#99ccff; font:bold 11px 'Times New Roman', Times, serif; cursor:pointer;">...</BUTTON>
+<DIV STYLE="position:absolute; right:8px; bottom:6px; font:11px 'Times New Roman', Times, serif; color:#9999ff; text-align:right;">
+<SPAN ID="sound-status">soundtrack</SPAN>
 <BR>
 <A HREF="midi_song_newage.mp3">MP3</A>
  |
-<A HREF="midi_song_newage.mid" TYPE="audio/midi">Original MIDI</A>
-</FONT>
+<A HREF="midi_song_newage.mid" TYPE="audio/midi">MIDI</A>
+</DIV>
+</DIV>
+<AUDIO ID="soundtrack" AUTOPLAY LOOP PRELOAD="AUTO" HIDDEN>
+<SOURCE SRC="midi_song_newage.mp3" TYPE="audio/mpeg">
+</AUDIO>
 </CENTER>
 <SCRIPT SRC="title.js"></SCRIPT>
 </BODY>

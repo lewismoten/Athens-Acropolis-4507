@@ -1,5 +1,8 @@
 (function () {
   var canvas = document.getElementById("dream-marquee");
+  var soundtrack = document.getElementById("soundtrack");
+  var soundToggle = document.getElementById("sound-toggle");
+  var soundStatus = document.getElementById("sound-status");
 
   if (!canvas || !canvas.getContext) {
     return;
@@ -33,6 +36,7 @@
   };
 
   resizeCanvas();
+  initSoundtrack();
   requestAnimationFrame(tick);
 
   function tick(timestamp) {
@@ -257,6 +261,63 @@
     }
 
     dot.y = (Math.random() * (canvas.height - 10)) + 5;
+  }
+
+  function initSoundtrack() {
+    if (!soundtrack || !soundToggle || !soundStatus) {
+      return;
+    }
+
+    soundToggle.addEventListener("click", toggleSoundtrack);
+    soundtrack.addEventListener("play", updateSoundUi);
+    soundtrack.addEventListener("pause", updateSoundUi);
+    soundtrack.addEventListener("ended", updateSoundUi);
+
+    updateSoundUi();
+
+    if (soundtrack.autoplay) {
+      attemptAutoplay();
+    }
+  }
+
+  function attemptAutoplay() {
+    var playPromise = soundtrack.play();
+
+    if (playPromise && playPromise.then) {
+      playPromise.then(function () {
+        updateSoundUi();
+      }).catch(function () {
+        soundStatus.innerHTML = "click for sound";
+        soundToggle.innerHTML = ">";
+      });
+    }
+  }
+
+  function toggleSoundtrack() {
+    if (!soundtrack) {
+      return;
+    }
+
+    if (soundtrack.paused) {
+      soundtrack.play();
+    } else {
+      soundtrack.pause();
+    }
+  }
+
+  function updateSoundUi() {
+    if (!soundtrack || !soundToggle || !soundStatus) {
+      return;
+    }
+
+    if (soundtrack.paused) {
+      soundToggle.innerHTML = ">";
+      soundStatus.innerHTML = "sound off";
+      return;
+    }
+
+    soundToggle.innerHTML = "||";
+    soundStatus.innerHTML = "sound on";
   }
 
   function lerp(start, end, progress) {
