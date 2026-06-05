@@ -14,6 +14,7 @@ This archive has been partially modernized so the original experience can still 
 - The original Java applet marquee in `title_old.html` has been recreated with HTML5 canvas in `title.html` and `title.js`, using the original message flow from [dreamers.txt](dreamers.txt).
 - The old embedded MIDI behavior has been replaced with a looping MP3 soundtrack plus a small themed play/pause control in the top frame.
 - The `Burton's Nightmare` / `nitemare.ttf` font now loads as a webfont through `font.css`, which restores the intended look of the navigation and page titles.
+- The old Visual Basic `Color Writer / <FONT> Editor` has been recreated as a browser app in `colorwriter.html` and `colorwriter.js`, including palette picking, per-letter anchor colors, gradient HTML output, and a live rendered preview.
 
 # 90's Nostalgia
 Lots of cutting edge stuff here from the 90's.
@@ -38,10 +39,13 @@ This little program was made using Visual Basic. It changed your text from one c
 
 ![Cool Color Maker Button](cool_color_maker_button.gif)
 
-
 ![Screenshot of Colorfont](colorfont_preview.gif)
 
 Windows Executable: [clr_fnt.zip](clr_fnt.zip)
+
+Modern HTML Version: [colorwriter.html](colorwriter.html)
+
+The restored web version keeps the same late-90s `<FONT>` workflow, but runs in a current browser and includes a live preview window so you can see the generated HTML as it would have looked on the site.
 
 
 # Custom Images
@@ -57,6 +61,7 @@ One thing of note here is the citiscape. I found a New York webcam online that s
 - Inner Circle image on home page is broken, but it is here ![Inner Circle](ic_icon.gif)
 - MIDI autoplay is restored with a browser-friendly MP3 conversion and inline themed playback control.
 - Fonts are restored with a webfont so the included `nitemare.ttf` displays again without local installation.
+- Color Writer is restored as an HTML app so the old gradient text generator can be used without the original VB executable.
 - Counter is static at 0049 for offline viewing.
 - Link Exchange is static for offline viewing.
 - LPage Guestbook. Host no longer available.
