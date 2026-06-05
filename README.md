@@ -8,6 +8,13 @@ I got a GeoCities web page in the 90's. This was my first web page. My account w
 
 I had archived a few of my web sites and made a CD Resume in 1999. Some of the content had been changed to support an offline version for viewing without an internet connection.
 
+# Restoration Notes
+This archive has been partially modernized so the original experience can still be viewed in a current browser without needing legacy plugins or local font installs.
+
+- The original Java applet marquee in `title_old.html` has been recreated with HTML5 canvas in `title.html` and `title.js`, using the original message flow from [dreamers.txt](dreamers.txt).
+- The old embedded MIDI behavior has been replaced with a looping MP3 soundtrack plus a small themed play/pause control in the top frame.
+- The `Burton's Nightmare` / `nitemare.ttf` font now loads as a webfont through `font.css`, which restores the intended look of the navigation and page titles.
+
 # 90's Nostalgia
 Lots of cutting edge stuff here from the 90's.
 
@@ -48,13 +55,13 @@ One thing of note here is the citiscape. I found a New York webcam online that s
 
 # Broken Stuff
 - Inner Circle image on home page is broken, but it is here ![Inner Circle](ic_icon.gif)
-- MIDI file download. It used to play automatically in the browser.
-- Fonts. Installing the included TTF fonts do not help change the appearance of the web page.
+- MIDI autoplay is restored with a browser-friendly MP3 conversion and inline themed playback control.
+- Fonts are restored with a webfont so the included `nitemare.ttf` displays again without local installation.
 - Counter is static at 0049 for offline viewing.
 - Link Exchange is static for offline viewing.
 - LPage Guestbook. Host no longer available.
 - Book of Dreamers Guesbook - was hosted at home. An archive is here at [book_of_dreamers.html]
-- Marquee Applet - doesn't display in top frame. Should show a list of floating/wavey messages found in [dreamers.txt](dreamers.txt)
+- Marquee applet behavior is restored with a canvas recreation in the top frame. It shows the floating / wavey messages from [dreamers.txt](dreamers.txt)
 - Link to Lycos. They no longer use `cgi-bin` for their queries.
 - Shoomi's Dreams Form Broken
 - Email form doesn't work. The `moonhalo` account on GeoCities is no longer active, and I don't have access to my email at `mindless.com`.
