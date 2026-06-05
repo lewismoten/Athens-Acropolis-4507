@@ -16,6 +16,22 @@ This archive has been partially modernized so the original experience can still 
 - The `Burton's Nightmare` / `nitemare.ttf` font now loads as a webfont through `font.css`, which restores the intended look of the navigation and page titles.
 - The old Visual Basic `Color Writer / <FONT> Editor` has been recreated as a browser app in `colorwriter.html` and `colorwriter.js`, including palette picking, per-letter anchor colors, gradient HTML output, and a live rendered preview.
 
+# MIDI Restoration
+The original site used an embedded MIDI file, `midi_song_newage.mid`, which modern browsers now tend to download instead of playing. To restore the mood of the page in a browser-friendly way, the MIDI was rendered to [midi_song_newage.mp3](midi_song_newage.mp3) and wired into the top frame with a themed inline player.
+
+The render was not a straight one-click conversion. The local TiMidity patch set used for conversion was missing two of the General MIDI programs requested by the file:
+
+- `50`: `Synth Strings 1`
+- `99`: `Atmosphere`
+
+To keep the result closer to the kind of late-90s Sound Blaster character the site originally had, [timidity-override.cfg](timidity-override.cfg) pins period-appropriate substitutes from the available patch bank:
+
+- `35` -> `Fretless Bass`
+- `50` -> `String Ensemble 1 Marcato`
+- `99` -> `Goblins--Unicorn`
+
+That last substitution is intentionally more Sound Blaster-flavored than a generic ambient pad. Old Creative-era banks commonly exposed nearby synth effect names like `Crystal`, `Atmosphere`, and `Goblins/Unicorn`, and the `Goblins--Unicorn` variant ended up sounding closer to the remembered original than the earlier `Crystal` test render. The goal was not perfect forensic recovery of the exact original sound card bank, but a restoration that feels closer to how the page likely sounded on 90s PC hardware.
+
 # 90's Nostalgia
 Lots of cutting edge stuff here from the 90's.
 
@@ -58,8 +74,13 @@ One thing of note here is the citiscape. I found a New York webcam online that s
 ![New York City changes into night](new_york_dream.gif)
 
 # Broken Stuff
-- Inner Circle image on home page is broken, but it is here ![Inner Circle](ic_icon.gif)
-- MIDI autoplay is restored with a browser-friendly MP3 conversion and inline themed playback control.
+- Inner Circle image on home page link changed to relative vs absolute url. ![Inner Circle](ic_icon.gif)
+- MIDI autoplay is restored with a browser-friendly MP3 conversion ([TiMidity++](https://wiki.archlinux.org/title/Timidity++) and [LAME](https://lame.sourceforge.io/)) and inline themed playback control. The closest patterns found were from the stock TiMidity patch library:
+  - 35 Fretless Bass
+  - 48 String Ensemble 1 Marcato
+  - 98 Crystal
+  - 98 FX 3 (crystal)
+  - 101 FX 6 (goblins unicorn)
 - Fonts are restored with a webfont so the included `nitemare.ttf` displays again without local installation.
 - Color Writer is restored as an HTML app so the old gradient text generator can be used without the original VB executable.
 - Counter is static at 0049 for offline viewing.
