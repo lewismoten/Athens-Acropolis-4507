@@ -20,6 +20,8 @@
     editing: false,
     currentIndex: 0,
     currentColor: "D71201",
+    baseColor: "D71201",
+    anchors: [],
     windowMode: "normal",
     restoreRect: {
       left: 24,
@@ -191,6 +193,9 @@
   document.addEventListener("mousemove", dragWindow);
   document.addEventListener("mouseup", stopDrag);
   textInput.addEventListener("input", onTextChange);
+  textInput.addEventListener("click", syncCurrentIndexFromCaret);
+  textInput.addEventListener("keyup", syncCurrentIndexFromCaret);
+  textInput.addEventListener("select", syncCurrentIndexFromCaret);
   hexInput.addEventListener("input", onHexInput);
 
   browserWindowEl.style.left = state.browserRect.left + "px";
@@ -217,11 +222,13 @@
     var color = state.palette.matrix[row][column];
 
     applyCurrentColor(color);
-    refreshUi();
 
     if (state.editing) {
-      assignColorToCurrentLetter(color);
+      upsertAnchorAtCurrentLetter(color);
+      rebuildOutputFromAnchors();
     }
+
+    refreshUi();
   }
 
   function toggleEditing() {
@@ -232,16 +239,15 @@
     }
 
     state.text = textInput.value;
-    if (!state.output.length || state.currentIndex >= state.text.length) {
-      state.output = [];
-      state.currentIndex = 0;
-    }
+    state.baseColor = state.currentColor;
     state.editing = true;
-    assignSpacesUntilLetter();
+    syncCurrentIndexFromCaret();
+    rebuildOutputFromAnchors();
     refreshUi();
   }
 
   function clearEditing() {
+    state.anchors = [];
     state.output = [];
     state.currentIndex = 0;
     state.editing = false;
@@ -254,9 +260,12 @@
 
   function onTextChange() {
     state.text = textInput.value;
-    if (!state.editing) {
-      refreshUi();
+    syncCurrentIndexFromCaret();
+    if (state.editing) {
+      pruneAnchors();
+      rebuildOutputFromAnchors();
     }
+    refreshUi();
   }
 
   function onHexInput() {
@@ -269,34 +278,121 @@
     refreshUi();
   }
 
-  function assignColorToCurrentLetter(color) {
-    var text = textInput.value;
-    if (state.currentIndex >= text.length) {
-      state.editing = false;
-      refreshUi();
+  function applyCurrentColor(color) {
+    state.currentColor = normalizeHex(color) || state.currentColor;
+  }
+
+  function syncCurrentIndexFromCaret() {
+    var caret = typeof textInput.selectionStart === "number" ? textInput.selectionStart : 0;
+    state.currentIndex = findNearestDrawableIndex(textInput.value, caret);
+  }
+
+  function upsertAnchorAtCurrentLetter(color) {
+    var anchorIndex = findNearestDrawableIndex(textInput.value, state.currentIndex);
+    var index;
+
+    if (anchorIndex < 0) {
       return;
     }
 
-    state.output[state.currentIndex] = wrapFontColor(text.charAt(state.currentIndex), color);
-    state.currentIndex += 1;
-    assignSpacesUntilLetter();
-    if (state.currentIndex >= text.length) {
-      state.editing = false;
+    for (index = 0; index < state.anchors.length; index += 1) {
+      if (state.anchors[index].index === anchorIndex) {
+        state.anchors[index].color = color;
+        state.currentIndex = anchorIndex;
+        return;
+      }
     }
-    refreshUi();
+
+    state.anchors.push({
+      index: anchorIndex,
+      color: color
+    });
+    state.currentIndex = anchorIndex;
   }
 
-  function assignSpacesUntilLetter() {
+  function pruneAnchors() {
     var text = textInput.value;
+    var nextAnchors = [];
+    var index;
 
-    while (state.currentIndex < text.length && text.charAt(state.currentIndex) === " ") {
-      state.output[state.currentIndex] = " ";
-      state.currentIndex += 1;
+    for (index = 0; index < state.anchors.length; index += 1) {
+      if (state.anchors[index].index < text.length && text.charAt(state.anchors[index].index) !== " ") {
+        nextAnchors.push(state.anchors[index]);
+      }
     }
+
+    state.anchors = nextAnchors;
   }
 
-  function applyCurrentColor(color) {
-    state.currentColor = normalizeHex(color) || state.currentColor;
+  function rebuildOutputFromAnchors() {
+    var text = textInput.value;
+    var characters = text.split("");
+    var drawableIndexes = [];
+    var drawableOrder = {};
+    var pointMap = {};
+    var points = [];
+    var output = [];
+    var index;
+    var rawIndex;
+    var order;
+    var startPoint;
+    var endPoint;
+    var span;
+    var offset;
+    var color;
+
+    for (index = 0; index < characters.length; index += 1) {
+      if (characters[index] === " ") {
+        output[index] = " ";
+      } else {
+        drawableOrder[index] = drawableIndexes.length;
+        drawableIndexes.push(index);
+      }
+    }
+
+    if (!drawableIndexes.length) {
+      state.output = [];
+      return;
+    }
+
+    pointMap[0] = state.baseColor;
+    pointMap[drawableIndexes.length - 1] = state.baseColor;
+
+    for (index = 0; index < state.anchors.length; index += 1) {
+      rawIndex = state.anchors[index].index;
+      if (drawableOrder[rawIndex] !== undefined) {
+        pointMap[drawableOrder[rawIndex]] = state.anchors[index].color;
+      }
+    }
+
+    for (order in pointMap) {
+      if (Object.prototype.hasOwnProperty.call(pointMap, order)) {
+        points.push({
+          order: Number(order),
+          color: pointMap[order]
+        });
+      }
+    }
+
+    points.sort(function (left, right) {
+      return left.order - right.order;
+    });
+
+    for (index = 0; index < points.length - 1; index += 1) {
+      startPoint = points[index];
+      endPoint = points[index + 1];
+      span = endPoint.order - startPoint.order;
+
+      for (offset = 0; offset <= span; offset += 1) {
+        rawIndex = drawableIndexes[startPoint.order + offset];
+        color = span === 0
+          ? endPoint.color
+          : mixHex(startPoint.color, endPoint.color, offset / span);
+        output[rawIndex] = wrapFontColor(characters[rawIndex], color);
+      }
+    }
+
+    state.output = output;
   }
 
   function refreshUi() {
@@ -310,6 +406,7 @@
     letterInput.value = currentLetter;
     hexInput.value = state.currentColor;
     swatch.style.background = "#" + state.currentColor;
+    textInput.style.background = state.editing ? "#fff8dc" : "#ffffff";
     livePreview.style.color = "#0000cc";
     livePreview.textContent = "shoomi@mindless.com";
     outputArea.value = htmlOutput;
@@ -518,6 +615,56 @@
 
   function countDrawableLetters(text) {
     return text.replace(/ /g, "").length;
+  }
+
+  function findNearestDrawableIndex(text, index) {
+    var safeIndex;
+    var offset;
+    var left;
+    var right;
+
+    if (!text.length) {
+      return 0;
+    }
+
+    safeIndex = Math.max(0, Math.min(text.length - 1, index >= text.length ? text.length - 1 : index));
+
+    if (text.charAt(safeIndex) !== " ") {
+      return safeIndex;
+    }
+
+    for (offset = 1; offset < text.length; offset += 1) {
+      right = safeIndex + offset;
+      left = safeIndex - offset;
+
+      if (right < text.length && text.charAt(right) !== " ") {
+        return right;
+      }
+
+      if (left >= 0 && text.charAt(left) !== " ") {
+        return left;
+      }
+    }
+
+    return -1;
+  }
+
+  function mixHex(startHex, endHex, ratio) {
+    var start = hexToRgb(startHex);
+    var end = hexToRgb(endHex);
+    var red = Math.round(start[0] + ((end[0] - start[0]) * ratio));
+    var green = Math.round(start[1] + ((end[1] - start[1]) * ratio));
+    var blue = Math.round(start[2] + ((end[2] - start[2]) * ratio));
+
+    return toHex(red) + toHex(green) + toHex(blue);
+  }
+
+  function hexToRgb(hex) {
+    return [
+      parseInt(hex.slice(0, 2), 16),
+      parseInt(hex.slice(2, 4), 16),
+      parseInt(hex.slice(4, 6), 16)
+    ];
   }
 
   function normalizeHex(value) {
