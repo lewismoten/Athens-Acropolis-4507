@@ -1,0 +1,16 @@
+Type=Exe
+Reference=*\G{00020430-0000-0000-C000-000000000046}#1.0#0#C:\WINDOWS\SYSTEM\stdole32.tlb#OLE Automation
+Form=colorwriter.frm
+Startup="colorwriter"
+Title="colorwriter"
+ExeName32="colorwriter3.exe"
+Name="Project1"
+Command32=""
+CompatibleMode="0"
+MajorVer=2
+MinorVer=1
+RevisionVer=2
+AutoIncrementVer=0
+
+' This file is reconstructed from compiled EXE metadata.
+' It is not guaranteed to match the original .vbp exactly.
