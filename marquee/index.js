@@ -7,7 +7,6 @@
   var copyButton = document.getElementById("copy-code");
   var copyStatus = document.getElementById("copy-status");
   var sequenceGridBody = document.getElementById("sequence-grid-body");
-  var addRowButton = document.getElementById("add-row");
   var rowModal = document.getElementById("row-modal");
   var rowModalForm = document.getElementById("row-modal-form");
   var modalCancel = document.getElementById("modal-cancel");
@@ -96,17 +95,6 @@
 
   if (copyButton) {
     copyButton.addEventListener("click", copyGeneratedCode);
-  }
-
-  if (addRowButton) {
-    addRowButton.addEventListener("click", function () {
-      openRowModal(-1, {
-        start: ">>",
-        end: ">>",
-        text: "",
-        colors: ""
-      });
-    });
   }
 
   if (modalCancel) {
@@ -372,9 +360,14 @@
       ].join("");
     }
 
-    if (!html) {
-      html = '<tr><td colspan="5" class="sequence-text">No rows yet. Use "Add Row" to create one.</td></tr>';
-    }
+    html += [
+      "<tr>",
+      '<td colspan="4" class="sequence-text">Optional message file rows.</td>',
+      '<td><div class="sequence-cell-actions">',
+      '<button type="button" class="row-button row-add">Add</button>',
+      "</div></td>",
+      "</tr>"
+    ].join("");
 
     sequenceGridBody.innerHTML = html;
   }
@@ -730,6 +723,16 @@
     var target = event.target;
     var index = parseInt(target.getAttribute("data-index"), 10);
     var temp;
+
+    if (target.classList.contains("row-add")) {
+      openRowModal(-1, {
+        start: ">>",
+        end: ">>",
+        text: "",
+        colors: ""
+      });
+      return;
+    }
 
     if (!isFinite(index)) {
       return;

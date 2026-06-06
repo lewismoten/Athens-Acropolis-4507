@@ -107,10 +107,13 @@
         </FORM>
 
         <FORM CLASS="panel sequencing-panel" ID="sequence-form">
-          <DIV CLASS="panel-heading">Sequencing</DIV>
+          <DIV CLASS="panel-heading">Message File</DIV>
+          <LABEL CLASS="field">
+            <SPAN CLASS="field-label">File Name</SPAN>
+            <INPUT ID="sequence-file-name" CLASS="field-input" TYPE="text" VALUE="dreamers.txt">
+          </LABEL>
           <DIV CLASS="sequence-toolbar">
-            <BUTTON ID="add-row" TYPE="button" CLASS="action-button">Add Row</BUTTON>
-            <SPAN CLASS="helper-copy">Optional `dreamers.txt` export. Sequence count is generated automatically from the number of rows. Row 1 writes `text`, `colors`. Later rows write `text`, `colors`, `enter,exit`.</SPAN>
+            <SPAN CLASS="helper-copy">Optional message file export. Sequence count is generated automatically from the number of rows. Row 1 writes `text`, `colors`. Later rows write `text`, `colors`, `enter,exit`.</SPAN>
           </DIV>
 
           <DIV CLASS="sequence-grid" ID="sequence-grid">
