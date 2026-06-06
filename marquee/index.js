@@ -111,7 +111,7 @@
     renderTitleColorPreview(config.titleColors);
     renderSequenceGrid(config.background);
     codeOutput.value = buildDreamersScript(config, rows);
-    htmlCodeOutput.value = marqueeApi.buildHtmlMarkup(buildHtmlMarqueeConfig(config, rows));
+    htmlCodeOutput.value = buildCanvasEmbedCode(config, rows);
     copyStatus.textContent = "";
   }
 
@@ -209,30 +209,70 @@
     return lines.join("\n");
   }
 
-  function buildHtmlMarqueeConfig(config, rows) {
-    var firstRow = rows[0] || {
+  function buildCanvasEmbedCode(config, rows) {
+    var fontWeight = config.bold ? "bold " : "";
+    var entryRows = [{
       start: ">>",
-      end: "<<",
+      end: ">>",
       text: config.titleText,
       colors: config.titleColors
-    };
-    var textColor = firstColorToCss(firstRow.colors || config.titleColors);
-
-    return marqueeApi.normalizeHtmlConfig({
-      text: firstRow.text || config.titleText,
-      behavior: mapBehavior(firstRow.end),
-      direction: mapDirection(firstRow.start),
-      scrollAmount: 6,
-      scrollDelay: 85,
-      loop: -1,
-      fontSize: config.fontSize,
+    }].concat(rows);
+    var optionsConfig = {
       width: config.width,
       height: config.height,
-      color: textColor,
-      background: config.background,
-      fontFamily: config.fontFamily,
-      bold: config.bold
-    });
+      backgroundColor: config.background,
+      dotColor: config.dotColor,
+      dotCount: config.dotCount,
+      waveHeight: config.waveHeight,
+      font: fontWeight + config.fontSize + "px " + config.fontFamily,
+      fontHeight: config.fontSize,
+      fps: 30,
+      displayFrames: config.holdFrames,
+      defaultColors: ["ffaa00"]
+    };
+    var entriesConfig = [];
+    var lines = [];
+    var index;
+
+    for (index = 0; index < entryRows.length; index += 1) {
+      entriesConfig.push({
+        start: entryRows[index].start,
+        end: entryRows[index].end,
+        text: entryRows[index].text,
+        colors: splitColorPipe(entryRows[index].colors),
+        holdFrames: config.holdFrames
+      });
+    }
+
+    lines.push('<canvas id="dream-marquee" width="' + config.width + '" height="' + config.height + '" style="display:block;">');
+    lines.push(escapeForInlineText(config.titleText));
+    lines.push("</canvas>");
+    lines.push('<script src="../dream-marquee.js"><\/script>');
+    lines.push("<script>");
+    lines.push("(function () {");
+    lines.push('  var canvas = document.getElementById("dream-marquee");');
+    lines.push("  var marqueeApi = window.DreamMarquee;");
+    lines.push("  var marqueeOptions = " + stringifyForCode(optionsConfig, 2) + ";");
+    lines.push("  var marqueeEntries = " + stringifyForCode(entriesConfig, 2) + ";");
+    lines.push("");
+    lines.push("  if (!canvas || !canvas.getContext || !marqueeApi) {");
+    lines.push("    return;");
+    lines.push("  }");
+    lines.push("");
+    lines.push("  marqueeOptions.canvas = canvas;");
+    lines.push("  marqueeOptions.defaultColors = marqueeApi.parseColorList(marqueeOptions.defaultColors.join(\"|\"));");
+    lines.push("  marqueeOptions.entries = marqueeEntries.map(function (entry) {");
+    lines.push("    return marqueeApi.createEntry(entry.start + \",\" + entry.end, entry.text, entry.colors.join(\"|\"), {");
+    lines.push("      defaultColors: marqueeOptions.defaultColors,");
+    lines.push("      holdFrames: entry.holdFrames");
+    lines.push("    });");
+    lines.push("  });");
+    lines.push("");
+    lines.push("  marqueeApi.createCanvasMarquee(marqueeOptions);");
+    lines.push("}());");
+    lines.push("<\/script>");
+
+    return lines.join("\n");
   }
 
   function seedDefaultRows() {
@@ -545,35 +585,6 @@
     return values.join("|") + "|";
   }
 
-  function firstColorToCss(colorPipe) {
-    var colors = marqueeApi.parseColorList(colorPipe || "");
-    return colors[0] || "#ffff66";
-  }
-
-  function mapDirection(start) {
-    if (start === "<<") {
-      return "right";
-    }
-
-    if (start === "VV") {
-      return "up";
-    }
-
-    if (start === "^^") {
-      return "down";
-    }
-
-    return "left";
-  }
-
-  function mapBehavior(end) {
-    if (end === "<>") {
-      return "slide";
-    }
-
-    return "scroll";
-  }
-
   function tokenToDirectionValue(token) {
     if (token === "<<") {
       return "left";
@@ -663,5 +674,28 @@
       .replace(/</g, "&lt;")
       .replace(/>/g, "&gt;")
       .replace(/"/g, "&quot;");
+  }
+
+  function escapeForInlineText(value) {
+    return String(value)
+      .replace(/&/g, "&amp;")
+      .replace(/</g, "&lt;")
+      .replace(/>/g, "&gt;");
+  }
+
+  function splitColorPipe(colorPipe) {
+    var colors = marqueeApi.parseColorList(colorPipe || "");
+    var values = [];
+    var index;
+
+    for (index = 0; index < colors.length; index += 1) {
+      values.push(colors[index].replace(/^#/, ""));
+    }
+
+    return values;
+  }
+
+  function stringifyForCode(value, indentSize) {
+    return JSON.stringify(value, null, indentSize || 2).replace(/<\/script/gi, "<\\/script");
   }
 }());
