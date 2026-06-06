@@ -151,7 +151,7 @@
   }
 
   function normalizeBackgroundMode(value) {
-    if (value === "rain" || value === "snow" || value === "fireflies" || value === "dust" || value === "bubbles" || value === "bubble-pop") {
+    if (value === "rain" || value === "snow" || value === "fireflies" || value === "dust" || value === "bubbles" || value === "bubble-pop" || value === "embers") {
       return value;
     }
 
@@ -497,6 +497,11 @@
         return;
       }
 
+      if (settings.backgroundMode === "embers") {
+        drawEmbers();
+        return;
+      }
+
       drawStars();
     }
 
@@ -798,6 +803,44 @@
       context.globalAlpha = 1;
     }
 
+    function drawEmbers() {
+      var index;
+      var dot;
+      var rise;
+      var sway;
+      var flicker;
+      var glowRadius;
+
+      for (index = 0; index < state.dots.length; index += 1) {
+        dot = state.dots[index];
+        rise = dot.speed * (settings.dotSpeed * 8.5);
+        sway = Math.sin((state.entryFrame / 16) + dot.phase) * dot.drift * (settings.dotSpeed * 3.1);
+        flicker = 0.25 + (0.55 * (0.5 + (Math.sin((state.entryFrame / 10) + dot.phase) / 2)));
+        glowRadius = dot.radius * (1.35 + (0.6 * flicker));
+
+        dot.x += sway;
+        dot.y -= rise;
+
+        if (dot.y < -dot.radius - 10 || dot.x < -26 || dot.x > canvas.width + 26) {
+          resetDot(dot, true);
+          continue;
+        }
+
+        context.fillStyle = dot.color;
+        context.globalAlpha = 0.12 + (0.12 * flicker);
+        context.beginPath();
+        context.arc(dot.x, dot.y, glowRadius, 0, Math.PI * 2, false);
+        context.fill();
+
+        context.globalAlpha = 0.45 + (0.35 * flicker);
+        context.beginPath();
+        context.arc(dot.x, dot.y, dot.radius, 0, Math.PI * 2, false);
+        context.fill();
+      }
+
+      context.globalAlpha = 1;
+    }
+
     function drawText(entry, metrics, baseX, baseY, progress, exitProgress) {
       var index;
       var character;
@@ -1024,6 +1067,9 @@
         dot.x = nextRandom() * canvas.width;
         dot.y = spawnOffscreen ? (canvas.height + dot.radius + (nextRandom() * (canvas.height * 0.25))) : (nextRandom() * canvas.height);
         dot.popTargetY = (canvas.height * (0.08 + (nextRandom() * 0.42))) + dot.radius;
+      } else if (settings.backgroundMode === "embers") {
+        dot.x = nextRandom() * canvas.width;
+        dot.y = spawnOffscreen ? (canvas.height + dot.radius + (nextRandom() * (canvas.height * 0.2))) : (nextRandom() * canvas.height);
       } else if (spawnOffscreen) {
         dot.x = canvas.width + dot.radius + (nextRandom() * (canvas.width * 0.35));
         dot.y = (nextRandom() * (canvas.height - 10)) + 5;
@@ -1102,6 +1148,17 @@
         dot.glow = 0.5 + (nextRandom() * 0.3);
         dot.length = 0;
         dot.popDuration = 6 + Math.floor(nextRandom() * 5);
+        return;
+      }
+
+      if (settings.backgroundMode === "embers") {
+        dot.radius = (nextRandom() * 1.4) + 0.7;
+        dot.speed = (nextRandom() * 0.8) + 0.45;
+        dot.wobble = (nextRandom() * 0.35) + 0.15;
+        dot.drift = (nextRandom() * 1.0) + 0.25;
+        dot.glow = 0.7 + (nextRandom() * 0.35);
+        dot.length = 0;
+        dot.popDuration = 8;
         return;
       }
 
