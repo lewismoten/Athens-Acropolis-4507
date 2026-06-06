@@ -56,7 +56,7 @@
           </TABLE>
         </DIV>
 
-        <DIV CLASS="field-row">
+        <DIV CLASS="field-row field-row-3-equal">
           <LABEL CLASS="field">
             <SPAN CLASS="field-label">Width</SPAN>
             <INPUT ID="marquee-width" CLASS="field-input" TYPE="number" MIN="120" MAX="1200" VALUE="640">
@@ -66,9 +66,13 @@
             <SPAN CLASS="field-label">Height</SPAN>
             <INPUT ID="marquee-height" CLASS="field-input" TYPE="number" MIN="32" MAX="240" VALUE="92">
           </LABEL>
+          <LABEL CLASS="field">
+            <SPAN CLASS="field-label">Background</SPAN>
+            <INPUT ID="marquee-background" CLASS="field-input field-color" TYPE="color" VALUE="#000066">
+          </LABEL>
         </DIV>
 
-        <DIV CLASS="field-row field-row-3">
+        <DIV CLASS="field-row field-row-4">
           <LABEL CLASS="field">
             <SPAN CLASS="field-label">Font Size</SPAN>
             <INPUT ID="marquee-font-size" CLASS="field-input" TYPE="number" MIN="10" MAX="72" VALUE="30">
@@ -88,19 +92,14 @@
               <OPTION VALUE="3">Bold Italic</OPTION>
             </SELECT>
           </LABEL>
-        </DIV>
-
-        <DIV CLASS="field-row field-row-4">
-          <LABEL CLASS="field">
-            <SPAN CLASS="field-label">Background</SPAN>
-            <INPUT ID="marquee-background" CLASS="field-input field-color" TYPE="color" VALUE="#000066">
-          </LABEL>
 
           <LABEL CLASS="field">
             <SPAN CLASS="field-label">Default Font Color</SPAN>
             <INPUT ID="marquee-default-color" CLASS="field-input field-color" TYPE="color" VALUE="#ffff66">
           </LABEL>
+        </DIV>
 
+        <DIV CLASS="field-row field-row-3-equal">
           <LABEL CLASS="field">
             <SPAN CLASS="field-label">Dot Color</SPAN>
             <INPUT ID="marquee-dot-color" CLASS="field-input field-color" TYPE="color" VALUE="#9999ff">
@@ -110,9 +109,7 @@
             <SPAN CLASS="field-label">Dots</SPAN>
             <INPUT ID="marquee-dot-count" CLASS="field-input" TYPE="number" MIN="0" MAX="999" VALUE="50">
           </LABEL>
-        </DIV>
 
-        <DIV CLASS="field-row">
           <LABEL CLASS="field">
             <SPAN CLASS="field-label">Wave Height</SPAN>
             <INPUT ID="marquee-wave-height" CLASS="field-input" TYPE="number" MIN="0" MAX="24" VALUE="8">
