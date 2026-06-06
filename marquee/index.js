@@ -2,7 +2,6 @@
   var form = document.getElementById("marquee-form");
   var previewCanvas = document.getElementById("marquee-preview-canvas");
   var previewFrame = document.getElementById("preview-frame");
-  var titleColorPreview = document.getElementById("title-color-preview");
   var codeOutput = document.getElementById("marquee-code");
   var htmlCodeOutput = document.getElementById("marquee-html-code");
   var copyButton = document.getElementById("copy-code");
@@ -24,9 +23,6 @@
 
   var fields = {
     delayCount: document.getElementById("marquee-delay-count"),
-    holdFrames: document.getElementById("marquee-hold-frames"),
-    titleText: document.getElementById("marquee-title-text"),
-    titleColors: document.getElementById("marquee-title-colors"),
     fontSize: document.getElementById("marquee-font-size"),
     width: document.getElementById("marquee-width"),
     height: document.getElementById("marquee-height"),
@@ -75,7 +71,7 @@
     addRowButton.addEventListener("click", function () {
       openRowModal(-1, {
         start: ">>",
-        end: "<<",
+        end: ">>",
         text: "",
         colors: "ffff66|ffee88|ffdd55|ffee88|"
       });
@@ -107,8 +103,6 @@
     if (previewFrame) {
       previewFrame.style.minHeight = Math.max(config.height + 38, 130) + "px";
     }
-
-    renderTitleColorPreview(config.titleColors);
     renderSequenceGrid(config.background);
     codeOutput.value = buildDreamersScript(config, rows);
     htmlCodeOutput.value = buildCanvasEmbedCode(config, rows);
@@ -132,11 +126,11 @@
   }
 
   function getPageConfig() {
+    var holdSeconds = marqueeApi.clampNumber(fields.delayCount.value, 0, 999, 7);
+
     return {
-      delayCount: marqueeApi.clampNumber(fields.delayCount.value, 0, 999, 7),
-      holdFrames: marqueeApi.clampNumber(fields.holdFrames.value, 20, 400, 100),
-      titleText: fields.titleText.value || "Shoomi's HomePage",
-      titleColors: normalizeColorPipe(fields.titleColors.value, "0000ff|0000ee|0000dd|0000cc|0000bb|0000aa|000099|000088|000000|000088|000099|0000aa|0000bb|0000cc|0000dd|0000ee|0000ff|"),
+      holdSeconds: holdSeconds,
+      holdFrames: holdSeconds * 30,
       width: marqueeApi.clampNumber(fields.width.value, 120, 1200, 640),
       height: marqueeApi.clampNumber(fields.height.value, 32, 240, 92),
       fontSize: marqueeApi.clampNumber(fields.fontSize.value, 10, 72, 30),
@@ -151,7 +145,7 @@
 
   function getCanvasConfig(config, rows) {
     var fontWeight = fields.bold.checked ? "bold " : "";
-    var defaultColors = marqueeApi.parseColorList((rows[0] && rows[0].colors) || config.titleColors);
+    var defaultColors = marqueeApi.parseColorList((rows[0] && rows[0].colors) || "ffaa00|");
 
     return {
       width: config.width,
@@ -171,14 +165,6 @@
     var entries = [];
     var index;
 
-    entries.push({
-      start: ">>",
-      end: ">>",
-      text: config.titleText,
-      colors: marqueeApi.parseColorList(config.titleColors),
-      holdFrames: config.holdFrames
-    });
-
     for (index = 0; index < rows.length; index += 1) {
       entries.push({
         start: rows[index].start,
@@ -193,11 +179,7 @@
   }
 
   function buildDreamersScript(config, rows) {
-    var lines = [
-      String(config.delayCount),
-      config.titleText,
-      config.titleColors
-    ];
+    var lines = [String(config.holdSeconds)];
     var index;
 
     for (index = 0; index < rows.length; index += 1) {
@@ -211,12 +193,7 @@
 
   function buildCanvasEmbedCode(config, rows) {
     var fontWeight = config.bold ? "bold " : "";
-    var entryRows = [{
-      start: ">>",
-      end: ">>",
-      text: config.titleText,
-      colors: config.titleColors
-    }].concat(rows);
+    var defaultColorValues = splitColorPipe((rows[0] && rows[0].colors) || "ffaa00|");
     var optionsConfig = {
       width: config.width,
       height: config.height,
@@ -228,24 +205,24 @@
       fontHeight: config.fontSize,
       fps: 30,
       displayFrames: config.holdFrames,
-      defaultColors: ["ffaa00"]
+      defaultColors: defaultColorValues
     };
     var entriesConfig = [];
     var lines = [];
     var index;
 
-    for (index = 0; index < entryRows.length; index += 1) {
+    for (index = 0; index < rows.length; index += 1) {
       entriesConfig.push({
-        start: entryRows[index].start,
-        end: entryRows[index].end,
-        text: entryRows[index].text,
-        colors: splitColorPipe(entryRows[index].colors),
+        start: rows[index].start,
+        end: rows[index].end,
+        text: rows[index].text,
+        colors: splitColorPipe(rows[index].colors),
         holdFrames: config.holdFrames
       });
     }
 
     lines.push('<canvas id="dream-marquee" width="' + config.width + '" height="' + config.height + '" style="display:block;">');
-    lines.push(escapeForInlineText(config.titleText));
+    lines.push(escapeForInlineText((rows[0] && rows[0].text) || "Dream marquee"));
     lines.push("</canvas>");
     lines.push('<script src="../dream-marquee.js"><\/script>');
     lines.push("<script>");
@@ -277,6 +254,11 @@
 
   function seedDefaultRows() {
     sequenceRows = [{
+      start: ">>",
+      end: ">>",
+      text: "Shoomi's HomePage",
+      colors: "0000ff|0000ee|0000dd|0000cc|0000bb|0000aa|000099|000088|000000|000088|000099|0000aa|0000bb|0000cc|0000dd|0000ee|0000ff|"
+    }, {
       start: ">>",
       end: ">>",
       text: "The beginning of all dreams",
@@ -311,10 +293,6 @@
 
   function getSequenceRows() {
     return sequenceRows.slice(0);
-  }
-
-  function renderTitleColorPreview(colorPipe) {
-    renderColorPreview(titleColorPreview, colorPipe);
   }
 
   function renderSequenceGrid(backgroundColor) {
@@ -388,14 +366,14 @@
   function openRowModal(index, row) {
     var values = row || sequenceRows[index] || {
       start: ">>",
-      end: "<<",
+      end: ">>",
       text: "",
       colors: "ffff66|ffee88|ffdd55|ffee88|"
     };
 
     editingRowIndex = typeof index === "number" ? index : -1;
     fields.modalStart.value = tokenToDirectionValue(values.start || ">>");
-    fields.modalEnd.value = tokenToDirectionValue(values.end || "<<");
+    fields.modalEnd.value = tokenToDirectionValue(values.end || ">>");
     fields.modalText.value = values.text || "";
     fields.modalColors.value = values.colors || "";
     updateModalColorPreview();
@@ -420,7 +398,7 @@
 
     record = {
       start: directionValueToToken(fields.modalStart.value || "right"),
-      end: directionValueToToken(fields.modalEnd.value || "left"),
+      end: directionValueToToken(fields.modalEnd.value || "right"),
       text: fields.modalText.value || "",
       colors: normalizeColorPipe(fields.modalColors.value, "ffff66|ffee88|ffdd55|ffee88|")
     };

@@ -25,36 +25,20 @@
       <FORM CLASS="panel control-panel" ID="marquee-form">
         <DIV CLASS="panel-heading">Controls</DIV>
 
-        <DIV CLASS="subheading">Script Header</DIV>
+        <DIV CLASS="subheading">Script Timing</DIV>
 
         <DIV CLASS="field-row">
           <LABEL CLASS="field">
-            <SPAN CLASS="field-label">Initial Delay / Count</SPAN>
+            <SPAN CLASS="field-label">Hold Seconds (`dreamers.txt` line 1)</SPAN>
             <INPUT ID="marquee-delay-count" CLASS="field-input" TYPE="number" MIN="0" MAX="999" VALUE="7">
           </LABEL>
-
-          <LABEL CLASS="field">
-            <SPAN CLASS="field-label">Hold Frames</SPAN>
-            <INPUT ID="marquee-hold-frames" CLASS="field-input" TYPE="number" MIN="20" MAX="400" VALUE="100">
-          </LABEL>
         </DIV>
-
-        <LABEL CLASS="field">
-          <SPAN CLASS="field-label">Title / First Message</SPAN>
-          <INPUT ID="marquee-title-text" CLASS="field-input" TYPE="text" VALUE="Shoomi's HomePage">
-        </LABEL>
-
-        <LABEL CLASS="field">
-          <SPAN CLASS="field-label">Title Color List</SPAN>
-          <INPUT ID="marquee-title-colors" CLASS="field-input" TYPE="text" VALUE="0000ff|0000ee|0000dd|0000cc|0000bb|0000aa|000099|000088|000000|000088|000099|0000aa|0000bb|0000cc|0000dd|0000ee|0000ff|">
-        </LABEL>
-        <DIV CLASS="color-preview-strip" ID="title-color-preview"></DIV>
 
         <DIV CLASS="subheading">Sequence Rows</DIV>
 
         <DIV CLASS="sequence-toolbar">
           <BUTTON ID="add-row" TYPE="button" CLASS="action-button">Add Row</BUTTON>
-          <SPAN CLASS="helper-copy">Each row becomes: `enter,exit` then `text` then `colors`.</SPAN>
+          <SPAN CLASS="helper-copy">Line 1 is hold seconds. Every row after that becomes: `enter,exit` then `text` then `colors`.</SPAN>
         </DIV>
 
         <DIV CLASS="sequence-grid" ID="sequence-grid">
