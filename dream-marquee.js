@@ -1171,7 +1171,7 @@
           syncDotRelativePosition(dot, canvas.width, canvas.height);
         }
 
-        alpha = 0.03 + (nextRandom() * 0.22);
+        alpha = 0.1 + (nextRandom() * 0.45);
         size = dot.length;
 
         context.fillStyle = dot.color;
@@ -1180,7 +1180,7 @@
       }
 
       for (y = 0; y < canvas.height; y += 3) {
-        scanlineAlpha = 0.018 + (0.01 * (0.5 + (Math.sin((state.backgroundFrame / 12) + (y / 18)) / 2)));
+        scanlineAlpha = 0.05 + (0.03 * (0.5 + (Math.sin((state.backgroundFrame / 12) + (y / 18)) / 2)));
         context.fillStyle = settings.dotColor;
         context.globalAlpha = scanlineAlpha;
         context.fillRect(0, y, canvas.width, 1);
