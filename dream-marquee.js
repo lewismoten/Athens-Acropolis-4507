@@ -545,15 +545,28 @@
     }
 
     function resizeCanvas() {
+      var previousWidth = canvas.width || settings.width;
+      var previousHeight = canvas.height || settings.height;
+      var index;
+      var dot;
+
       canvas.width = settings.width;
       canvas.height = settings.height;
       context.font = settings.font;
+
+      for (index = 0; index < state.dots.length; index += 1) {
+        dot = state.dots[index];
+        syncDotRelativePosition(dot, previousWidth, previousHeight);
+        syncDotAbsolutePosition(dot);
+      }
     }
 
     function makeDot(spawnOffscreen) {
       var dot = {
         x: 0,
         y: 0,
+        relativeX: 0,
+        relativeY: 0,
         radius: (nextRandom() * 1.35) + 0.45,
         speed: (nextRandom() * 1.2) + 0.6,
         wobble: nextRandom() * 0.6,
@@ -573,6 +586,20 @@
       }
 
       dot.y = (nextRandom() * (canvas.height - 10)) + 5;
+      syncDotRelativePosition(dot, canvas.width, canvas.height);
+    }
+
+    function syncDotRelativePosition(dot, width, height) {
+      var safeWidth = Math.max(width || canvas.width || 1, 1);
+      var safeHeight = Math.max(height || canvas.height || 1, 1);
+
+      dot.relativeX = dot.x / safeWidth;
+      dot.relativeY = dot.y / safeHeight;
+    }
+
+    function syncDotAbsolutePosition(dot) {
+      dot.x = dot.relativeX * canvas.width;
+      dot.y = dot.relativeY * canvas.height;
     }
 
     function nextRandom() {
