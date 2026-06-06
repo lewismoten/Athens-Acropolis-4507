@@ -116,6 +116,7 @@ A {
 .field-textarea {
   resize: vertical;
   min-height: 90px;
+  line-height: 1.25;
 }
 
 .field-color {
@@ -134,10 +135,6 @@ A {
   width: 18px;
   height: 18px;
   margin-top: 10px;
-}
-
-.field-justify-end {
-  justify-content: flex-end;
 }
 
 .code-output {
@@ -319,11 +316,35 @@ A {
   padding-bottom: 14px;
 }
 
+.modal-footer {
+  display: flex;
+  align-items: flex-end;
+  justify-content: space-between;
+  gap: 14px;
+  padding: 16px 14px 0;
+}
+
+.modal-toolbar {
+  display: flex;
+  align-items: flex-end;
+  gap: 10px;
+}
+
+.modal-color-control {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.modal-color-input {
+  width: 52px;
+  min-width: 52px;
+}
+
 .modal-actions {
   display: flex;
   justify-content: flex-end;
   gap: 10px;
-  padding: 16px 14px 0;
 }
 
 .button-row {
@@ -347,10 +368,6 @@ A {
   background: #0a1b55;
   color: #6c80ba;
   cursor: default;
-}
-
-.action-button-inline {
-  width: 100%;
 }
 
 .modal-row-preview {
@@ -377,6 +394,16 @@ A {
 
   .field-row {
     grid-template-columns: 1fr;
+  }
+
+  .modal-footer {
+    flex-direction: column;
+    align-items: stretch;
+  }
+
+  .modal-toolbar,
+  .modal-actions {
+    justify-content: flex-start;
   }
 
   .marquee-preview-canvas {

@@ -135,18 +135,6 @@
         <TEXTAREA ID="modal-row-text" CLASS="field-input field-textarea" ROWS="4"></TEXTAREA>
       </LABEL>
 
-      <DIV CLASS="field-row">
-        <LABEL CLASS="field">
-          <SPAN CLASS="field-label">Selection Color</SPAN>
-          <INPUT ID="modal-row-color-picker" CLASS="field-input field-color" TYPE="color" VALUE="#ffff66">
-        </LABEL>
-
-        <DIV CLASS="field field-check field-justify-end">
-          <SPAN CLASS="field-label">Undo Last Change</SPAN>
-          <BUTTON TYPE="button" ID="modal-undo" CLASS="action-button action-button-inline">Undo</BUTTON>
-        </DIV>
-      </DIV>
-
       <INPUT ID="modal-row-colors" TYPE="hidden">
 
       <DIV CLASS="field">
@@ -154,9 +142,19 @@
         <DIV ID="modal-row-preview" CLASS="modal-row-preview"></DIV>
       </DIV>
 
-      <DIV CLASS="modal-actions">
-        <BUTTON TYPE="button" ID="modal-cancel" CLASS="row-button">Cancel</BUTTON>
-        <BUTTON TYPE="submit" CLASS="action-button">Save Row</BUTTON>
+      <DIV CLASS="modal-footer">
+        <DIV CLASS="modal-toolbar">
+          <LABEL CLASS="modal-color-control">
+            <SPAN CLASS="field-label">Selection Color</SPAN>
+            <INPUT ID="modal-row-color-picker" CLASS="field-input field-color modal-color-input" TYPE="color" VALUE="#ffff66">
+          </LABEL>
+          <BUTTON TYPE="button" ID="modal-undo" CLASS="action-button">Undo</BUTTON>
+        </DIV>
+
+        <DIV CLASS="modal-actions">
+          <BUTTON TYPE="button" ID="modal-cancel" CLASS="row-button">Cancel</BUTTON>
+          <BUTTON TYPE="submit" CLASS="action-button">Save Row</BUTTON>
+        </DIV>
       </DIV>
     </FORM>
   </DIV>

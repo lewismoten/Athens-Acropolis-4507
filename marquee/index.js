@@ -494,17 +494,23 @@
   }
 
   function updateModalEditorPreview() {
+    var config;
+
     if (!fields.modalPreview) {
       return;
     }
 
+    config = getPageConfig();
     fields.modalColors.value = normalizeColorPipeForText(
       fields.modalText.value || "",
       fields.modalColors.value,
       "ffff66|ffee88|ffdd55|ffee88|"
     );
     fields.modalPreview.style.background = marqueeApi.normalizeColor(fields.background.value, "#000066");
-    fields.modalPreview.style.font = (fields.bold.checked ? "bold " : "") + getPageConfig().fontSize + "px " + getPageConfig().fontFamily;
+    fields.modalPreview.style.font = (fields.bold.checked ? "bold " : "") + config.fontSize + "px " + config.fontFamily;
+    fields.modalText.style.font = fields.modalPreview.style.font;
+    fields.modalText.style.background = fields.modalPreview.style.background;
+    fields.modalText.style.color = "#ffffff";
     fields.modalPreview.innerHTML = buildColorizedTextMarkup(fields.modalText.value || "", fields.modalColors.value);
     updateModalColorControls();
   }
