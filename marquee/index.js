@@ -26,6 +26,7 @@
 
   var fields = {
     delayCount: document.getElementById("marquee-delay-count"),
+    displayTime: document.getElementById("marquee-display-time"),
     fontSize: document.getElementById("marquee-font-size"),
     width: document.getElementById("marquee-width"),
     height: document.getElementById("marquee-height"),
@@ -54,10 +55,10 @@
     dotColor: "#9999ff",
     dotCount: 50,
     waveHeight: 8,
-    dotSpeed: 0.18,
+    dotSpeed: toDotSpeed(3),
     font: "italic 30px Times New Roman, Times, serif",
     fontHeight: 30,
-    fps: 30,
+    fps: 20,
     displayFrames: 100,
     defaultColors: marqueeApi.parseColorList("ffff66"),
     entries: [[">>,<<", "Welcome to Shoomi's marquee maker.", "#ffff66|#ffee88|#ffdd55|#ffee88"]]
@@ -167,7 +168,7 @@
   }
 
   function getPageConfig() {
-    var holdSeconds = marqueeApi.clampNumber(fields.delayCount.value, 0, 999, 7);
+    var delayCount = marqueeApi.clampNumber(fields.delayCount.value, 0, 999, 7);
     var width = marqueeApi.clampNumber(fields.width.value, 120, 1200, 640);
     var height = marqueeApi.clampNumber(fields.height.value, 32, 240, 92);
     var fontSize = marqueeApi.clampNumber(fields.fontSize.value, 10, 72, 30);
@@ -175,15 +176,15 @@
     var fontStyle = String(fields.fontStyle.value || "0");
 
     return {
-      holdSeconds: holdSeconds,
-      holdFrames: holdSeconds * 30,
+      delayCount: delayCount,
+      displayTime: marqueeApi.clampNumber(fields.displayTime.value, 1, 999, 100),
       width: width,
       height: height,
       fontSize: fontSize,
       waveHeight: marqueeApi.clampNumber(fields.waveHeight.value, 0, 24, 8),
       dotCount: marqueeApi.clampNumber(fields.dotCount.value, 0, 999, 50),
-      backgroundSpeed: marqueeApi.clampNumber(fields.backgroundSpeed.value, 0, 300, 18) / 100,
-      animationSpeed: marqueeApi.clampNumber(fields.animationSpeed.value, 1, 120, 30),
+      backgroundSpeed: marqueeApi.clampNumber(fields.backgroundSpeed.value, 0, 30, 3),
+      animationSpeed: marqueeApi.clampNumber(fields.animationSpeed.value, 1, 120, 20),
       background: marqueeApi.normalizeColor(fields.background.value, "#000066"),
       defaultColor: defaultColor,
       dotColor: marqueeApi.normalizeColor(fields.dotColor.value, "#9999ff"),
@@ -201,12 +202,12 @@
       backgroundColor: config.background,
       dotColor: config.dotColor,
       dotCount: config.dotCount,
-      dotSpeed: config.backgroundSpeed,
+      dotSpeed: toDotSpeed(config.backgroundSpeed),
       waveHeight: config.waveHeight,
       font: buildFontDeclaration(config),
       fontHeight: config.fontSize,
       fps: config.animationSpeed,
-      displayFrames: config.holdFrames,
+      displayFrames: config.displayTime,
       defaultColors: defaultColors
     };
   }
@@ -221,7 +222,7 @@
         end: rows[index].end,
         text: rows[index].text,
         colors: marqueeApi.parseColorList(rows[index].colors),
-        holdFrames: config.holdFrames
+        holdFrames: config.displayTime
       });
     }
 
@@ -229,7 +230,7 @@
   }
 
   function buildDreamersScript(config, rows) {
-    var lines = [String(config.holdSeconds)];
+    var lines = [String(config.delayCount)];
     var index;
 
     for (index = 0; index < rows.length; index += 1) {
@@ -249,12 +250,12 @@
       backgroundColor: config.background,
       dotColor: config.dotColor,
       dotCount: config.dotCount,
-      dotSpeed: config.backgroundSpeed,
+      dotSpeed: toDotSpeed(config.backgroundSpeed),
       waveHeight: config.waveHeight,
       font: buildFontDeclaration(config),
       fontHeight: config.fontSize,
       fps: config.animationSpeed,
-      displayFrames: config.holdFrames,
+      displayFrames: config.displayTime,
       defaultColors: defaultColorValues
     };
     var entriesConfig = [];
@@ -267,7 +268,7 @@
         end: rows[index].end,
         text: rows[index].text,
         colors: splitColorPipe(rows[index].colors),
-        holdFrames: config.holdFrames
+        holdFrames: config.displayTime
       });
     }
 
@@ -862,6 +863,10 @@
 
   function getDefaultFontColorPipe() {
     return marqueeApi.normalizeColor((fields.defaultColor && fields.defaultColor.value) || "#ffff66", "#ffff66").replace(/^#/, "") + "|";
+  }
+
+  function toDotSpeed(backgroundSpeed) {
+    return Number(backgroundSpeed || 0) * 0.06;
   }
 
   function buildFontDeclaration(config) {

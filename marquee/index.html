@@ -27,10 +27,20 @@
 
         <DIV CLASS="subheading">Script Timing</DIV>
 
-        <DIV CLASS="field-row">
+        <DIV CLASS="field-row field-row-3-equal">
           <LABEL CLASS="field">
-            <SPAN CLASS="field-label">Hold Seconds (`dreamers.txt` line 1)</SPAN>
+            <SPAN CLASS="field-label">Script Count (`dreamers.txt` line 1)</SPAN>
             <INPUT ID="marquee-delay-count" CLASS="field-input" TYPE="number" MIN="0" MAX="999" VALUE="7">
+          </LABEL>
+
+          <LABEL CLASS="field">
+            <SPAN CLASS="field-label">Display Time</SPAN>
+            <INPUT ID="marquee-display-time" CLASS="field-input" TYPE="number" MIN="1" MAX="999" VALUE="100">
+          </LABEL>
+
+          <LABEL CLASS="field">
+            <SPAN CLASS="field-label">Speed</SPAN>
+            <INPUT ID="marquee-animation-speed" CLASS="field-input" TYPE="number" MIN="1" MAX="120" STEP="1" VALUE="20">
           </LABEL>
         </DIV>
 
@@ -38,7 +48,7 @@
 
         <DIV CLASS="sequence-toolbar">
           <BUTTON ID="add-row" TYPE="button" CLASS="action-button">Add Row</BUTTON>
-          <SPAN CLASS="helper-copy">Line 1 is hold seconds. Every row after that becomes: `enter,exit` then `text` then `colors`.</SPAN>
+          <SPAN CLASS="helper-copy">Line 1 stays the old script count. Every row after that becomes: `enter,exit` then `text` then `colors`.</SPAN>
         </DIV>
 
         <DIV CLASS="sequence-grid" ID="sequence-grid">
@@ -117,12 +127,7 @@
 
           <LABEL CLASS="field">
             <SPAN CLASS="field-label">Background Speed</SPAN>
-            <INPUT ID="marquee-background-speed" CLASS="field-input" TYPE="number" MIN="0" MAX="300" STEP="1" VALUE="18">
-          </LABEL>
-
-          <LABEL CLASS="field">
-            <SPAN CLASS="field-label">Animation Speed</SPAN>
-            <INPUT ID="marquee-animation-speed" CLASS="field-input" TYPE="number" MIN="1" MAX="120" STEP="1" VALUE="30">
+            <INPUT ID="marquee-background-speed" CLASS="field-input" TYPE="number" MIN="0" MAX="30" STEP="1" VALUE="3">
           </LABEL>
         </DIV>
       </FORM>
