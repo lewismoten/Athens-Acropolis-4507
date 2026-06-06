@@ -72,6 +72,10 @@
   fields.modalText.addEventListener("keyup", onModalSelectionChange);
   fields.modalText.addEventListener("keydown", onModalTextKeyDown);
 
+  if (fields.modalPreview) {
+    fields.modalPreview.addEventListener("mouseup", onModalPreviewMouseUp);
+  }
+
   if (fields.modalUndo) {
     fields.modalUndo.addEventListener("click", undoModalChange);
   }
@@ -555,6 +559,39 @@
     updateModalColorControls();
   }
 
+  function onModalPreviewMouseUp() {
+    var selection = window.getSelection ? window.getSelection() : null;
+    var range;
+    var startIndex;
+    var endIndex;
+    var start;
+    var end;
+
+    if (!selection || !selection.rangeCount || selection.isCollapsed) {
+      return;
+    }
+
+    range = selection.getRangeAt(0);
+
+    if (!fields.modalPreview.contains(range.startContainer) || !fields.modalPreview.contains(range.endContainer)) {
+      return;
+    }
+
+    startIndex = getPreviewCharIndexFromNode(range.startContainer, range.startOffset, true);
+    endIndex = getPreviewCharIndexFromNode(range.endContainer, range.endOffset, false);
+
+    if (startIndex < 0 || endIndex < 0) {
+      return;
+    }
+
+    start = Math.min(startIndex, endIndex);
+    end = Math.max(startIndex, endIndex);
+    modalSelectionStart = start;
+    modalSelectionEnd = end;
+    fields.modalText.focus();
+    restoreModalSelection();
+  }
+
   function onModalColorTriggerMouseDown(event) {
     rememberModalSelection();
     event.preventDefault();
@@ -758,7 +795,7 @@
 
     for (index = 0; index < safeText.length; index += 1) {
       color = colors[index] || colors[colors.length - 1];
-      html += '<span class="sequence-text-char" style="color:' + escapeHtml(color) + ';">' + escapeHtml(safeText.charAt(index)) + '</span>';
+      html += '<span class="sequence-text-char" data-char-index="' + index + '" style="color:' + escapeHtml(color) + ';">' + escapeHtml(safeText.charAt(index)) + '</span>';
     }
 
     return html;
@@ -804,6 +841,33 @@
     }
 
     return values.join("|") + (values.length ? "|" : "");
+  }
+
+  function getPreviewCharIndexFromNode(node, offset, isStart) {
+    var target = node;
+    var charIndex;
+    var normalizedOffset;
+
+    while (target && target !== fields.modalPreview && (!target.getAttribute || target.getAttribute("data-char-index") === null)) {
+      target = target.parentNode;
+    }
+
+    if (!target || target === fields.modalPreview) {
+      return -1;
+    }
+
+    charIndex = parseInt(target.getAttribute("data-char-index"), 10);
+
+    if (!isFinite(charIndex)) {
+      return -1;
+    }
+
+    if (node && node.nodeType === 3) {
+      normalizedOffset = Math.max(0, Math.min(offset, String(node.nodeValue || "").length));
+      return isStart ? charIndex : (charIndex + Math.min(normalizedOffset, 1));
+    }
+
+    return isStart ? charIndex : (charIndex + 1);
   }
 
   function tokenToDirectionValue(token) {

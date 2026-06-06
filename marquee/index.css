@@ -392,6 +392,7 @@ A {
   color: #ffffff;
   white-space: pre-wrap;
   word-break: break-word;
+  user-select: text;
 }
 
 .copy-status {
