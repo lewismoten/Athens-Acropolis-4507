@@ -1458,6 +1458,20 @@
     }) || null;
   }
 
+  function clipMetaStatusLabel(label, maxLength) {
+    var text = String(label || "");
+
+    if (!maxLength || text.length <= maxLength) {
+      return text;
+    }
+
+    if (maxLength <= 3) {
+      return text.slice(0, maxLength);
+    }
+
+    return text.slice(0, maxLength - 3) + "...";
+  }
+
   function getMetaSegmentLabel(segment, mode) {
     var shortMode = mode === "short";
 
