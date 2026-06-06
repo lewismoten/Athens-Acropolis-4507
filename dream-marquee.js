@@ -1255,6 +1255,14 @@
       for (index = 0; index < state.dots.length; index += 1) {
         dot = state.dots[index];
 
+        if (dot.fireworkState === "idle") {
+          dot.fireworkDelay -= 1;
+          if (dot.fireworkDelay <= 0) {
+            dot.fireworkState = "launch";
+          }
+          continue;
+        }
+
         if (dot.fireworkState === "launch") {
           launchX = dot.x;
           launchY = dot.y;
@@ -1569,6 +1577,7 @@
         vx: 0,
         vy: 0,
         fireworkState: "",
+        fireworkDelay: 0,
         fireworkTargetY: 0,
         fireworkBurstSize: 0,
         fireworkBurstCount: 0,
@@ -1577,19 +1586,37 @@
       };
 
       applyDotStyle(dot);
-      resetDot(dot, spawnOffscreen);
+      resetDot(dot, spawnOffscreen, true);
       return dot;
     }
 
-    function resetDot(dot, spawnOffscreen) {
+    function resetDot(dot, spawnOffscreen, initialSpawn) {
+      var initialAge;
+      var risePerFrame;
+      var startY;
+      var riseFrames;
+      var cycleFrames;
+      var simX;
+      var simY;
+      var simVx;
+      var simVy;
+      var simFrame;
+      var launchScale;
+      var launchFrames;
+      var burstX;
+      var burstY;
+      var startX;
+      var totalFrames;
+      var idleFrames;
+
       applyDotStyle(dot);
 
       if (settings.backgroundMode === "rain") {
-        dot.x = nextRandom() * (canvas.width + 32);
-        dot.y = spawnOffscreen ? (-dot.length - (nextRandom() * (canvas.height * 0.35))) : (nextRandom() * canvas.height);
+        dot.x = initialSpawn ? ((nextRandom() * (canvas.width + 96)) - 32) : (nextRandom() * (canvas.width + 32));
+        dot.y = spawnOffscreen ? (-dot.length - (nextRandom() * (canvas.height * 0.35))) : (initialSpawn ? ((nextRandom() * (canvas.height * 1.7)) - (canvas.height * 0.35)) : (nextRandom() * canvas.height));
       } else if (settings.backgroundMode === "snow") {
-        dot.x = nextRandom() * canvas.width;
-        dot.y = spawnOffscreen ? (-dot.radius - (nextRandom() * (canvas.height * 0.3))) : (nextRandom() * canvas.height);
+        dot.x = initialSpawn ? ((nextRandom() * (canvas.width + 48)) - 24) : (nextRandom() * canvas.width);
+        dot.y = spawnOffscreen ? (-dot.radius - (nextRandom() * (canvas.height * 0.3))) : (initialSpawn ? ((nextRandom() * (canvas.height * 1.6)) - (canvas.height * 0.25)) : (nextRandom() * canvas.height));
       } else if (settings.backgroundMode === "fireflies") {
         dot.x = nextRandom() * canvas.width;
         dot.y = nextRandom() * canvas.height;
@@ -1598,14 +1625,37 @@
         dot.y = nextRandom() * canvas.height;
       } else if (settings.backgroundMode === "bubbles") {
         dot.x = nextRandom() * canvas.width;
-        dot.y = spawnOffscreen ? (canvas.height + dot.radius + (nextRandom() * (canvas.height * 0.25))) : (nextRandom() * canvas.height);
+        dot.y = spawnOffscreen ? (canvas.height + dot.radius + (nextRandom() * (canvas.height * 0.25))) : (initialSpawn ? ((nextRandom() * (canvas.height * 1.8)) - (canvas.height * 0.45)) : (nextRandom() * canvas.height));
       } else if (settings.backgroundMode === "bubble-pop") {
         dot.x = nextRandom() * canvas.width;
-        dot.y = spawnOffscreen ? (canvas.height + dot.radius + (nextRandom() * (canvas.height * 0.25))) : (nextRandom() * canvas.height);
+        dot.y = spawnOffscreen ? (canvas.height + dot.radius + (nextRandom() * (canvas.height * 0.25))) : (initialSpawn ? ((nextRandom() * (canvas.height * 1.8)) - (canvas.height * 0.45)) : (nextRandom() * canvas.height));
         dot.popTargetY = (canvas.height * (0.08 + (nextRandom() * 0.42))) + dot.radius;
+        if (initialSpawn) {
+          risePerFrame = Math.max(dot.speed * Math.max(settings.dotSpeed, 0.01) * 6.5, 0.01);
+          startX = dot.x;
+          startY = canvas.height + dot.radius + (nextRandom() * (canvas.height * 0.25));
+          riseFrames = Math.max(1, Math.round((startY - dot.popTargetY) / risePerFrame));
+          cycleFrames = riseFrames + Math.max(dot.popDuration, 1);
+          initialAge = Math.floor(nextRandom() * Math.max(cycleFrames, 1));
+          simX = startX;
+          simY = startY;
+
+          for (simFrame = 0; simFrame < initialAge && simFrame < riseFrames; simFrame += 1) {
+            simX += Math.sin((simFrame / 24) + dot.phase) * dot.drift * (Math.max(settings.dotSpeed, 0.01) * 2.8);
+            simY -= risePerFrame;
+          }
+
+          dot.x = simX;
+          dot.y = simY;
+
+          if (initialAge >= riseFrames) {
+            dot.popFrame = Math.min(initialAge - riseFrames, Math.max(dot.popDuration, 1));
+            dot.y = dot.popTargetY + ((nextRandom() * dot.radius * 2) - dot.radius);
+          }
+        }
       } else if (settings.backgroundMode === "embers") {
         dot.x = nextRandom() * canvas.width;
-        dot.y = spawnOffscreen ? (canvas.height + dot.radius + (nextRandom() * (canvas.height * 0.2))) : (nextRandom() * canvas.height);
+        dot.y = spawnOffscreen ? (canvas.height + dot.radius + (nextRandom() * (canvas.height * 0.2))) : (initialSpawn ? ((nextRandom() * (canvas.height * 1.65)) - (canvas.height * 0.3)) : (nextRandom() * canvas.height));
       } else if (settings.backgroundMode === "sparkles") {
         dot.x = nextRandom() * canvas.width;
         dot.y = nextRandom() * canvas.height;
@@ -1614,14 +1664,17 @@
         dot.x = spawnOffscreen ? (canvas.width + (dot.radius * 8.5) + (nextRandom() * (canvas.width * 0.18))) : (nextRandom() * canvas.width);
         dot.y = (nextRandom() * canvas.height);
       } else if (settings.backgroundMode === "comets") {
-        dot.x = spawnOffscreen ? (canvas.width + dot.length + (nextRandom() * canvas.width * 0.8)) : (nextRandom() * (canvas.width + dot.length));
-        dot.y = nextRandom() * canvas.height;
+        dot.x = spawnOffscreen ? (canvas.width + dot.length + (nextRandom() * canvas.width * 0.8)) : (initialSpawn ? ((nextRandom() * (canvas.width + dot.length + (canvas.width * 0.8))) - (canvas.width * 0.35)) : (nextRandom() * (canvas.width + dot.length)));
+        dot.y = initialSpawn ? ((nextRandom() * (canvas.height * 1.3)) - (canvas.height * 0.15)) : (nextRandom() * canvas.height);
       } else if (settings.backgroundMode === "matrix") {
         dot.x = Math.floor(nextRandom() * Math.max(canvas.width - dot.radius, 1));
-        dot.y = spawnOffscreen ? (-dot.length * dot.glow - (nextRandom() * canvas.height * 0.35)) : (nextRandom() * canvas.height);
+        if (initialSpawn) {
+          dot.x += (nextRandom() * 6) - 3;
+        }
+        dot.y = spawnOffscreen ? (-dot.length * dot.glow - (nextRandom() * canvas.height * 0.35)) : (initialSpawn ? ((nextRandom() * (canvas.height * 1.8)) - (dot.length * dot.glow * 0.9)) : (nextRandom() * canvas.height));
       } else if (settings.backgroundMode === "confetti") {
         dot.x = nextRandom() * canvas.width;
-        dot.y = spawnOffscreen ? (-dot.length - (nextRandom() * canvas.height * 0.35)) : (nextRandom() * canvas.height);
+        dot.y = spawnOffscreen ? (-dot.length - (nextRandom() * canvas.height * 0.35)) : (initialSpawn ? ((nextRandom() * (canvas.height * 1.65)) - (canvas.height * 0.3)) : (nextRandom() * canvas.height));
       } else if (settings.backgroundMode === "balls") {
         dot.x = dot.radius + (nextRandom() * Math.max(canvas.width - (dot.radius * 2), 1));
         dot.y = dot.radius + (nextRandom() * Math.max(canvas.height - (dot.radius * 2), 1));
@@ -1630,13 +1683,81 @@
         dot.y = nextRandom() * canvas.height;
       } else if (settings.backgroundMode === "leaves") {
         dot.x = nextRandom() * canvas.width;
-        dot.y = spawnOffscreen ? (-dot.length - (nextRandom() * canvas.height * 0.3)) : (nextRandom() * canvas.height);
+        dot.y = spawnOffscreen ? (-dot.length - (nextRandom() * canvas.height * 0.3)) : (initialSpawn ? ((nextRandom() * (canvas.height * 1.65)) - (canvas.height * 0.3)) : (nextRandom() * canvas.height));
       } else if (settings.backgroundMode === "fireworks") {
         dot.x = canvas.width * (0.04 + (nextRandom() * 0.92));
-        dot.y = canvas.height + (nextRandom() * (canvas.height * 0.14));
-        dot.fireworkState = "launch";
+        dot.y = canvas.height + (nextRandom() * (canvas.height * 0.42));
+        dot.fireworkState = "idle";
+        dot.fireworkDelay = 12 + Math.floor(nextRandom() * 90);
         dot.fireworkTargetY = canvas.height * (0.12 + (nextRandom() * 0.38));
         dot.sparkleFrame = 0;
+        if (initialSpawn || spawnOffscreen) {
+          launchScale = Math.max(1, 0.75 + (settings.dotSpeed * 2.5));
+          simX = dot.x;
+          simY = dot.y;
+          simVx = dot.vx;
+          simVy = dot.vy;
+          burstX = simX;
+          burstY = simY;
+          launchFrames = 0;
+
+          for (simFrame = 0; simFrame < 240; simFrame += 1) {
+            simX += simVx * launchScale;
+            simY += simVy * launchScale;
+            simVy += 0.085 * launchScale;
+
+            if (simY <= dot.fireworkTargetY || (simVy >= 0 && simY <= canvas.height * 0.5)) {
+              burstX = simX;
+              burstY = simY;
+              launchFrames = simFrame + 1;
+              break;
+            }
+          }
+
+          if (!launchFrames) {
+            burstX = canvas.width * (0.04 + (nextRandom() * 0.92));
+            burstY = canvas.height * (0.12 + (nextRandom() * 0.38));
+            launchFrames = 1;
+          }
+
+          idleFrames = dot.fireworkDelay;
+
+          if (initialSpawn) {
+            totalFrames = idleFrames + launchFrames + Math.max(dot.sparkleLifeDuration || 1, 1);
+            initialAge = Math.floor(nextRandom() * Math.max(totalFrames, 1));
+          } else if (nextRandom() < 0.72) {
+            initialAge = idleFrames + Math.floor(nextRandom() * Math.max(launchFrames, 1));
+          } else {
+            initialAge = 0;
+          }
+
+          if (initialAge < idleFrames) {
+            dot.fireworkState = "idle";
+            dot.fireworkDelay = idleFrames - initialAge;
+          } else if (initialAge < idleFrames + launchFrames) {
+            dot.fireworkState = "launch";
+            simX = dot.x;
+            simY = dot.y;
+            simVx = dot.vx;
+            simVy = dot.vy;
+
+            for (simFrame = 0; simFrame < initialAge - idleFrames; simFrame += 1) {
+              simX += simVx * launchScale;
+              simY += simVy * launchScale;
+              simVy += 0.085 * launchScale;
+            }
+
+            dot.x = simX;
+            dot.y = simY;
+            dot.vx = simVx;
+            dot.vy = simVy;
+          } else {
+            dot.fireworkState = "burst";
+            dot.x = burstX;
+            dot.y = Math.min(burstY, canvas.height * 0.5);
+            dot.sparkleFrame = initialAge - idleFrames - launchFrames;
+          }
+        }
       } else if (spawnOffscreen) {
         dot.x = canvas.width + dot.radius + (nextRandom() * (canvas.width * 0.35));
         dot.y = (nextRandom() * (canvas.height - 10)) + 5;
@@ -1663,6 +1784,7 @@
 
       if (settings.backgroundMode !== "fireworks") {
         dot.fireworkState = "";
+        dot.fireworkDelay = 0;
         dot.fireworkTargetY = 0;
         dot.fireworkBurstSize = 0;
         dot.fireworkBurstCount = 0;
