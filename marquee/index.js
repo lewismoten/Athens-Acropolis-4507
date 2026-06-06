@@ -224,8 +224,7 @@
         start: rows[index].start,
         end: rows[index].end,
         text: rows[index].text,
-        colors: marqueeApi.parseColorList(rows[index].colors),
-        holdFrames: config.displayTime
+        colors: marqueeApi.parseColorList(rows[index].colors)
       });
     }
 
@@ -236,7 +235,12 @@
     var lines = [String(config.sequenceCount)];
     var index;
 
-    for (index = 0; index < rows.length; index += 1) {
+    if (rows[0]) {
+      lines.push(rows[0].text);
+      lines.push(rows[0].colors);
+    }
+
+    for (index = 1; index < rows.length; index += 1) {
       lines.push(rows[index].text);
       lines.push(rows[index].colors);
       lines.push(rows[index].start + "," + rows[index].end);
