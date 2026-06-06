@@ -889,7 +889,7 @@
   }
 
   function normalizeBackgroundMode(value) {
-    if (value === "rain" || value === "snow" || value === "fireflies" || value === "dust" || value === "bubbles" || value === "bubble-pop" || value === "embers" || value === "sparkles" || value === "fog" || value === "comets" || value === "matrix" || value === "confetti" || value === "balls" || value === "static") {
+    if (value === "rain" || value === "snow" || value === "fireflies" || value === "dust" || value === "bubbles" || value === "bubble-pop" || value === "embers" || value === "sparkles" || value === "fog" || value === "comets" || value === "matrix" || value === "confetti" || value === "balls" || value === "static" || value === "leaves") {
       return value;
     }
 

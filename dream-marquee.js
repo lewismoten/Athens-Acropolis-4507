@@ -151,7 +151,7 @@
   }
 
   function normalizeBackgroundMode(value) {
-    if (value === "rain" || value === "snow" || value === "fireflies" || value === "dust" || value === "bubbles" || value === "bubble-pop" || value === "embers" || value === "sparkles" || value === "fog" || value === "comets" || value === "matrix" || value === "confetti" || value === "balls" || value === "static") {
+    if (value === "rain" || value === "snow" || value === "fireflies" || value === "dust" || value === "bubbles" || value === "bubble-pop" || value === "embers" || value === "sparkles" || value === "fog" || value === "comets" || value === "matrix" || value === "confetti" || value === "balls" || value === "static" || value === "leaves") {
       return value;
     }
 
@@ -536,6 +536,11 @@
 
       if (settings.backgroundMode === "static") {
         drawStatic();
+        return;
+      }
+
+      if (settings.backgroundMode === "leaves") {
+        drawLeaves();
         return;
       }
 
@@ -1179,6 +1184,54 @@
       context.globalAlpha = 1;
     }
 
+    function drawLeaves() {
+      var index;
+      var dot;
+      var fall;
+      var sway;
+      var width;
+      var height;
+      var rotation;
+
+      for (index = 0; index < state.dots.length; index += 1) {
+        dot = state.dots[index];
+        fall = dot.speed * settings.dotSpeed * 5.6;
+        sway = Math.sin((state.backgroundFrame / 22) + dot.phase) * dot.drift * (settings.dotSpeed * 3.4);
+        width = dot.radius * 1.55;
+        height = dot.length;
+        rotation = Math.sin((state.backgroundFrame / 20) + dot.phase) * 0.85;
+
+        dot.x += sway;
+        dot.y += fall;
+
+        if (dot.y - height > canvas.height + 18 || dot.x < -28 || dot.x > canvas.width + 28) {
+          resetDot(dot, true);
+          continue;
+        }
+
+        context.save();
+        context.translate(dot.x, dot.y);
+        context.rotate(rotation);
+        context.fillStyle = dot.color;
+        context.globalAlpha = 0.78;
+        drawLeafShape(width, height);
+        context.restore();
+      }
+
+      context.globalAlpha = 1;
+    }
+
+    function drawLeafShape(width, height) {
+      context.beginPath();
+      context.moveTo(0, -height / 2);
+      context.bezierCurveTo(width / 2, -height / 3, width / 2, height / 3, 0, height / 2);
+      context.bezierCurveTo(-width / 2, height / 3, -width / 2, -height / 3, 0, -height / 2);
+      context.fill();
+
+      context.globalAlpha *= 0.55;
+      context.fillRect(-0.5, -height / 2, 1, height);
+    }
+
     function drawFogEllipse(centerX, centerY, width, height) {
       context.beginPath();
       if (typeof context.ellipse === "function") {
@@ -1449,6 +1502,9 @@
       } else if (settings.backgroundMode === "static") {
         dot.x = nextRandom() * canvas.width;
         dot.y = nextRandom() * canvas.height;
+      } else if (settings.backgroundMode === "leaves") {
+        dot.x = nextRandom() * canvas.width;
+        dot.y = spawnOffscreen ? (-dot.length - (nextRandom() * canvas.height * 0.3)) : (nextRandom() * canvas.height);
       } else if (spawnOffscreen) {
         dot.x = canvas.width + dot.radius + (nextRandom() * (canvas.width * 0.35));
         dot.y = (nextRandom() * (canvas.height - 10)) + 5;
@@ -1627,6 +1683,17 @@
         dot.drift = 0;
         dot.glow = 1;
         dot.length = (nextRandom() < 0.82) ? 1 : 2;
+        dot.popDuration = 8;
+        return;
+      }
+
+      if (settings.backgroundMode === "leaves") {
+        dot.radius = (nextRandom() * 3.2) + 2.2;
+        dot.speed = (nextRandom() * 0.7) + 0.45;
+        dot.wobble = 0;
+        dot.drift = (nextRandom() * 1.1) + 0.45;
+        dot.glow = 1;
+        dot.length = (nextRandom() * 8) + 10;
         dot.popDuration = 8;
         return;
       }
