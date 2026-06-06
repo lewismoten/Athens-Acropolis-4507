@@ -150,6 +150,14 @@
     return fallback;
   }
 
+  function normalizeBackgroundMode(value) {
+    if (value === "rain" || value === "snow") {
+      return value;
+    }
+
+    return "stars";
+  }
+
   function escapeAttribute(value) {
     return String(value)
       .replace(/&/g, "&amp;")
@@ -249,6 +257,7 @@
       width: options.width || canvas.width || 500,
       height: options.height || canvas.height || 78,
       backgroundColor: options.backgroundColor || "#000033",
+      backgroundMode: normalizeBackgroundMode(options.backgroundMode),
       dotColor: options.dotColor || "#9999ff",
       dotCount: typeof options.dotCount === "number" ? options.dotCount : 50,
       waveHeight: typeof options.waveHeight === "number" ? options.waveHeight : 8,
@@ -341,10 +350,12 @@
       var next = nextOptions || {};
       var previousDotCount = settings.dotCount;
       var previousDotColor = settings.dotColor;
+      var previousBackgroundMode = settings.backgroundMode;
 
       settings.width = next.width || settings.width;
       settings.height = next.height || settings.height;
       settings.backgroundColor = next.backgroundColor || settings.backgroundColor;
+      settings.backgroundMode = next.backgroundMode ? normalizeBackgroundMode(next.backgroundMode) : settings.backgroundMode;
       settings.dotColor = next.dotColor || settings.dotColor;
       settings.dotCount = typeof next.dotCount === "number" ? next.dotCount : settings.dotCount;
       settings.waveHeight = typeof next.waveHeight === "number" ? next.waveHeight : settings.waveHeight;
@@ -358,6 +369,10 @@
 
       if (settings.dotCount !== previousDotCount) {
         state.dots = resizeDots(settings.dotCount);
+      }
+
+      if (settings.backgroundMode !== previousBackgroundMode) {
+        state.dots = createDots(settings.dotCount);
       }
 
       if (settings.dotColor !== previousDotColor) {
@@ -452,6 +467,20 @@
     }
 
     function drawDots() {
+      if (settings.backgroundMode === "rain") {
+        drawRain();
+        return;
+      }
+
+      if (settings.backgroundMode === "snow") {
+        drawSnow();
+        return;
+      }
+
+      drawStars();
+    }
+
+    function drawStars() {
       var index;
       var dot;
       var drift;
@@ -474,6 +503,73 @@
         context.globalAlpha = twinkle;
         context.beginPath();
         context.arc(dot.x, dot.y + shimmerY, dot.radius, 0, Math.PI * 2, false);
+        context.fill();
+      }
+
+      context.globalAlpha = 1;
+    }
+
+    function drawRain() {
+      var index;
+      var dot;
+      var fall;
+      var drift;
+      var length;
+      var alpha;
+
+      context.lineWidth = 1.2;
+
+      for (index = 0; index < state.dots.length; index += 1) {
+        dot = state.dots[index];
+        fall = dot.speed * (settings.dotSpeed * 22);
+        drift = dot.drift * (settings.dotSpeed * 5);
+        length = dot.length;
+        alpha = 0.35 + (0.45 * dot.glow);
+
+        dot.x += drift;
+        dot.y += fall;
+
+        if (dot.y - length > canvas.height || dot.x > canvas.width + 12 || dot.x < -12) {
+          resetDot(dot, true);
+        }
+
+        context.strokeStyle = dot.color;
+        context.globalAlpha = alpha;
+        context.beginPath();
+        context.moveTo(dot.x, dot.y - length);
+        context.lineTo(dot.x + (drift * 1.6), dot.y);
+        context.stroke();
+      }
+
+      context.globalAlpha = 1;
+    }
+
+    function drawSnow() {
+      var index;
+      var dot;
+      var drift;
+      var fall;
+      var sway;
+      var alpha;
+
+      for (index = 0; index < state.dots.length; index += 1) {
+        dot = state.dots[index];
+        drift = Math.sin((state.entryFrame / 22) + dot.phase) * dot.drift * (settings.dotSpeed * 3.4);
+        fall = dot.speed * (settings.dotSpeed * 7.5);
+        sway = Math.cos((state.entryFrame / 20) + dot.phase) * dot.wobble * 2.2;
+        alpha = 0.45 + (0.35 * (0.5 + (Math.sin((state.entryFrame / 16) + dot.phase) / 2)));
+
+        dot.x += drift;
+        dot.y += fall;
+
+        if (dot.y - dot.radius > canvas.height || dot.x > canvas.width + 18 || dot.x < -18) {
+          resetDot(dot, true);
+        }
+
+        context.fillStyle = dot.color;
+        context.globalAlpha = alpha;
+        context.beginPath();
+        context.arc(dot.x + sway, dot.y, dot.radius, 0, Math.PI * 2, false);
         context.fill();
       }
 
@@ -666,26 +762,70 @@
         y: 0,
         relativeX: 0,
         relativeY: 0,
-        radius: (nextRandom() * 1.35) + 0.45,
-        speed: (nextRandom() * 1.2) + 0.6,
-        wobble: nextRandom() * 0.6,
+        radius: 1,
+        speed: 1,
+        wobble: 0,
+        drift: 0,
+        glow: 1,
+        length: 8,
         phase: nextRandom() * Math.PI * 2,
         color: settings.dotColor
       };
 
+      applyDotStyle(dot);
       resetDot(dot, spawnOffscreen);
       return dot;
     }
 
     function resetDot(dot, spawnOffscreen) {
-      if (spawnOffscreen) {
+      applyDotStyle(dot);
+
+      if (settings.backgroundMode === "rain") {
+        dot.x = nextRandom() * (canvas.width + 32);
+        dot.y = spawnOffscreen ? (-dot.length - (nextRandom() * (canvas.height * 0.35))) : (nextRandom() * canvas.height);
+      } else if (settings.backgroundMode === "snow") {
+        dot.x = nextRandom() * canvas.width;
+        dot.y = spawnOffscreen ? (-dot.radius - (nextRandom() * (canvas.height * 0.3))) : (nextRandom() * canvas.height);
+      } else if (spawnOffscreen) {
         dot.x = canvas.width + dot.radius + (nextRandom() * (canvas.width * 0.35));
+        dot.y = (nextRandom() * (canvas.height - 10)) + 5;
       } else {
         dot.x = nextRandom() * canvas.width;
+        dot.y = (nextRandom() * (canvas.height - 10)) + 5;
       }
 
-      dot.y = (nextRandom() * (canvas.height - 10)) + 5;
       syncDotRelativePosition(dot, canvas.width, canvas.height);
+    }
+
+    function applyDotStyle(dot) {
+      dot.color = settings.dotColor;
+
+      if (settings.backgroundMode === "rain") {
+        dot.radius = 1;
+        dot.speed = (nextRandom() * 1.6) + 1.2;
+        dot.wobble = 0;
+        dot.drift = (nextRandom() * 0.8) + 0.15;
+        dot.glow = (nextRandom() * 0.4) + 0.6;
+        dot.length = (nextRandom() * 12) + 10;
+        return;
+      }
+
+      if (settings.backgroundMode === "snow") {
+        dot.radius = (nextRandom() * 1.6) + 1.1;
+        dot.speed = (nextRandom() * 0.8) + 0.5;
+        dot.wobble = (nextRandom() * 1.2) + 0.35;
+        dot.drift = (nextRandom() * 1.1) + 0.4;
+        dot.glow = 1;
+        dot.length = 0;
+        return;
+      }
+
+      dot.radius = (nextRandom() * 1.35) + 0.45;
+      dot.speed = (nextRandom() * 1.2) + 0.6;
+      dot.wobble = nextRandom() * 0.6;
+      dot.drift = 0;
+      dot.glow = 1;
+      dot.length = 0;
     }
 
     function syncDotRelativePosition(dot, width, height) {

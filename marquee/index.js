@@ -32,6 +32,7 @@
     waveHeight: document.getElementById("marquee-wave-height"),
     dotCount: document.getElementById("marquee-dot-count"),
     backgroundSpeed: document.getElementById("marquee-background-speed"),
+    backgroundMode: document.getElementById("marquee-background-mode"),
     animationSpeed: document.getElementById("marquee-animation-speed"),
     background: document.getElementById("marquee-background"),
     fileName: document.getElementById("sequence-file-name"),
@@ -52,6 +53,7 @@
     width: 640,
     height: 92,
     backgroundColor: "#000066",
+    backgroundMode: "stars",
     dotColor: "#9999ff",
     dotCount: 50,
     waveHeight: 8,
@@ -174,6 +176,7 @@
       waveHeight: marqueeApi.clampNumber(fields.waveHeight.value, 0, 24, 8),
       dotCount: marqueeApi.clampNumber(fields.dotCount.value, 0, 999, 50),
       backgroundSpeed: marqueeApi.clampNumber(fields.backgroundSpeed.value, 0, 30, 3),
+      backgroundMode: normalizeBackgroundMode(fields.backgroundMode.value),
       animationSpeed: marqueeApi.clampNumber(fields.animationSpeed.value, 1, 120, 20),
       background: marqueeApi.normalizeColor(fields.background.value, "#000066"),
       defaultColor: defaultColor,
@@ -190,6 +193,7 @@
       width: config.width,
       height: config.height,
       backgroundColor: config.background,
+      backgroundMode: config.backgroundMode,
       dotColor: config.dotColor,
       dotCount: config.dotCount,
       dotSpeed: toDotSpeed(config.backgroundSpeed),
@@ -239,6 +243,7 @@
       width: config.width,
       height: config.height,
       backgroundColor: config.background,
+      backgroundMode: config.backgroundMode,
       dotColor: config.dotColor,
       dotCount: config.dotCount,
       dotSpeed: toDotSpeed(config.backgroundSpeed),
@@ -881,6 +886,14 @@
 
   function toDotSpeed(backgroundSpeed) {
     return Number(backgroundSpeed || 0) * 0.06;
+  }
+
+  function normalizeBackgroundMode(value) {
+    if (value === "rain" || value === "snow") {
+      return value;
+    }
+
+    return "stars";
   }
 
   function buildFontDeclaration(config) {
