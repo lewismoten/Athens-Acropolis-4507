@@ -151,7 +151,7 @@
   }
 
   function normalizeBackgroundMode(value) {
-    if (value === "rain" || value === "snow" || value === "fireflies" || value === "dust" || value === "bubbles" || value === "bubble-pop" || value === "embers" || value === "sparkles" || value === "fog") {
+    if (value === "rain" || value === "snow" || value === "fireflies" || value === "dust" || value === "bubbles" || value === "bubble-pop" || value === "embers" || value === "sparkles" || value === "fog" || value === "comets") {
       return value;
     }
 
@@ -511,6 +511,11 @@
 
       if (settings.backgroundMode === "fog") {
         drawFog();
+        return;
+      }
+
+      if (settings.backgroundMode === "comets") {
+        drawComets();
         return;
       }
 
@@ -954,6 +959,48 @@
       context.globalAlpha = 1;
     }
 
+    function drawComets() {
+      var index;
+      var dot;
+      var driftX;
+      var driftY;
+      var tailLength;
+      var alpha;
+
+      context.lineWidth = 1.2;
+
+      for (index = 0; index < state.dots.length; index += 1) {
+        dot = state.dots[index];
+        driftX = dot.speed * settings.dotSpeed * 12;
+        driftY = dot.drift * settings.dotSpeed * 3.4;
+        tailLength = dot.length;
+        alpha = 0.18 + (0.55 * dot.glow);
+
+        dot.x -= driftX;
+        dot.y += driftY;
+
+        if (dot.x < -tailLength - 28 || dot.y > canvas.height + 28 || dot.y < -28) {
+          resetDot(dot, true);
+          continue;
+        }
+
+        context.strokeStyle = dot.color;
+        context.globalAlpha = alpha * 0.55;
+        context.beginPath();
+        context.moveTo(dot.x + tailLength, dot.y - (driftY * 3.4));
+        context.lineTo(dot.x, dot.y);
+        context.stroke();
+
+        context.globalAlpha = alpha;
+        context.beginPath();
+        context.arc(dot.x, dot.y, dot.radius, 0, Math.PI * 2, false);
+        context.fillStyle = dot.color;
+        context.fill();
+      }
+
+      context.globalAlpha = 1;
+    }
+
     function drawFogEllipse(centerX, centerY, width, height) {
       context.beginPath();
       if (typeof context.ellipse === "function") {
@@ -1207,6 +1254,9 @@
       } else if (settings.backgroundMode === "fog") {
         dot.x = spawnOffscreen ? (canvas.width + (dot.radius * 8.5) + (nextRandom() * (canvas.width * 0.18))) : (nextRandom() * canvas.width);
         dot.y = (nextRandom() * canvas.height);
+      } else if (settings.backgroundMode === "comets") {
+        dot.x = spawnOffscreen ? (canvas.width + dot.length + (nextRandom() * canvas.width * 0.8)) : (nextRandom() * (canvas.width + dot.length));
+        dot.y = nextRandom() * canvas.height;
       } else if (spawnOffscreen) {
         dot.x = canvas.width + dot.radius + (nextRandom() * (canvas.width * 0.35));
         dot.y = (nextRandom() * (canvas.height - 10)) + 5;
@@ -1323,6 +1373,17 @@
         dot.drift = 0;
         dot.glow = 1;
         dot.length = 0;
+        dot.popDuration = 8;
+        return;
+      }
+
+      if (settings.backgroundMode === "comets") {
+        dot.radius = (nextRandom() * 1.2) + 0.8;
+        dot.speed = (nextRandom() * 1.6) + 1.6;
+        dot.wobble = 0;
+        dot.drift = (nextRandom() * 1.2) - 0.6;
+        dot.glow = 0.55 + (nextRandom() * 0.4);
+        dot.length = (nextRandom() * 46) + 28;
         dot.popDuration = 8;
         return;
       }
