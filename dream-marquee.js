@@ -151,7 +151,7 @@
   }
 
   function normalizeBackgroundMode(value) {
-    if (value === "rain" || value === "snow" || value === "fireflies" || value === "dust" || value === "bubbles" || value === "bubble-pop" || value === "embers" || value === "sparkles" || value === "fog" || value === "comets" || value === "matrix" || value === "confetti" || value === "balls") {
+    if (value === "rain" || value === "snow" || value === "fireflies" || value === "dust" || value === "bubbles" || value === "bubble-pop" || value === "embers" || value === "sparkles" || value === "fog" || value === "comets" || value === "matrix" || value === "confetti" || value === "balls" || value === "static") {
       return value;
     }
 
@@ -531,6 +531,11 @@
 
       if (settings.backgroundMode === "balls") {
         drawBalls();
+        return;
+      }
+
+      if (settings.backgroundMode === "static") {
+        drawStatic();
         return;
       }
 
@@ -1139,6 +1144,41 @@
       context.globalAlpha = 1;
     }
 
+    function drawStatic() {
+      var index;
+      var dot;
+      var alpha;
+      var size;
+      var scanlineAlpha;
+      var y;
+
+      for (index = 0; index < state.dots.length; index += 1) {
+        dot = state.dots[index];
+
+        if (nextRandom() < 0.085) {
+          dot.x = nextRandom() * canvas.width;
+          dot.y = nextRandom() * canvas.height;
+          syncDotRelativePosition(dot, canvas.width, canvas.height);
+        }
+
+        alpha = 0.03 + (nextRandom() * 0.22);
+        size = dot.length;
+
+        context.fillStyle = dot.color;
+        context.globalAlpha = alpha;
+        context.fillRect(dot.x, dot.y, size, size);
+      }
+
+      for (y = 0; y < canvas.height; y += 3) {
+        scanlineAlpha = 0.018 + (0.01 * (0.5 + (Math.sin((state.backgroundFrame / 12) + (y / 18)) / 2)));
+        context.fillStyle = settings.dotColor;
+        context.globalAlpha = scanlineAlpha;
+        context.fillRect(0, y, canvas.width, 1);
+      }
+
+      context.globalAlpha = 1;
+    }
+
     function drawFogEllipse(centerX, centerY, width, height) {
       context.beginPath();
       if (typeof context.ellipse === "function") {
@@ -1406,6 +1446,9 @@
       } else if (settings.backgroundMode === "balls") {
         dot.x = dot.radius + (nextRandom() * Math.max(canvas.width - (dot.radius * 2), 1));
         dot.y = dot.radius + (nextRandom() * Math.max(canvas.height - (dot.radius * 2), 1));
+      } else if (settings.backgroundMode === "static") {
+        dot.x = nextRandom() * canvas.width;
+        dot.y = nextRandom() * canvas.height;
       } else if (spawnOffscreen) {
         dot.x = canvas.width + dot.radius + (nextRandom() * (canvas.width * 0.35));
         dot.y = (nextRandom() * (canvas.height - 10)) + 5;
@@ -1574,6 +1617,17 @@
         dot.popDuration = 8;
         dot.vx = ((nextRandom() * 1.4) + 0.55) * (nextRandom() < 0.5 ? -1 : 1);
         dot.vy = ((nextRandom() * 1.4) + 0.55) * (nextRandom() < 0.5 ? -1 : 1);
+        return;
+      }
+
+      if (settings.backgroundMode === "static") {
+        dot.radius = 1;
+        dot.speed = 1;
+        dot.wobble = 0;
+        dot.drift = 0;
+        dot.glow = 1;
+        dot.length = (nextRandom() < 0.82) ? 1 : 2;
+        dot.popDuration = 8;
         return;
       }
 
