@@ -130,39 +130,29 @@
   <DIV CLASS="modal-card" ROLE="dialog" ARIA-MODAL="true" ARIA-LABELLEDBY="row-modal-title">
     <DIV CLASS="panel-heading" ID="row-modal-title">Edit Sequence Row</DIV>
     <FORM ID="row-modal-form" CLASS="modal-form">
-      <DIV CLASS="field-row">
-        <LABEL CLASS="field">
-          <SPAN CLASS="field-label">Enter From</SPAN>
-          <SELECT ID="modal-row-start" CLASS="field-input">
-            <OPTION VALUE="right">right</OPTION>
-            <OPTION VALUE="left">left</OPTION>
-            <OPTION VALUE="top">top</OPTION>
-            <OPTION VALUE="bottom">bottom</OPTION>
-          </SELECT>
-        </LABEL>
-
-        <LABEL CLASS="field">
-          <SPAN CLASS="field-label">Exit Toward</SPAN>
-          <SELECT ID="modal-row-end" CLASS="field-input">
-            <OPTION VALUE="left">left</OPTION>
-            <OPTION VALUE="right">right</OPTION>
-            <OPTION VALUE="top">top</OPTION>
-            <OPTION VALUE="bottom">bottom</OPTION>
-            <OPTION VALUE="center">center</OPTION>
-          </SELECT>
-        </LABEL>
-      </DIV>
-
       <LABEL CLASS="field">
         <SPAN CLASS="field-label">Text</SPAN>
         <TEXTAREA ID="modal-row-text" CLASS="field-input field-textarea" ROWS="4"></TEXTAREA>
       </LABEL>
 
-      <LABEL CLASS="field">
-        <SPAN CLASS="field-label">Color List</SPAN>
-        <INPUT ID="modal-row-colors" CLASS="field-input" TYPE="text">
-      </LABEL>
-      <DIV CLASS="color-preview-strip color-preview-modal" ID="modal-row-color-preview"></DIV>
+      <DIV CLASS="field-row">
+        <LABEL CLASS="field">
+          <SPAN CLASS="field-label">Selection Color</SPAN>
+          <INPUT ID="modal-row-color-picker" CLASS="field-input field-color" TYPE="color" VALUE="#ffff66">
+        </LABEL>
+
+        <DIV CLASS="field field-check field-justify-end">
+          <SPAN CLASS="field-label">Apply To Text Selection</SPAN>
+          <BUTTON TYPE="button" ID="modal-apply-color" CLASS="action-button action-button-inline">Apply Color</BUTTON>
+        </DIV>
+      </DIV>
+
+      <INPUT ID="modal-row-colors" TYPE="hidden">
+
+      <DIV CLASS="field">
+        <SPAN CLASS="field-label">Preview</SPAN>
+        <DIV ID="modal-row-preview" CLASS="modal-row-preview"></DIV>
+      </DIV>
 
       <DIV CLASS="modal-actions">
         <BUTTON TYPE="button" ID="modal-cancel" CLASS="row-button">Cancel</BUTTON>

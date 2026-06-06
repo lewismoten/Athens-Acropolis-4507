@@ -113,22 +113,6 @@ A {
   font: inherit;
 }
 
-.color-preview-strip {
-  display: flex;
-  flex-wrap: wrap;
-  gap: 6px;
-  padding: 10px 14px 0;
-}
-
-.color-chip {
-  min-width: 52px;
-  padding: 4px 6px;
-  border: 1px solid #5577cc;
-  font: bold 12px/1 "Courier New", Courier, monospace;
-  text-align: center;
-  background: #000022;
-}
-
 .field-textarea {
   resize: vertical;
   min-height: 90px;
@@ -150,6 +134,10 @@ A {
   width: 18px;
   height: 18px;
   margin-top: 10px;
+}
+
+.field-justify-end {
+  justify-content: flex-end;
 }
 
 .code-output {
@@ -331,10 +319,6 @@ A {
   padding-bottom: 14px;
 }
 
-.color-preview-modal {
-  padding-top: 4px;
-}
-
 .modal-actions {
   display: flex;
   justify-content: flex-end;
@@ -356,6 +340,28 @@ A {
   color: #ffffff;
   font: bold 14px "Times New Roman", Times, serif;
   cursor: pointer;
+}
+
+.action-button[disabled] {
+  border-color: #4d5f9d;
+  background: #0a1b55;
+  color: #6c80ba;
+  cursor: default;
+}
+
+.action-button-inline {
+  width: 100%;
+}
+
+.modal-row-preview {
+  min-height: 72px;
+  padding: 14px 16px;
+  border: 1px solid #5577cc;
+  background: #000066;
+  box-shadow: inset 0 0 0 1px rgba(255, 255, 255, 0.06);
+  color: #ffffff;
+  white-space: pre-wrap;
+  word-break: break-word;
 }
 
 .copy-status {

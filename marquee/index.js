@@ -11,7 +11,6 @@
   var rowModal = document.getElementById("row-modal");
   var rowModalForm = document.getElementById("row-modal-form");
   var modalCancel = document.getElementById("modal-cancel");
-  var modalRowColorPreview = document.getElementById("modal-row-color-preview");
   var marqueeApi = window.DreamMarquee;
   var previewMarquee;
   var sequenceRows = [];
@@ -32,10 +31,11 @@
     dotColor: document.getElementById("marquee-dot-color"),
     fontFamily: document.getElementById("marquee-font-family"),
     bold: document.getElementById("marquee-bold"),
-    modalStart: document.getElementById("modal-row-start"),
-    modalEnd: document.getElementById("modal-row-end"),
     modalText: document.getElementById("modal-row-text"),
-    modalColors: document.getElementById("modal-row-colors")
+    modalColors: document.getElementById("modal-row-colors"),
+    modalColorPicker: document.getElementById("modal-row-color-picker"),
+    modalApplyColor: document.getElementById("modal-apply-color"),
+    modalPreview: document.getElementById("modal-row-preview")
   };
 
   previewMarquee = marqueeApi.createCanvasMarquee({
@@ -61,7 +61,18 @@
   sequenceGridBody.addEventListener("change", onSequenceGridChange);
   rowModal.addEventListener("click", onModalShellClick);
   rowModalForm.addEventListener("submit", onModalSubmit);
-  fields.modalColors.addEventListener("input", updateModalColorPreview);
+  fields.modalText.addEventListener("input", onModalTextInput);
+  fields.modalText.addEventListener("select", updateModalColorControls);
+  fields.modalText.addEventListener("click", updateModalColorControls);
+  fields.modalText.addEventListener("keyup", updateModalColorControls);
+
+  if (fields.modalApplyColor) {
+    fields.modalApplyColor.addEventListener("click", applyColorToModalSelection);
+  }
+
+  if (fields.modalColorPicker) {
+    fields.modalColorPicker.addEventListener("input", updateModalColorControls);
+  }
 
   if (copyButton) {
     copyButton.addEventListener("click", copyGeneratedCode);
@@ -115,6 +126,9 @@
     }
 
     updateMarquee();
+    if (!rowModal.hidden) {
+      updateModalEditorPreview();
+    }
   }
 
   function onFormFieldChange(event) {
@@ -123,6 +137,9 @@
     }
 
     updateMarquee();
+    if (!rowModal.hidden) {
+      updateModalEditorPreview();
+    }
   }
 
   function getPageConfig() {
@@ -372,11 +389,10 @@
     };
 
     editingRowIndex = typeof index === "number" ? index : -1;
-    fields.modalStart.value = tokenToDirectionValue(values.start || ">>");
-    fields.modalEnd.value = tokenToDirectionValue(values.end || ">>");
     fields.modalText.value = values.text || "";
-    fields.modalColors.value = values.colors || "";
-    updateModalColorPreview();
+    fields.modalColors.value = normalizeColorPipeForText(values.text || "", values.colors || "", "ffff66|ffee88|ffdd55|ffee88|");
+    fields.modalColorPicker.value = detectModalSelectionColor();
+    updateModalEditorPreview();
     rowModal.hidden = false;
     fields.modalText.focus();
     fields.modalText.select();
@@ -387,20 +403,16 @@
     editingRowIndex = -1;
   }
 
-  function updateModalColorPreview() {
-    renderColorPreview(modalRowColorPreview, fields.modalColors.value);
-  }
-
   function onModalSubmit(event) {
     var record;
 
     event.preventDefault();
 
     record = {
-      start: directionValueToToken(fields.modalStart.value || "right"),
-      end: directionValueToToken(fields.modalEnd.value || "right"),
+      start: editingRowIndex >= 0 && sequenceRows[editingRowIndex] ? sequenceRows[editingRowIndex].start : ">>",
+      end: editingRowIndex >= 0 && sequenceRows[editingRowIndex] ? sequenceRows[editingRowIndex].end : ">>",
       text: fields.modalText.value || "",
-      colors: normalizeColorPipe(fields.modalColors.value, "ffff66|ffee88|ffdd55|ffee88|")
+      colors: normalizeColorPipeForText(fields.modalText.value || "", fields.modalColors.value, "ffff66|ffee88|ffdd55|ffee88|")
     };
 
     if (!record.text.trim()) {
@@ -416,6 +428,86 @@
 
     closeRowModal();
     updateMarquee();
+  }
+
+  function onModalTextInput() {
+    fields.modalColors.value = normalizeColorPipeForText(
+      fields.modalText.value || "",
+      fields.modalColors.value,
+      "ffff66|ffee88|ffdd55|ffee88|"
+    );
+    updateModalEditorPreview();
+  }
+
+  function applyColorToModalSelection() {
+    var text = fields.modalText.value || "";
+    var selectionStart = fields.modalText.selectionStart;
+    var selectionEnd = fields.modalText.selectionEnd;
+    var colors;
+    var index;
+    var nextColor;
+
+    if (!text || selectionStart === selectionEnd) {
+      updateModalColorControls();
+      return;
+    }
+
+    colors = expandColorArrayForText(text, fields.modalColors.value, "ffff66|ffee88|ffdd55|ffee88|");
+    nextColor = marqueeApi.normalizeColor(fields.modalColorPicker.value, "#ffff66").replace(/^#/, "");
+
+    for (index = selectionStart; index < selectionEnd && index < colors.length; index += 1) {
+      colors[index] = nextColor;
+    }
+
+    fields.modalColors.value = colors.join("|") + (colors.length ? "|" : "");
+    updateModalEditorPreview();
+    fields.modalText.focus();
+    fields.modalText.setSelectionRange(selectionStart, selectionEnd);
+  }
+
+  function updateModalEditorPreview() {
+    if (!fields.modalPreview) {
+      return;
+    }
+
+    fields.modalColors.value = normalizeColorPipeForText(
+      fields.modalText.value || "",
+      fields.modalColors.value,
+      "ffff66|ffee88|ffdd55|ffee88|"
+    );
+    fields.modalPreview.style.background = marqueeApi.normalizeColor(fields.background.value, "#000066");
+    fields.modalPreview.style.font = (fields.bold.checked ? "bold " : "") + getPageConfig().fontSize + "px " + getPageConfig().fontFamily;
+    fields.modalPreview.innerHTML = buildColorizedTextMarkup(fields.modalText.value || "", fields.modalColors.value);
+    updateModalColorControls();
+  }
+
+  function updateModalColorControls() {
+    var selectionStart = fields.modalText.selectionStart;
+    var selectionEnd = fields.modalText.selectionEnd;
+
+    if (fields.modalApplyColor) {
+      fields.modalApplyColor.disabled = !fields.modalText.value || selectionStart === selectionEnd;
+    }
+
+    if (fields.modalColorPicker) {
+      fields.modalColorPicker.value = detectModalSelectionColor();
+    }
+  }
+
+  function detectModalSelectionColor() {
+    var text = fields.modalText.value || "";
+    var selectionStart = fields.modalText.selectionStart;
+    var colors = expandColorArrayForText(text, fields.modalColors.value, "ffff66|ffee88|ffdd55|ffee88|");
+
+    if (!colors.length) {
+      return "#ffff66";
+    }
+
+    if (selectionStart >= 0 && selectionStart < colors.length) {
+      return colors[selectionStart].charAt(0) === "#" ? colors[selectionStart] : ("#" + colors[selectionStart]);
+    }
+
+    return colors[0].charAt(0) === "#" ? colors[0] : ("#" + colors[0]);
   }
 
   function onModalShellClick(event) {
@@ -495,24 +587,8 @@
     }
   }
 
-  function renderColorPreview(container, colorPipe) {
-    var colors = marqueeApi.parseColorList(colorPipe || "");
-    var html = "";
-    var index;
-
-    if (!container) {
-      return;
-    }
-
-    for (index = 0; index < colors.length; index += 1) {
-      html += buildColorChip(colors[index]);
-    }
-
-    container.innerHTML = html || '<span class="sequence-text">No valid colors yet.</span>';
-  }
-
   function buildColorizedTextMarkup(text, colorPipe) {
-    var colors = marqueeApi.parseColorList(colorPipe || "");
+    var colors = expandColorArrayForText(text, colorPipe, "ffff66|ffee88|ffdd55|ffee88|");
     var safeText = String(text || "");
     var html = "";
     var index;
@@ -527,33 +603,11 @@
     }
 
     for (index = 0; index < safeText.length; index += 1) {
-      color = colors[index % colors.length];
+      color = colors[index] || colors[colors.length - 1];
       html += '<span class="sequence-text-char" style="color:' + escapeHtml(color) + ';">' + escapeHtml(safeText.charAt(index)) + '</span>';
     }
 
     return html;
-  }
-
-  function buildColorChip(color) {
-    return '<span class="color-chip" title="' + escapeHtml(color.replace(/^#/, "")) + '" style="background:' + escapeHtml(color) + ';color:' + escapeHtml(getReadableTextColor(color)) + ';">' + escapeHtml(color.replace(/^#/, "")) + "</span>";
-  }
-
-  function getReadableTextColor(color) {
-    var match = /^#?([0-9a-f]{6})$/i.exec(color || "");
-    var red;
-    var green;
-    var blue;
-    var luminance;
-
-    if (!match) {
-      return "#ffffff";
-    }
-
-    red = parseInt(match[1].slice(0, 2), 16);
-    green = parseInt(match[1].slice(2, 4), 16);
-    blue = parseInt(match[1].slice(4, 6), 16);
-    luminance = ((red * 299) + (green * 587) + (blue * 114)) / 1000;
-    return luminance > 140 ? "#000000" : "#ffffff";
   }
 
   function normalizeColorPipe(rawValue, fallback) {
@@ -570,6 +624,32 @@
     }
 
     return values.join("|") + "|";
+  }
+
+  function expandColorArrayForText(text, colorPipe, fallback) {
+    var safeText = String(text || "");
+    var parsedColors = marqueeApi.parseColorList(colorPipe || "");
+    var baseColors = parsedColors.length ? parsedColors : marqueeApi.parseColorList(fallback || "ffff66|");
+    var expandedColors = [];
+    var index;
+
+    for (index = 0; index < safeText.length; index += 1) {
+      expandedColors.push(baseColors[index % baseColors.length]);
+    }
+
+    return expandedColors;
+  }
+
+  function normalizeColorPipeForText(text, colorPipe, fallback) {
+    var colors = expandColorArrayForText(text, colorPipe, fallback);
+    var values = [];
+    var index;
+
+    for (index = 0; index < colors.length; index += 1) {
+      values.push(String(colors[index] || "").replace(/^#/, ""));
+    }
+
+    return values.join("|") + (values.length ? "|" : "");
   }
 
   function tokenToDirectionValue(token) {
