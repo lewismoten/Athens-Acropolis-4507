@@ -1,0 +1,152 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 3.2//EN">
+<HTML>
+<HEAD>
+	<TITLE>Shoomi Dream Soundtrack</TITLE>
+	<LINK REL="stylesheet" HREF="index.css?v=20260606">
+</HEAD>
+<BODY CLASS="soundtrack-page">
+<CENTER>
+<DIV CLASS="soundtrack-page-shell">
+<DIV CLASS="soundtrack-sticky-header">
+<DIV CLASS="soundtrack-title">
+Shoomi's Soundtrack
+</DIV>
+<DIV CLASS="soundtrack-subtitle">
+Late-90s MIDI restored with Web Audio
+</DIV>
+<CANVAS ID="spectrum-visualizer" WIDTH="180" HEIGHT="44" CLASS="soundtrack-spectrum">
+Spectrum visualization
+</CANVAS>
+<BUTTON ID="sound-toggle" TYPE="BUTTON" TITLE="Play or pause the soundtrack"
+CLASS="soundtrack-toggle">...</BUTTON>
+<DIV CLASS="soundtrack-hidden">
+<SPAN ID="sound-status">soundtrack</SPAN>
+<A ID="midi-link" HREF="../midi_song_newage.mid" TYPE="audio/midi">MIDI</A>
+</DIV>
+</DIV>
+
+<DIV CLASS="soundtrack-panel soundtrack-panel-chooser">
+<DIV CLASS="soundtrack-panel-title">Choose a dream tune</DIV>
+<DIV CLASS="soundtrack-mt-8">
+<LABEL CLASS="soundtrack-block-label">
+<INPUT ID="midi-source-library" TYPE="RADIO" NAME="midi-source" VALUE="library" CHECKED CLASS="soundtrack-radio">
+Select a soundtrack
+</LABEL>
+<SELECT ID="midi-select" CLASS="soundtrack-select soundtrack-select-main">
+<OPTION VALUE="../midi_song_newage.mid">Site soundtrack - New Age</OPTION>
+<OPTION VALUE="rock_a_bye_baby.mid?v=3">Rock-a-bye Baby</OPTION>
+<OPTION VALUE="hush_little_baby.mid?v=6">Hush, Little Baby</OPTION>
+<OPTION VALUE="twinkle_twinkle_little_star.mid?v=3">Twinkle, Twinkle, Little Star</OPTION>
+</SELECT>
+</DIV>
+<DIV CLASS="soundtrack-divider-tight">
+<DIV CLASS="soundtrack-section-label">Bring Your Own MIDI</DIV>
+<DIV CLASS="soundtrack-mt-8">
+<LABEL CLASS="soundtrack-block-label">
+<INPUT ID="midi-source-file" TYPE="RADIO" NAME="midi-source" VALUE="file" CLASS="soundtrack-radio">
+Use a MIDI file from your computer
+</LABEL>
+<INPUT ID="midi-file" TYPE="FILE" ACCEPT=".mid,.midi,audio/midi,audio/x-midi" CLASS="soundtrack-file-input">
+</DIV>
+<DIV CLASS="soundtrack-note soundtrack-note-tight">
+Local MIDI files load directly from your computer for inspection and playback.
+</DIV>
+</DIV>
+<DIV ID="timing-status" CLASS="soundtrack-status soundtrack-status-hidden"></DIV>
+<DIV ID="lyric-status" CLASS="soundtrack-lyric-status"></DIV>
+<DIV ID="midi-caption" CLASS="soundtrack-caption"></DIV>
+<DIV CLASS="soundtrack-note soundtrack-mt-8">
+This web player only has a small sample bank available, so imported MIDI files may need their track mapping adjusted to sound better here. MIDI files are instructions for instruments to play or trigger events, not full audio recordings, so an external song will not sound exactly like its original playback unless it used the same instruments, note ranges, and sample set.
+</DIV>
+<DIV CLASS="soundtrack-note soundtrack-note-tight">
+For the melodic sounds here, this player is usually pitch-shifting a single recorded note, such as one bass, strings, or pad sample, across many MIDI note values rather than loading a full multi-sample instrument bank.
+</DIV>
+<DIV CLASS="soundtrack-divider">
+<LABEL FOR="program-profile" CLASS="soundtrack-inline-label soundtrack-inline-label-profile">Program meaning profile:</LABEL>
+<SELECT ID="program-profile" CLASS="soundtrack-select soundtrack-select-profile">
+<OPTION VALUE="gm">General MIDI (GM)</OPTION>
+<OPTION VALUE="gs">Roland GS</OPTION>
+<OPTION VALUE="xg">Yamaha XG</OPTION>
+<OPTION VALUE="game">Game / chip heuristic</OPTION>
+</SELECT>
+<DIV CLASS="soundtrack-note soundtrack-note-tight">
+GM is the base 128-program standard. GS and XG usually keep those base meanings and extend them. Game / chip heuristic keeps the same numbers, but leans the automatic remapping toward console-style MIDI conversions.
+</DIV>
+</DIV>
+<DIV ID="track-sound-mapper" CLASS="soundtrack-detail-block soundtrack-mt-10"></DIV>
+</DIV>
+
+<DIV CLASS="soundtrack-panel soundtrack-panel-flow">
+<DIV CLASS="soundtrack-panel-title soundtrack-mb-8">Track flow</DIV>
+<CANVAS ID="track-visualizer" WIDTH="478" HEIGHT="220" CLASS="soundtrack-canvas soundtrack-canvas-track">
+Track visualization
+</CANVAS>
+<DIV CLASS="soundtrack-legend">
+Colored lanes show where each track is active, while the bright vertical line marks the current playback position.
+</DIV>
+<DIV CLASS="soundtrack-controls">
+<LABEL CLASS="soundtrack-controls-inline soundtrack-controls-inline-gap">
+<INPUT ID="full-song-toggle" TYPE="CHECKBOX" CHECKED CLASS="soundtrack-checkbox">
+Show full song
+</LABEL>
+<LABEL FOR="window-slider" CLASS="soundtrack-controls-inline soundtrack-controls-inline-smallgap">Range:</LABEL>
+<INPUT ID="window-slider" TYPE="RANGE" MIN="1" MAX="30" STEP="1" VALUE="10" CLASS="soundtrack-range soundtrack-window-slider">
+<SPAN ID="window-slider-value" CLASS="soundtrack-window-value">10 sec</SPAN>
+<LABEL CLASS="soundtrack-controls-inline soundtrack-controls-inline-leftgap">
+<INPUT ID="track-marker-toggle" TYPE="CHECKBOX" CLASS="soundtrack-checkbox">
+Show change markers
+</LABEL>
+</DIV>
+<DIV ID="marker-controls-wrap" CLASS="soundtrack-marker-wrap">
+<SPAN CLASS="soundtrack-marker-label">Marker types:</SPAN>
+<LABEL CLASS="soundtrack-marker-option soundtrack-marker-program"><INPUT ID="marker-type-program" TYPE="CHECKBOX" CHECKED CLASS="soundtrack-checkbox"> Program</LABEL>
+<LABEL CLASS="soundtrack-marker-option soundtrack-marker-bank-msb"><INPUT ID="marker-type-bank-msb" TYPE="CHECKBOX" CHECKED CLASS="soundtrack-checkbox"> Bank M</LABEL>
+<LABEL CLASS="soundtrack-marker-option soundtrack-marker-bank-lsb"><INPUT ID="marker-type-bank-lsb" TYPE="CHECKBOX" CHECKED CLASS="soundtrack-checkbox"> Bank L</LABEL>
+<LABEL CLASS="soundtrack-marker-option soundtrack-marker-nrpn-msb"><INPUT ID="marker-type-nrpn-msb" TYPE="CHECKBOX" CHECKED CLASS="soundtrack-checkbox"> NRPN M</LABEL>
+<LABEL CLASS="soundtrack-marker-option soundtrack-marker-nrpn-lsb"><INPUT ID="marker-type-nrpn-lsb" TYPE="CHECKBOX" CHECKED CLASS="soundtrack-checkbox"> NRPN L</LABEL>
+<LABEL CLASS="soundtrack-marker-option soundtrack-marker-data"><INPUT ID="marker-type-data" TYPE="CHECKBOX" CHECKED CLASS="soundtrack-checkbox"> Data</LABEL>
+<LABEL CLASS="soundtrack-marker-option soundtrack-marker-volume"><INPUT ID="marker-type-volume" TYPE="CHECKBOX" CHECKED CLASS="soundtrack-checkbox"> Volume</LABEL>
+<LABEL CLASS="soundtrack-marker-option soundtrack-marker-pan"><INPUT ID="marker-type-pan" TYPE="CHECKBOX" CHECKED CLASS="soundtrack-checkbox"> Pan</LABEL>
+<LABEL CLASS="soundtrack-marker-option soundtrack-marker-expression"><INPUT ID="marker-type-expression" TYPE="CHECKBOX" CHECKED CLASS="soundtrack-checkbox"> Expression</LABEL>
+<LABEL CLASS="soundtrack-marker-option soundtrack-marker-attack"><INPUT ID="marker-type-attack" TYPE="CHECKBOX" CHECKED CLASS="soundtrack-checkbox"> Attack</LABEL>
+<LABEL CLASS="soundtrack-marker-option soundtrack-marker-reverb"><INPUT ID="marker-type-reverb" TYPE="CHECKBOX" CHECKED CLASS="soundtrack-checkbox"> Reverb</LABEL>
+<LABEL CLASS="soundtrack-marker-option soundtrack-marker-other"><INPUT ID="marker-type-other" TYPE="CHECKBOX" CHECKED CLASS="soundtrack-checkbox"> Other</LABEL>
+<DIV CLASS="soundtrack-marker-subrow">
+<LABEL CLASS="soundtrack-controls-inline"><INPUT ID="register-link-toggle" TYPE="CHECKBOX" CLASS="soundtrack-checkbox"> Show register links</LABEL>
+<LABEL CLASS="soundtrack-controls-inline soundtrack-controls-inline-leftgap"><INPUT ID="register-state-toggle" TYPE="CHECKBOX" CLASS="soundtrack-checkbox"> Track register values</LABEL>
+</DIV>
+</DIV>
+<DIV ID="register-state-status" CLASS="soundtrack-detail-block soundtrack-status-hidden"></DIV>
+<DIV ID="meta-visualizer-wrap" CLASS="soundtrack-meta-wrap">
+<DIV CLASS="soundtrack-panel-title soundtrack-mb-8">Meta / control flow</DIV>
+<CANVAS ID="meta-visualizer" WIDTH="478" HEIGHT="140" CLASS="soundtrack-canvas soundtrack-canvas-meta">
+Meta track visualization
+</CANVAS>
+<DIV ID="meta-hover-tooltip" CLASS="soundtrack-tooltip"></DIV>
+<DIV CLASS="soundtrack-legend">
+Timed lyrics, text, and control events are shown here when they happen during the song.
+</DIV>
+<DIV ID="meta-state-status" CLASS="soundtrack-status soundtrack-lyric-status"></DIV>
+<DIV ID="meta-current-status" CLASS="soundtrack-status soundtrack-status-hidden"></DIV>
+<DIV ID="meta-lane-details" CLASS="soundtrack-detail-block"></DIV>
+</DIV>
+<DIV ID="track-details" CLASS="soundtrack-detail-block"></DIV>
+<DIV ID="song-metadata" CLASS="soundtrack-detail-block"></DIV>
+</DIV>
+</DIV>
+<DIV ID="track-hover-tooltip" CLASS="soundtrack-tooltip"></DIV>
+<AUDIO ID="soundtrack" HIDDEN></AUDIO>
+</CENTER>
+<SCRIPT SRC="soundtrack-webaudio.js?v=20260606"></SCRIPT>
+<SCRIPT SRC="index-shared.js?v=20260606"></SCRIPT>
+<SCRIPT SRC="index-visualizer.js?v=20260606"></SCRIPT>
+<SCRIPT SRC="index-markers.js?v=20260606"></SCRIPT>
+<SCRIPT SRC="index-interaction.js?v=20260606"></SCRIPT>
+<SCRIPT SRC="index-data.js?v=20260606"></SCRIPT>
+<SCRIPT SRC="index-session.js?v=20260606"></SCRIPT>
+<SCRIPT SRC="index-metadata.js?v=20260606"></SCRIPT>
+<SCRIPT SRC="index-state.js?v=20260606"></SCRIPT>
+<SCRIPT SRC="index-mapper.js?v=20260606"></SCRIPT>
+<SCRIPT SRC="index.js?v=20260606"></SCRIPT>
+</BODY>
+</HTML>

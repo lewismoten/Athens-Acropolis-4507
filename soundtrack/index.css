@@ -1,0 +1,640 @@
+.soundtrack-page {
+  background: #000033;
+  color: #ffffff;
+}
+
+.soundtrack-page a {
+  color: #99ccff;
+}
+
+.soundtrack-page-shell {
+  width: 500px;
+  margin-top: 24px;
+}
+
+.soundtrack-sticky-header {
+  position: sticky;
+  top: 8px;
+  z-index: 4;
+  width: 500px;
+  height: 86px;
+  border: 1px solid #6666aa;
+  background: linear-gradient(180deg, #000044 0%, #000033 100%);
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.35);
+}
+
+.soundtrack-title {
+  position: absolute;
+  left: 14px;
+  top: 10px;
+  color: #99ccff;
+  font: italic 28px "Times New Roman", Times, serif;
+}
+
+.soundtrack-subtitle {
+  position: absolute;
+  left: 16px;
+  top: 44px;
+  color: #9999ff;
+  font: 12px "Times New Roman", Times, serif;
+}
+
+.soundtrack-spectrum {
+  position: absolute;
+  left: 268px;
+  top: 10px;
+  width: 180px;
+  height: 58px;
+  border: 1px solid #555588;
+  background: #000018;
+}
+
+.soundtrack-toggle {
+  position: absolute;
+  top: 26px;
+  right: 10px;
+  width: 26px;
+  height: 26px;
+  padding: 0;
+  border: 1px solid #9999ff;
+  background: #000066;
+  color: #99ccff;
+  font: bold 11px "Times New Roman", Times, serif;
+  cursor: pointer;
+}
+
+.soundtrack-hidden {
+  display: none;
+}
+
+.soundtrack-panel {
+  margin-top: 12px;
+  border: 1px solid #6666aa;
+  color: #ccccff;
+  font: 13px "Times New Roman", Times, serif;
+  text-align: left;
+}
+
+.soundtrack-panel-chooser {
+  background: #00003f;
+  padding: 12px 16px;
+}
+
+.soundtrack-panel-flow {
+  background: #00003a;
+  padding: 10px 10px 12px;
+}
+
+.soundtrack-panel-title {
+  color: #99ccff;
+  font: bold 14px "Times New Roman", Times, serif;
+}
+
+.soundtrack-section-label {
+  color: #99ccff;
+  font: bold 13px "Times New Roman", Times, serif;
+}
+
+.soundtrack-mt-8 {
+  margin-top: 8px;
+}
+
+.soundtrack-mt-10 {
+  margin-top: 10px;
+}
+
+.soundtrack-mb-8 {
+  margin-bottom: 8px;
+}
+
+.soundtrack-divider {
+  margin-top: 8px;
+  padding-top: 8px;
+  border-top: 1px solid #333366;
+}
+
+.soundtrack-divider-tight {
+  margin-top: 10px;
+  padding-top: 8px;
+  border-top: 1px solid #333366;
+}
+
+.soundtrack-block-label {
+  display: block;
+  margin-bottom: 6px;
+  color: #99ccff;
+}
+
+.soundtrack-radio,
+.soundtrack-checkbox,
+.soundtrack-range {
+  vertical-align: middle;
+}
+
+.soundtrack-select {
+  background: #000066;
+  color: #ccccff;
+  border: 1px solid #6666aa;
+  font-family: "Times New Roman", Times, serif;
+}
+
+.soundtrack-select-main {
+  margin-left: 18px;
+  width: 250px;
+  font-size: 13px;
+}
+
+.soundtrack-select-profile {
+  width: 220px;
+  font-size: 12px;
+}
+
+.soundtrack-file-input {
+  margin-left: 18px;
+  width: 260px;
+  color: #ccccff;
+  font: 12px "Times New Roman", Times, serif;
+}
+
+.soundtrack-status {
+  color: #ccccff;
+  font-size: 12px;
+}
+
+.soundtrack-status-hidden {
+  display: none;
+  margin-top: 8px;
+}
+
+.soundtrack-lyric-status {
+  margin-top: 6px;
+  min-height: 16px;
+  color: #ffccff;
+  font-size: 12px;
+  line-height: 1.4;
+}
+
+.soundtrack-caption,
+.soundtrack-detail-block {
+  margin-top: 8px;
+  color: #9999ff;
+  font-size: 12px;
+  line-height: 1.35;
+}
+
+.soundtrack-note {
+  color: #8888bb;
+  font-size: 11px;
+  line-height: 1.35;
+}
+
+.soundtrack-note-tight {
+  margin-top: 4px;
+}
+
+.soundtrack-inline-label {
+  display: inline-block;
+  color: #99ccff;
+}
+
+.soundtrack-inline-label-profile {
+  width: 152px;
+}
+
+.soundtrack-canvas {
+  display: block;
+  border: 1px solid #555588;
+}
+
+.soundtrack-canvas-track {
+  width: 478px;
+  height: 220px;
+  background: #000022;
+}
+
+.soundtrack-canvas-meta {
+  width: 478px;
+  height: 140px;
+  background: #000018;
+}
+
+.soundtrack-legend {
+  margin-top: 6px;
+  color: #9999ff;
+  font-size: 12px;
+}
+
+.soundtrack-controls {
+  margin-top: 8px;
+  padding: 6px 8px;
+  border: 1px solid #333366;
+  background: #000028;
+  color: #ccccff;
+  font-size: 12px;
+}
+
+.soundtrack-controls-inline {
+  display: inline-block;
+  color: #99ccff;
+}
+
+.soundtrack-controls-inline-gap {
+  margin-right: 10px;
+}
+
+.soundtrack-controls-inline-smallgap {
+  margin-right: 8px;
+}
+
+.soundtrack-controls-inline-leftgap {
+  margin-left: 12px;
+}
+
+.soundtrack-window-slider {
+  width: 160px;
+}
+
+.soundtrack-window-value {
+  display: inline-block;
+  width: 58px;
+  color: #ccccff;
+}
+
+.soundtrack-marker-wrap {
+  display: none;
+  margin-top: 6px;
+  padding: 6px 8px;
+  border: 1px solid #222255;
+  background: #000022;
+  color: #ccccff;
+  font-size: 11px;
+  line-height: 1.6;
+}
+
+.soundtrack-marker-label {
+  display: inline-block;
+  margin-right: 8px;
+  color: #99ccff;
+}
+
+.soundtrack-marker-option {
+  display: inline-block;
+  margin-right: 8px;
+  color: #ccccff;
+}
+
+.soundtrack-marker-program {
+  color: #99ccff;
+}
+
+.soundtrack-marker-bank-msb {
+  color: #ffb36b;
+}
+
+.soundtrack-marker-bank-lsb {
+  color: #7fd0ff;
+}
+
+.soundtrack-marker-nrpn-msb {
+  color: #ffb366;
+}
+
+.soundtrack-marker-nrpn-lsb {
+  color: #99ddff;
+}
+
+.soundtrack-marker-data {
+  color: #ff6666;
+}
+
+.soundtrack-marker-volume {
+  color: #99ff99;
+}
+
+.soundtrack-marker-pan {
+  color: #99ffff;
+}
+
+.soundtrack-marker-expression {
+  color: #ffcc99;
+}
+
+.soundtrack-marker-attack {
+  color: #ff9999;
+}
+
+.soundtrack-marker-reverb {
+  color: #99aaff;
+}
+
+.soundtrack-marker-other {
+  color: #d9b3ff;
+}
+
+.soundtrack-marker-subrow {
+  margin-top: 4px;
+}
+
+.soundtrack-meta-wrap {
+  position: relative;
+  margin-top: 10px;
+}
+
+.soundtrack-tooltip {
+  display: none;
+  position: absolute;
+  left: 0;
+  top: 0;
+  z-index: 5;
+  max-width: 220px;
+  padding: 4px 6px;
+  border: 1px solid #7777aa;
+  background: rgba(0, 0, 24, 0.94);
+  color: #ffddaa;
+  font: 11px "Times New Roman", Times, serif;
+  line-height: 1.25;
+  pointer-events: none;
+}
+
+#soundtrack .soundtrack-inline-error,
+.soundtrack-inline-error {
+  color: #ff9999;
+}
+
+.soundtrack-dim {
+  color: #7777aa;
+}
+
+.soundtrack-note-dim {
+  color: #8888bb;
+  font-size: 11px;
+}
+
+.soundtrack-note-dim-tight {
+  margin-top: 4px;
+}
+
+.soundtrack-table {
+  width: 100%;
+  border-collapse: collapse;
+  color: #ccccff;
+  font-size: 12px;
+}
+
+.soundtrack-table-spaced {
+  margin-top: 8px;
+}
+
+.soundtrack-table-dark {
+  background: #000022;
+}
+
+.soundtrack-table-head {
+  background: #000044;
+}
+
+.soundtrack-table-subhead {
+  background: #000033;
+}
+
+.soundtrack-table-label {
+  color: #99ccff;
+}
+
+.soundtrack-table-label-top {
+  color: #99ccff;
+  vertical-align: top;
+}
+
+.soundtrack-table-top {
+  vertical-align: top;
+}
+
+.soundtrack-table-cell-muted {
+  color: #7777aa;
+  background: #00002a;
+}
+
+.soundtrack-table-cell-warning {
+  color: #ffbbbb;
+}
+
+.soundtrack-list {
+  margin: 0;
+  padding-left: 16px;
+}
+
+.soundtrack-sublist {
+  margin: 3px 0 0 14px;
+  padding-left: 14px;
+}
+
+.soundtrack-state-key {
+  color: #99ccff;
+}
+
+.soundtrack-state-value {
+  color: #ccccff;
+}
+
+.soundtrack-state-sep {
+  color: #7777aa;
+}
+
+.soundtrack-tooltip-title {
+  color: #99ccff;
+  margin-bottom: 2px;
+}
+
+.soundtrack-tooltip-meta {
+  margin-top: 2px;
+  color: #9999ff;
+  font-size: 10px;
+}
+
+.soundtrack-tooltip-subtitle {
+  color: #ccccff;
+  margin-bottom: 3px;
+}
+
+.soundtrack-tooltip-empty {
+  color: #9999ff;
+}
+
+.soundtrack-tooltip-hint {
+  margin: -1px 0 2px 12px;
+  color: #8888bb;
+  font-size: 10px;
+}
+
+.soundtrack-tooltip-label-muted {
+  color: #7777aa;
+}
+
+.soundtrack-tooltip-value-muted {
+  color: #9999bb;
+}
+
+.soundtrack-lyrics-heading {
+  margin-bottom: 4px;
+  color: #99ccff;
+}
+
+.soundtrack-lyric-row {
+  position: relative;
+  padding: 2px 4px;
+  margin-bottom: 2px;
+  cursor: pointer;
+  min-height: 24px;
+}
+
+.soundtrack-lyric-row-future {
+  color: #ffccff;
+  background: rgba(16, 10, 28, 0.72);
+}
+
+.soundtrack-lyric-row-past {
+  color: #cfa8cf;
+  background: rgba(20, 12, 34, 0.62);
+}
+
+.soundtrack-lyric-row-active {
+  color: #ffffff;
+  background: rgba(28, 18, 48, 0.92);
+}
+
+.soundtrack-lyric-time {
+  position: absolute;
+  left: 4px;
+  top: 4px;
+  width: 38px;
+  color: #9999ff;
+}
+
+.soundtrack-lyric-progress {
+  position: absolute;
+  left: 42px;
+  top: 2px;
+  width: 4px;
+  height: calc(100% - 4px);
+  background: #332244;
+}
+
+.soundtrack-lyric-progress-fill {
+  position: absolute;
+  left: 0;
+  top: 0;
+  width: 4px;
+  background: #ff99ff;
+}
+
+.soundtrack-lyric-text {
+  display: block;
+  margin-left: 54px;
+  padding: 2px 6px;
+  min-height: 18px;
+  background: rgba(0, 0, 0, 0.22);
+  border-radius: 2px;
+  white-space: normal;
+  word-break: break-word;
+  box-sizing: border-box;
+}
+
+.soundtrack-mapper-bias-row {
+  padding: 6px 8px;
+  background: #000028;
+  color: #ccccff;
+}
+
+.soundtrack-mapper-bias-label {
+  display: inline-block;
+  min-width: 140px;
+  color: #99ccff;
+}
+
+.soundtrack-mapper-bias-select,
+.soundtrack-mapper-track-select,
+.soundtrack-mapper-drum-select {
+  background: #000066;
+  color: #ccccff;
+  border: 1px solid #6666aa;
+  font: 12px "Times New Roman", Times, serif;
+}
+
+.soundtrack-mapper-bias-select {
+  width: 200px;
+}
+
+.soundtrack-mapper-track-select {
+  width: 160px;
+}
+
+.soundtrack-mapper-drum-select {
+  width: 170px;
+}
+
+.soundtrack-mapper-bias-note {
+  margin-left: 10px;
+  color: #8888bb;
+  font-size: 11px;
+}
+
+.soundtrack-preview-wrap {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 4px;
+}
+
+.soundtrack-preview-button {
+  width: 20px;
+  height: 20px;
+  padding: 0;
+  border: 1px solid #6666aa;
+  background: #000044;
+  color: #99ccff;
+  font: 11px "Times New Roman", Times, serif;
+  cursor: pointer;
+}
+
+.soundtrack-drum-config-row {
+  padding: 6px 10px;
+  background: #000025;
+}
+
+.soundtrack-drum-config-note {
+  color: #ffdd99;
+  font-size: 11px;
+  margin-bottom: 4px;
+}
+
+.soundtrack-drum-config-line {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin: 3px 0;
+}
+
+.soundtrack-drum-config-label {
+  display: inline-block;
+  min-width: 170px;
+  color: #ffcc99;
+}
+
+.soundtrack-drum-preview-slot {
+  display: inline-block;
+  width: 44px;
+  height: 44px;
+}
+
+#meta-state-status {
+  min-height: 16px;
+  color: #ccccff;
+  line-height: 1.35;
+}
+
+#meta-current-status {
+  min-height: 16px;
+  color: #ffddaa;
+  line-height: 1.35;
+}
