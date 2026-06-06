@@ -4,6 +4,7 @@
   var previewFrame = document.getElementById("preview-frame");
   var codeOutput = document.getElementById("marquee-code");
   var htmlCodeOutput = document.getElementById("marquee-html-code");
+  var generatedFileHeading = document.getElementById("generated-file-heading");
   var copyButton = document.getElementById("copy-code");
   var copyStatus = document.getElementById("copy-status");
   var sequenceGridBody = document.getElementById("sequence-grid-body");
@@ -33,6 +34,7 @@
     backgroundSpeed: document.getElementById("marquee-background-speed"),
     animationSpeed: document.getElementById("marquee-animation-speed"),
     background: document.getElementById("marquee-background"),
+    fileName: document.getElementById("sequence-file-name"),
     defaultColor: document.getElementById("marquee-default-color"),
     dotColor: document.getElementById("marquee-dot-color"),
     fontFamily: document.getElementById("marquee-font-family"),
@@ -126,6 +128,7 @@
       previewCanvas.style.width = config.width + "px";
       previewCanvas.style.height = config.height + "px";
     }
+    updateGeneratedFileHeading();
     renderSequenceGrid(config.background);
     codeOutput.value = buildDreamersScript(config, rows);
     htmlCodeOutput.value = buildCanvasEmbedCode(config, rows);
@@ -1027,5 +1030,21 @@
 
   function stringifyForCode(value, indentSize) {
     return JSON.stringify(value, null, indentSize || 2).replace(/<\/script/gi, "<\\/script");
+  }
+
+  function updateGeneratedFileHeading() {
+    var fileName;
+
+    if (!generatedFileHeading) {
+      return;
+    }
+
+    fileName = getSequenceFileName();
+    generatedFileHeading.innerHTML = "Generated `" + escapeHtml(fileName) + "`";
+  }
+
+  function getSequenceFileName() {
+    var value = fields.fileName && fields.fileName.value ? String(fields.fileName.value).trim() : "";
+    return value || "dreamers.txt";
   }
 }());

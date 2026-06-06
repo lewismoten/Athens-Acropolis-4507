@@ -50,11 +50,18 @@
               <SPAN CLASS="field-label">Height</SPAN>
               <INPUT ID="marquee-height" CLASS="field-input" TYPE="number" MIN="32" MAX="240" VALUE="92">
             </LABEL>
-            <LABEL CLASS="field">
-              <SPAN CLASS="field-label">Background</SPAN>
-              <INPUT ID="marquee-background" CLASS="field-input field-color" TYPE="color" VALUE="#000066">
-            </LABEL>
-          </DIV>
+          <LABEL CLASS="field">
+            <SPAN CLASS="field-label">Background</SPAN>
+            <INPUT ID="marquee-background" CLASS="field-input field-color" TYPE="color" VALUE="#000066">
+          </LABEL>
+        </DIV>
+
+        <DIV CLASS="field-row">
+          <LABEL CLASS="field">
+            <SPAN CLASS="field-label">Message File</SPAN>
+            <INPUT ID="sequence-file-name" CLASS="field-input" TYPE="text" VALUE="dreamers.txt">
+          </LABEL>
+        </DIV>
 
           <DIV CLASS="field-row field-row-4">
             <LABEL CLASS="field">
@@ -108,14 +115,6 @@
 
         <FORM CLASS="panel sequencing-panel" ID="sequence-form">
           <DIV CLASS="panel-heading">Message File</DIV>
-          <LABEL CLASS="field">
-            <SPAN CLASS="field-label">File Name</SPAN>
-            <INPUT ID="sequence-file-name" CLASS="field-input" TYPE="text" VALUE="dreamers.txt">
-          </LABEL>
-          <DIV CLASS="sequence-toolbar">
-            <SPAN CLASS="helper-copy">Optional message file export. Sequence count is generated automatically from the number of rows. Row 1 writes `text`, `colors`. Later rows write `text`, `colors`, `enter,exit`.</SPAN>
-          </DIV>
-
           <DIV CLASS="sequence-grid" ID="sequence-grid">
             <TABLE CLASS="sequence-table">
               <THEAD>
@@ -134,7 +133,7 @@
       </DIV>
 
       <DIV CLASS="panel code-panel">
-        <DIV CLASS="panel-heading">Generated `dreamers.txt`</DIV>
+        <DIV CLASS="panel-heading" ID="generated-file-heading">Generated `dreamers.txt`</DIV>
         <TEXTAREA ID="marquee-code" CLASS="code-output" ROWS="18" READONLY></TEXTAREA>
         <DIV CLASS="button-row">
           <BUTTON ID="copy-code" TYPE="button" CLASS="action-button">Copy Script</BUTTON>
