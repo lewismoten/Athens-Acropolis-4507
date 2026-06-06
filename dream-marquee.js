@@ -151,7 +151,7 @@
   }
 
   function normalizeBackgroundMode(value) {
-    if (value === "rain" || value === "snow") {
+    if (value === "rain" || value === "snow" || value === "fireflies") {
       return value;
     }
 
@@ -477,6 +477,11 @@
         return;
       }
 
+      if (settings.backgroundMode === "fireflies") {
+        drawFireflies();
+        return;
+      }
+
       drawStars();
     }
 
@@ -570,6 +575,43 @@
         context.globalAlpha = alpha;
         context.beginPath();
         context.arc(dot.x + sway, dot.y, dot.radius, 0, Math.PI * 2, false);
+        context.fill();
+      }
+
+      context.globalAlpha = 1;
+    }
+
+    function drawFireflies() {
+      var index;
+      var dot;
+      var driftX;
+      var driftY;
+      var pulse;
+      var glowRadius;
+
+      for (index = 0; index < state.dots.length; index += 1) {
+        dot = state.dots[index];
+        driftX = Math.sin((state.entryFrame / 26) + dot.phase) * dot.drift * (settings.dotSpeed * 2.4);
+        driftY = Math.cos((state.entryFrame / 31) + dot.phase) * dot.wobble * (settings.dotSpeed * 1.5);
+        pulse = 0.2 + (0.8 * Math.max(0, Math.sin((state.entryFrame / 12) + dot.phase)));
+        glowRadius = dot.radius * (1.8 + (0.8 * pulse));
+
+        dot.x += driftX;
+        dot.y += driftY;
+
+        if (dot.x < -24 || dot.x > canvas.width + 24 || dot.y < -24 || dot.y > canvas.height + 24) {
+          resetDot(dot, false);
+        }
+
+        context.fillStyle = dot.color;
+        context.globalAlpha = 0.14 + (0.2 * pulse);
+        context.beginPath();
+        context.arc(dot.x, dot.y, glowRadius, 0, Math.PI * 2, false);
+        context.fill();
+
+        context.globalAlpha = 0.5 + (0.45 * pulse);
+        context.beginPath();
+        context.arc(dot.x, dot.y, dot.radius, 0, Math.PI * 2, false);
         context.fill();
       }
 
@@ -786,6 +828,9 @@
       } else if (settings.backgroundMode === "snow") {
         dot.x = nextRandom() * canvas.width;
         dot.y = spawnOffscreen ? (-dot.radius - (nextRandom() * (canvas.height * 0.3))) : (nextRandom() * canvas.height);
+      } else if (settings.backgroundMode === "fireflies") {
+        dot.x = nextRandom() * canvas.width;
+        dot.y = nextRandom() * canvas.height;
       } else if (spawnOffscreen) {
         dot.x = canvas.width + dot.radius + (nextRandom() * (canvas.width * 0.35));
         dot.y = (nextRandom() * (canvas.height - 10)) + 5;
@@ -816,6 +861,16 @@
         dot.wobble = (nextRandom() * 1.2) + 0.35;
         dot.drift = (nextRandom() * 1.1) + 0.4;
         dot.glow = 1;
+        dot.length = 0;
+        return;
+      }
+
+      if (settings.backgroundMode === "fireflies") {
+        dot.radius = ((nextRandom() * 1.7) + 1.2) * 0.5;
+        dot.speed = (nextRandom() * 0.5) + 0.35;
+        dot.wobble = (nextRandom() * 0.9) + 0.35;
+        dot.drift = (nextRandom() * 0.9) + 0.3;
+        dot.glow = (nextRandom() * 0.5) + 0.8;
         dot.length = 0;
         return;
       }
