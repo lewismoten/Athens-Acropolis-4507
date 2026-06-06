@@ -151,7 +151,7 @@
   }
 
   function normalizeBackgroundMode(value) {
-    if (value === "rain" || value === "snow" || value === "fireflies" || value === "dust" || value === "bubbles" || value === "bubble-pop" || value === "embers") {
+    if (value === "rain" || value === "snow" || value === "fireflies" || value === "dust" || value === "bubbles" || value === "bubble-pop" || value === "embers" || value === "sparkles") {
       return value;
     }
 
@@ -275,6 +275,7 @@
     var state = {
       currentIndex: 0,
       entryFrame: 0,
+      backgroundFrame: 0,
       dots: createDots(settings.dotCount),
       lastTimestamp: 0,
       entries: []
@@ -428,6 +429,7 @@
       if (timestamp - state.lastTimestamp >= 1000 / settings.fps) {
         state.lastTimestamp = timestamp;
         drawFrame();
+        state.backgroundFrame += 1;
         state.entryFrame += 1;
 
         if (state.entryFrame > state.entries[state.currentIndex].durationFrames) {
@@ -499,6 +501,11 @@
 
       if (settings.backgroundMode === "embers") {
         drawEmbers();
+        return;
+      }
+
+      if (settings.backgroundMode === "sparkles") {
+        drawSparkles();
         return;
       }
 
@@ -841,6 +848,65 @@
       context.globalAlpha = 1;
     }
 
+    function drawSparkles() {
+      var index;
+      var dot;
+      var twinkle;
+      var sparkleSize;
+      var offset;
+      var lifeProgress;
+      var fadeAlpha;
+      var fadeFrames;
+      var holdFrames;
+
+      context.lineWidth = 1;
+
+      for (index = 0; index < state.dots.length; index += 1) {
+        dot = state.dots[index];
+        fadeFrames = Math.max(dot.sparkleFadeDuration || 24, 1);
+        holdFrames = Math.max((dot.sparkleLifeDuration || 180) - (fadeFrames * 2), 1);
+        lifeProgress = dot.sparkleFrame || 0;
+
+        if (lifeProgress < fadeFrames) {
+          fadeAlpha = lifeProgress / fadeFrames;
+        } else if (lifeProgress < fadeFrames + holdFrames) {
+          fadeAlpha = 1;
+        } else if (lifeProgress < (fadeFrames * 2) + holdFrames) {
+          fadeAlpha = 1 - ((lifeProgress - fadeFrames - holdFrames) / fadeFrames);
+        } else {
+          dot.x = nextRandom() * canvas.width;
+          dot.y = nextRandom() * canvas.height;
+          syncDotRelativePosition(dot, canvas.width, canvas.height);
+          dot.sparkleFrame = 0;
+          fadeAlpha = 0;
+          lifeProgress = 0;
+        }
+
+        twinkle = 0.18 + (0.82 * Math.max(0, Math.sin((state.backgroundFrame / dot.speed) + dot.phase)));
+        sparkleSize = dot.radius * (0.6 + (0.9 * twinkle));
+        offset = sparkleSize * 1.6;
+
+        context.strokeStyle = dot.color;
+        context.globalAlpha = (0.2 + (0.55 * twinkle)) * fadeAlpha;
+        context.beginPath();
+        context.moveTo(dot.x - offset, dot.y);
+        context.lineTo(dot.x + offset, dot.y);
+        context.moveTo(dot.x, dot.y - offset);
+        context.lineTo(dot.x, dot.y + offset);
+        context.stroke();
+
+        context.globalAlpha = (0.12 + (0.22 * twinkle)) * fadeAlpha;
+        context.beginPath();
+        context.arc(dot.x, dot.y, sparkleSize * 1.1, 0, Math.PI * 2, false);
+        context.fillStyle = dot.color;
+        context.fill();
+
+        dot.sparkleFrame += 1;
+      }
+
+      context.globalAlpha = 1;
+    }
+
     function drawText(entry, metrics, baseX, baseY, progress, exitProgress) {
       var index;
       var character;
@@ -1036,6 +1102,9 @@
         popFrame: -1,
         popDuration: 8,
         popTargetY: -1,
+        sparkleFrame: 0,
+        sparkleLifeDuration: 180,
+        sparkleFadeDuration: 24,
         phase: nextRandom() * Math.PI * 2,
         color: settings.dotColor
       };
@@ -1070,6 +1139,10 @@
       } else if (settings.backgroundMode === "embers") {
         dot.x = nextRandom() * canvas.width;
         dot.y = spawnOffscreen ? (canvas.height + dot.radius + (nextRandom() * (canvas.height * 0.2))) : (nextRandom() * canvas.height);
+      } else if (settings.backgroundMode === "sparkles") {
+        dot.x = nextRandom() * canvas.width;
+        dot.y = nextRandom() * canvas.height;
+        dot.sparkleFrame = Math.floor(nextRandom() * Math.max(dot.sparkleLifeDuration || 1, 1));
       } else if (spawnOffscreen) {
         dot.x = canvas.width + dot.radius + (nextRandom() * (canvas.width * 0.35));
         dot.y = (nextRandom() * (canvas.height - 10)) + 5;
@@ -1083,6 +1156,10 @@
 
       if (settings.backgroundMode !== "bubble-pop") {
         dot.popTargetY = -1;
+      }
+
+      if (settings.backgroundMode !== "sparkles") {
+        dot.sparkleFrame = 0;
       }
     }
 
@@ -1159,6 +1236,19 @@
         dot.glow = 0.7 + (nextRandom() * 0.35);
         dot.length = 0;
         dot.popDuration = 8;
+        return;
+      }
+
+      if (settings.backgroundMode === "sparkles") {
+        dot.radius = (nextRandom() * 1.1) + 0.55;
+        dot.speed = (nextRandom() * 18) + 10;
+        dot.wobble = 0;
+        dot.drift = 0;
+        dot.glow = 1;
+        dot.length = 0;
+        dot.popDuration = 8;
+        dot.sparkleFadeDuration = 18 + Math.floor(nextRandom() * 18);
+        dot.sparkleLifeDuration = (dot.sparkleFadeDuration * 2) + 80 + Math.floor(nextRandom() * 180);
         return;
       }
 
