@@ -151,7 +151,7 @@
   }
 
   function normalizeBackgroundMode(value) {
-    if (value === "rain" || value === "snow" || value === "fireflies" || value === "dust" || value === "bubbles" || value === "bubble-pop" || value === "embers" || value === "sparkles" || value === "fog" || value === "comets") {
+    if (value === "rain" || value === "snow" || value === "fireflies" || value === "dust" || value === "bubbles" || value === "bubble-pop" || value === "embers" || value === "sparkles" || value === "fog" || value === "comets" || value === "matrix") {
       return value;
     }
 
@@ -516,6 +516,11 @@
 
       if (settings.backgroundMode === "comets") {
         drawComets();
+        return;
+      }
+
+      if (settings.backgroundMode === "matrix") {
+        drawMatrix();
         return;
       }
 
@@ -1001,6 +1006,52 @@
       context.globalAlpha = 1;
     }
 
+    function drawMatrix() {
+      var index;
+      var dot;
+      var fall;
+      var trailStep;
+      var segmentCount;
+      var segmentIndex;
+      var segmentY;
+      var alpha;
+      var width;
+
+      for (index = 0; index < state.dots.length; index += 1) {
+        dot = state.dots[index];
+        fall = dot.speed * settings.dotSpeed * 7.5;
+        trailStep = dot.length;
+        segmentCount = Math.max(3, Math.round(dot.glow));
+        width = dot.radius;
+
+        dot.y += fall;
+
+        if (dot.y - (trailStep * segmentCount) > canvas.height + 18) {
+          resetDot(dot, true);
+          continue;
+        }
+
+        for (segmentIndex = 0; segmentIndex < segmentCount; segmentIndex += 1) {
+          segmentY = dot.y - (segmentIndex * trailStep);
+          alpha = (1 - (segmentIndex / segmentCount)) * 0.45;
+
+          if (segmentY < -trailStep || segmentY > canvas.height + trailStep) {
+            continue;
+          }
+
+          context.fillStyle = dot.color;
+          context.globalAlpha = alpha;
+          context.fillRect(dot.x, segmentY, width, trailStep * 0.72);
+        }
+
+        context.globalAlpha = 0.85;
+        context.fillStyle = dot.color;
+        context.fillRect(dot.x, dot.y, width, trailStep * 0.78);
+      }
+
+      context.globalAlpha = 1;
+    }
+
     function drawFogEllipse(centerX, centerY, width, height) {
       context.beginPath();
       if (typeof context.ellipse === "function") {
@@ -1257,6 +1308,9 @@
       } else if (settings.backgroundMode === "comets") {
         dot.x = spawnOffscreen ? (canvas.width + dot.length + (nextRandom() * canvas.width * 0.8)) : (nextRandom() * (canvas.width + dot.length));
         dot.y = nextRandom() * canvas.height;
+      } else if (settings.backgroundMode === "matrix") {
+        dot.x = Math.floor(nextRandom() * Math.max(canvas.width - dot.radius, 1));
+        dot.y = spawnOffscreen ? (-dot.length * dot.glow - (nextRandom() * canvas.height * 0.35)) : (nextRandom() * canvas.height);
       } else if (spawnOffscreen) {
         dot.x = canvas.width + dot.radius + (nextRandom() * (canvas.width * 0.35));
         dot.y = (nextRandom() * (canvas.height - 10)) + 5;
@@ -1384,6 +1438,17 @@
         dot.drift = (nextRandom() * 1.2) - 0.6;
         dot.glow = 0.55 + (nextRandom() * 0.4);
         dot.length = (nextRandom() * 46) + 28;
+        dot.popDuration = 8;
+        return;
+      }
+
+      if (settings.backgroundMode === "matrix") {
+        dot.radius = (nextRandom() * 2.4) + 1.4;
+        dot.speed = (nextRandom() * 0.9) + 0.8;
+        dot.wobble = 0;
+        dot.drift = 0;
+        dot.glow = 4 + Math.floor(nextRandom() * 6);
+        dot.length = (nextRandom() * 10) + 8;
         dot.popDuration = 8;
         return;
       }
