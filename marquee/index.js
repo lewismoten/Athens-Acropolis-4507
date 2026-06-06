@@ -889,7 +889,7 @@
   }
 
   function normalizeBackgroundMode(value) {
-    if (value === "rain" || value === "snow" || value === "fireflies" || value === "dust") {
+    if (value === "rain" || value === "snow" || value === "fireflies" || value === "dust" || value === "bubbles") {
       return value;
     }
 

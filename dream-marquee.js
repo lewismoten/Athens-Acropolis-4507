@@ -151,7 +151,7 @@
   }
 
   function normalizeBackgroundMode(value) {
-    if (value === "rain" || value === "snow" || value === "fireflies" || value === "dust") {
+    if (value === "rain" || value === "snow" || value === "fireflies" || value === "dust" || value === "bubbles") {
       return value;
     }
 
@@ -487,6 +487,11 @@
         return;
       }
 
+      if (settings.backgroundMode === "bubbles") {
+        drawBubbles();
+        return;
+      }
+
       drawStars();
     }
 
@@ -650,6 +655,54 @@
         context.globalAlpha = pulse;
         context.beginPath();
         context.arc(dot.x, dot.y, dot.radius, 0, Math.PI * 2, false);
+        context.fill();
+      }
+
+      context.globalAlpha = 1;
+    }
+
+    function drawBubbles() {
+      var index;
+      var dot;
+      var rise;
+      var sway;
+      var pulse;
+      var highlightX;
+      var highlightY;
+
+      context.lineWidth = 1;
+
+      for (index = 0; index < state.dots.length; index += 1) {
+        dot = state.dots[index];
+        rise = dot.speed * (settings.dotSpeed * 6.5);
+        sway = Math.sin((state.entryFrame / 24) + dot.phase) * dot.drift * (settings.dotSpeed * 2.8);
+        pulse = 0.14 + (0.12 * (0.5 + (Math.sin((state.entryFrame / 18) + dot.phase) / 2)));
+
+        dot.x += sway;
+        dot.y -= rise;
+
+        if (dot.y < -dot.radius - 10 || dot.x < -24 || dot.x > canvas.width + 24) {
+          resetDot(dot, true);
+        }
+
+        highlightX = dot.x - (dot.radius * 0.28);
+        highlightY = dot.y - (dot.radius * 0.28);
+
+        context.strokeStyle = dot.color;
+        context.globalAlpha = 0.35 + pulse;
+        context.beginPath();
+        context.arc(dot.x, dot.y, dot.radius, 0, Math.PI * 2, false);
+        context.stroke();
+
+        context.fillStyle = dot.color;
+        context.globalAlpha = 0.12 + pulse;
+        context.beginPath();
+        context.arc(dot.x, dot.y, dot.radius * 0.92, 0, Math.PI * 2, false);
+        context.fill();
+
+        context.globalAlpha = 0.35 + pulse;
+        context.beginPath();
+        context.arc(highlightX, highlightY, Math.max(0.4, dot.radius * 0.22), 0, Math.PI * 2, false);
         context.fill();
       }
 
@@ -872,6 +925,9 @@
       } else if (settings.backgroundMode === "dust") {
         dot.x = spawnOffscreen ? (canvas.width + dot.radius + (nextRandom() * (canvas.width * 0.2))) : (nextRandom() * canvas.width);
         dot.y = nextRandom() * canvas.height;
+      } else if (settings.backgroundMode === "bubbles") {
+        dot.x = nextRandom() * canvas.width;
+        dot.y = spawnOffscreen ? (canvas.height + dot.radius + (nextRandom() * (canvas.height * 0.25))) : (nextRandom() * canvas.height);
       } else if (spawnOffscreen) {
         dot.x = canvas.width + dot.radius + (nextRandom() * (canvas.width * 0.35));
         dot.y = (nextRandom() * (canvas.height - 10)) + 5;
@@ -922,6 +978,16 @@
         dot.wobble = (nextRandom() * 0.7) + 0.2;
         dot.drift = (nextRandom() * 0.8) + 0.2;
         dot.glow = 0.4 + (nextRandom() * 0.25);
+        dot.length = 0;
+        return;
+      }
+
+      if (settings.backgroundMode === "bubbles") {
+        dot.radius = (nextRandom() * 3.2) + 1.8;
+        dot.speed = (nextRandom() * 0.45) + 0.3;
+        dot.wobble = 0;
+        dot.drift = (nextRandom() * 0.85) + 0.25;
+        dot.glow = 0.5 + (nextRandom() * 0.3);
         dot.length = 0;
         return;
       }
