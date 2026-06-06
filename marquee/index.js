@@ -25,7 +25,6 @@
   }
 
   var fields = {
-    delayCount: document.getElementById("marquee-delay-count"),
     displayTime: document.getElementById("marquee-display-time"),
     fontSize: document.getElementById("marquee-font-size"),
     width: document.getElementById("marquee-width"),
@@ -138,9 +137,6 @@
     if (previewCanvas) {
       previewCanvas.style.width = config.width + "px";
       previewCanvas.style.height = config.height + "px";
-    }
-    if (fields.delayCount) {
-      fields.delayCount.value = String(rows.length);
     }
     renderSequenceGrid(config.background);
     codeOutput.value = buildDreamersScript(config, rows);
