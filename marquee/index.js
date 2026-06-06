@@ -174,7 +174,7 @@
       height: height,
       fontSize: fontSize,
       waveHeight: marqueeApi.clampNumber(fields.waveHeight.value, 0, 24, 8),
-      dotCount: marqueeApi.clampNumber(fields.dotCount.value, 0, 999, 50),
+      dotCount: marqueeApi.clampNumber(fields.dotCount.value, 0, 9999, 50),
       backgroundSpeed: marqueeApi.clampNumber(fields.backgroundSpeed.value, 0, 30, 3),
       backgroundMode: normalizeBackgroundMode(fields.backgroundMode.value),
       animationSpeed: marqueeApi.clampNumber(fields.animationSpeed.value, 1, 120, 20),
