@@ -111,6 +111,10 @@ A {
   grid-template-columns: repeat(4, 1fr);
 }
 
+.field-row-5 {
+  grid-template-columns: repeat(5, 1fr);
+}
+
 .field-label {
   display: block;
   margin-bottom: 6px;
