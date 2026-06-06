@@ -151,7 +151,7 @@
   }
 
   function normalizeBackgroundMode(value) {
-    if (value === "rain" || value === "snow" || value === "fireflies" || value === "dust" || value === "bubbles") {
+    if (value === "rain" || value === "snow" || value === "fireflies" || value === "dust" || value === "bubbles" || value === "bubble-pop") {
       return value;
     }
 
@@ -492,6 +492,11 @@
         return;
       }
 
+      if (settings.backgroundMode === "bubble-pop") {
+        drawBubblePop();
+        return;
+      }
+
       drawStars();
     }
 
@@ -683,6 +688,90 @@
 
         if (dot.y < -dot.radius - 10 || dot.x < -24 || dot.x > canvas.width + 24) {
           resetDot(dot, true);
+        }
+
+        highlightX = dot.x - (dot.radius * 0.28);
+        highlightY = dot.y - (dot.radius * 0.28);
+
+        context.strokeStyle = dot.color;
+        context.globalAlpha = 0.35 + pulse;
+        context.beginPath();
+        context.arc(dot.x, dot.y, dot.radius, 0, Math.PI * 2, false);
+        context.stroke();
+
+        context.fillStyle = dot.color;
+        context.globalAlpha = 0.12 + pulse;
+        context.beginPath();
+        context.arc(dot.x, dot.y, dot.radius * 0.92, 0, Math.PI * 2, false);
+        context.fill();
+
+        context.globalAlpha = 0.35 + pulse;
+        context.beginPath();
+        context.arc(highlightX, highlightY, Math.max(0.4, dot.radius * 0.22), 0, Math.PI * 2, false);
+        context.fill();
+      }
+
+      context.globalAlpha = 1;
+    }
+
+    function drawBubblePop() {
+      var index;
+      var dot;
+      var rise;
+      var sway;
+      var pulse;
+      var highlightX;
+      var highlightY;
+      var popProgress;
+      var popRadius;
+
+      context.lineWidth = 1;
+
+      for (index = 0; index < state.dots.length; index += 1) {
+        dot = state.dots[index];
+
+        if (dot.popFrame >= 0) {
+          popProgress = Math.min(dot.popFrame / dot.popDuration, 1);
+          popRadius = dot.radius * (1 + (1.35 * popProgress));
+
+          context.strokeStyle = dot.color;
+          context.globalAlpha = 0.5 * (1 - popProgress);
+          context.beginPath();
+          context.arc(dot.x, dot.y, popRadius, 0, Math.PI * 2, false);
+          context.stroke();
+
+          context.globalAlpha = 0.3 * (1 - popProgress);
+          context.beginPath();
+          context.arc(dot.x, dot.y, popRadius * 0.62, 0, Math.PI * 2, false);
+          context.stroke();
+
+          dot.popFrame += 1;
+          if (dot.popFrame > dot.popDuration) {
+            resetDot(dot, true);
+          }
+          continue;
+        }
+
+        rise = dot.speed * (settings.dotSpeed * 6.5);
+        sway = Math.sin((state.entryFrame / 24) + dot.phase) * dot.drift * (settings.dotSpeed * 2.8);
+        pulse = 0.14 + (0.12 * (0.5 + (Math.sin((state.entryFrame / 18) + dot.phase) / 2)));
+
+        dot.x += sway;
+        dot.y -= rise;
+
+        if (dot.popTargetY >= 0 && dot.y <= dot.popTargetY) {
+          dot.popFrame = 0;
+          continue;
+        }
+
+        if (dot.y < -dot.radius - 10) {
+          resetDot(dot, true);
+          continue;
+        }
+
+        if (dot.x < -24 || dot.x > canvas.width + 24) {
+          resetDot(dot, true);
+          continue;
         }
 
         highlightX = dot.x - (dot.radius * 0.28);
@@ -901,6 +990,9 @@
         drift: 0,
         glow: 1,
         length: 8,
+        popFrame: -1,
+        popDuration: 8,
+        popTargetY: -1,
         phase: nextRandom() * Math.PI * 2,
         color: settings.dotColor
       };
@@ -928,6 +1020,10 @@
       } else if (settings.backgroundMode === "bubbles") {
         dot.x = nextRandom() * canvas.width;
         dot.y = spawnOffscreen ? (canvas.height + dot.radius + (nextRandom() * (canvas.height * 0.25))) : (nextRandom() * canvas.height);
+      } else if (settings.backgroundMode === "bubble-pop") {
+        dot.x = nextRandom() * canvas.width;
+        dot.y = spawnOffscreen ? (canvas.height + dot.radius + (nextRandom() * (canvas.height * 0.25))) : (nextRandom() * canvas.height);
+        dot.popTargetY = (canvas.height * (0.08 + (nextRandom() * 0.42))) + dot.radius;
       } else if (spawnOffscreen) {
         dot.x = canvas.width + dot.radius + (nextRandom() * (canvas.width * 0.35));
         dot.y = (nextRandom() * (canvas.height - 10)) + 5;
@@ -937,6 +1033,11 @@
       }
 
       syncDotRelativePosition(dot, canvas.width, canvas.height);
+      dot.popFrame = -1;
+
+      if (settings.backgroundMode !== "bubble-pop") {
+        dot.popTargetY = -1;
+      }
     }
 
     function applyDotStyle(dot) {
@@ -989,6 +1090,18 @@
         dot.drift = (nextRandom() * 0.85) + 0.25;
         dot.glow = 0.5 + (nextRandom() * 0.3);
         dot.length = 0;
+        dot.popDuration = 8 + Math.floor(nextRandom() * 4);
+        return;
+      }
+
+      if (settings.backgroundMode === "bubble-pop") {
+        dot.radius = (nextRandom() * 3.2) + 1.8;
+        dot.speed = (nextRandom() * 0.45) + 0.3;
+        dot.wobble = 0;
+        dot.drift = (nextRandom() * 0.85) + 0.25;
+        dot.glow = 0.5 + (nextRandom() * 0.3);
+        dot.length = 0;
+        dot.popDuration = 6 + Math.floor(nextRandom() * 5);
         return;
       }
 
@@ -998,6 +1111,7 @@
       dot.drift = 0;
       dot.glow = 1;
       dot.length = 0;
+      dot.popDuration = 8;
     }
 
     function syncDotRelativePosition(dot, width, height) {
