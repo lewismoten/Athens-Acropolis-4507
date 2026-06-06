@@ -151,7 +151,7 @@
   }
 
   function normalizeBackgroundMode(value) {
-    if (value === "rain" || value === "snow" || value === "fireflies" || value === "dust" || value === "bubbles" || value === "bubble-pop" || value === "embers" || value === "sparkles") {
+    if (value === "rain" || value === "snow" || value === "fireflies" || value === "dust" || value === "bubbles" || value === "bubble-pop" || value === "embers" || value === "sparkles" || value === "fog") {
       return value;
     }
 
@@ -506,6 +506,11 @@
 
       if (settings.backgroundMode === "sparkles") {
         drawSparkles();
+        return;
+      }
+
+      if (settings.backgroundMode === "fog") {
+        drawFog();
         return;
       }
 
@@ -907,6 +912,62 @@
       context.globalAlpha = 1;
     }
 
+    function drawFog() {
+      var index;
+      var dot;
+      var driftX;
+      var driftY;
+      var alpha;
+      var width;
+      var height;
+
+      for (index = 0; index < state.dots.length; index += 1) {
+        dot = state.dots[index];
+        driftX = dot.speed * settings.dotSpeed * 0.9;
+        driftY = Math.sin((state.backgroundFrame / 48) + dot.phase) * dot.wobble * settings.dotSpeed * 0.4;
+        alpha = 0.045 + (0.04 * (0.5 + (Math.sin((state.backgroundFrame / 36) + dot.phase) / 2)));
+        width = dot.radius * 8.5;
+        height = dot.radius * 2.6;
+
+        dot.x -= driftX;
+        dot.y += driftY;
+
+        if (dot.x < -width - 24) {
+          resetDot(dot, true);
+        } else if (dot.y < -height) {
+          dot.y = 6;
+          syncDotRelativePosition(dot, canvas.width, canvas.height);
+        } else if (dot.y > canvas.height + height) {
+          dot.y = canvas.height - 6;
+          syncDotRelativePosition(dot, canvas.width, canvas.height);
+        }
+
+        context.fillStyle = dot.color;
+        context.globalAlpha = alpha;
+        drawFogEllipse(dot.x, dot.y, width, height);
+        context.globalAlpha = alpha * 0.75;
+        drawFogEllipse(dot.x + (width * 0.22), dot.y - (height * 0.1), width * 0.68, height * 0.72);
+        context.globalAlpha = alpha * 0.55;
+        drawFogEllipse(dot.x - (width * 0.18), dot.y + (height * 0.08), width * 0.56, height * 0.62);
+      }
+
+      context.globalAlpha = 1;
+    }
+
+    function drawFogEllipse(centerX, centerY, width, height) {
+      context.beginPath();
+      if (typeof context.ellipse === "function") {
+        context.ellipse(centerX, centerY, width / 2, height / 2, 0, 0, Math.PI * 2);
+      } else {
+        context.save();
+        context.translate(centerX, centerY);
+        context.scale(width / 2, height / 2);
+        context.arc(0, 0, 1, 0, Math.PI * 2, false);
+        context.restore();
+      }
+      context.fill();
+    }
+
     function drawText(entry, metrics, baseX, baseY, progress, exitProgress) {
       var index;
       var character;
@@ -1143,6 +1204,9 @@
         dot.x = nextRandom() * canvas.width;
         dot.y = nextRandom() * canvas.height;
         dot.sparkleFrame = Math.floor(nextRandom() * Math.max(dot.sparkleLifeDuration || 1, 1));
+      } else if (settings.backgroundMode === "fog") {
+        dot.x = spawnOffscreen ? (canvas.width + (dot.radius * 8.5) + (nextRandom() * (canvas.width * 0.18))) : (nextRandom() * canvas.width);
+        dot.y = (nextRandom() * canvas.height);
       } else if (spawnOffscreen) {
         dot.x = canvas.width + dot.radius + (nextRandom() * (canvas.width * 0.35));
         dot.y = (nextRandom() * (canvas.height - 10)) + 5;
@@ -1249,6 +1313,17 @@
         dot.popDuration = 8;
         dot.sparkleFadeDuration = 18 + Math.floor(nextRandom() * 18);
         dot.sparkleLifeDuration = (dot.sparkleFadeDuration * 2) + 80 + Math.floor(nextRandom() * 180);
+        return;
+      }
+
+      if (settings.backgroundMode === "fog") {
+        dot.radius = (nextRandom() * 10) + 8;
+        dot.speed = (nextRandom() * 0.32) + 0.18;
+        dot.wobble = (nextRandom() * 0.85) + 0.2;
+        dot.drift = 0;
+        dot.glow = 1;
+        dot.length = 0;
+        dot.popDuration = 8;
         return;
       }
 
