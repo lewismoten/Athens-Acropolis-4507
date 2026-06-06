@@ -45,6 +45,79 @@
     return results;
   }
 
+  function isTransitionLine(value) {
+    return /^(>>|<<|\^\^|VV|<>),(>>|<<|\^\^|VV|<>)$/i.test(String(value || "").trim());
+  }
+
+  function parseMessageFile(rawText, options) {
+    var settings = options || {};
+    var lines = String(rawText || "").replace(/\r/g, "").split("\n");
+    var entries = [];
+    var totalCount;
+    var index = 0;
+    var entryText;
+    var entryColors;
+    var entryAction;
+    var remaining;
+    var parseUniformTriplets;
+
+    while (index < lines.length && !String(lines[index] || "").trim()) {
+      index += 1;
+    }
+
+    totalCount = parseInt(lines[index] || "", 10);
+    if (!isFinite(totalCount) || totalCount < 0) {
+      totalCount = 0;
+    } else {
+      index += 1;
+    }
+
+    remaining = lines.length - index;
+    parseUniformTriplets = remaining >= 3 && (
+      (totalCount > 0 && remaining >= totalCount * 3) ||
+      isTransitionLine(lines[index + 2])
+    );
+
+    while (index < lines.length) {
+      entryText = lines[index] || "";
+      entryColors = lines[index + 1] || "";
+      entryAction = parseUniformTriplets ? (lines[index + 2] || "") : "";
+
+      if (!entryText && !entryColors && !entryAction) {
+        break;
+      }
+
+      entries.push(createEntry(
+        entryAction || settings.firstEntryAction || settings.defaultEntryAction || ">>,>>",
+        entryText,
+        entryColors,
+        settings
+      ));
+      index += parseUniformTriplets ? 3 : 2;
+    }
+
+    if (totalCount > 0 && entries.length > totalCount) {
+      entries = entries.slice(0, totalCount);
+    }
+
+    return entries;
+  }
+
+  function loadMessageFile(messageFile, options) {
+    if (!messageFile || typeof fetch !== "function") {
+      return Promise.resolve([]);
+    }
+
+    return fetch(messageFile).then(function (response) {
+      if (!response.ok) {
+        throw new Error("Unable to load message file: " + messageFile);
+      }
+      return response.text();
+    }).then(function (rawText) {
+      return parseMessageFile(rawText, options);
+    });
+  }
+
   function clampNumber(rawValue, minimum, maximum, fallback) {
     var value = parseInt(rawValue, 10);
 
@@ -200,6 +273,20 @@
 
     resizeCanvas();
     setEntries(options.entries || [], false);
+    if (options.messageFile) {
+      loadMessageFile(options.messageFile, {
+        defaultColors: settings.defaultColors,
+        holdFrames: settings.displayFrames,
+        firstEntryAction: options.firstEntryAction,
+        defaultEntryAction: options.defaultEntryAction
+      }).then(function (loadedEntries) {
+        if (loadedEntries && loadedEntries.length) {
+          setEntries(loadedEntries, false);
+        }
+      }).catch(function () {
+        // Keep the current entries if the optional message file fails to load.
+      });
+    }
     requestAnimationFrame(tick);
 
     return {
@@ -474,10 +561,10 @@
     function getPosition(entry, metrics, progress, holdProgress) {
       var centerX = (canvas.width - metrics.width) / 2;
       var centerY = canvas.height / 2;
-      var startX = axisPoint(entry.start, "x", metrics.width, settings.edgePadding, centerX);
-      var startY = axisPoint(entry.start, "y", metrics.height, settings.edgePadding, centerY);
-      var endX = axisPoint(entry.end, "x", metrics.width, settings.edgePadding, centerX);
-      var endY = axisPoint(entry.end, "y", metrics.height, settings.edgePadding, centerY);
+      var startX = axisPoint(entry.start, "x", "start", metrics.width, settings.edgePadding, centerX);
+      var startY = axisPoint(entry.start, "y", "start", metrics.height, settings.edgePadding, centerY);
+      var endX = axisPoint(entry.end, "x", "end", metrics.width, settings.edgePadding, centerX);
+      var endY = axisPoint(entry.end, "y", "end", metrics.height, settings.edgePadding, centerY);
       var x = lerp(startX, centerX, easeOutCubic(progress));
       var y = lerp(startY, centerY, easeOutCubic(progress));
       var exitProgress;
@@ -491,23 +578,35 @@
       return { x: x, y: y };
     }
 
-    function axisPoint(direction, axis, size, edgePadding, center) {
+    function axisPoint(direction, axis, phase, size, edgePadding, center) {
       if (axis === "x") {
         if (direction.indexOf("<") !== -1) {
+          if (phase === "start") {
+            return canvas.width + edgePadding;
+          }
           return -size - edgePadding;
         }
 
         if (direction.indexOf(">") !== -1) {
+          if (phase === "start") {
+            return -size - edgePadding;
+          }
           return canvas.width + edgePadding;
         }
       }
 
       if (axis === "y") {
         if (direction.indexOf("^") !== -1) {
+          if (phase === "start") {
+            return canvas.height + edgePadding;
+          }
           return -edgePadding;
         }
 
         if (direction.indexOf("V") !== -1) {
+          if (phase === "start") {
+            return -edgePadding;
+          }
           return canvas.height + edgePadding;
         }
       }
@@ -624,6 +723,8 @@
   window.DreamMarquee = {
     parseColorList: parseColorList,
     parseEntries: parseEntries,
+    parseMessageFile: parseMessageFile,
+    loadMessageFile: loadMessageFile,
     createEntry: createEntry,
     createCanvasMarquee: createCanvasMarquee,
     normalizeHtmlConfig: normalizeHtmlConfig,

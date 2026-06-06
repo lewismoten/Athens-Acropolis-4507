@@ -222,12 +222,7 @@
     var lines = [String(config.sequenceCount)];
     var index;
 
-    if (rows[0]) {
-      lines.push(rows[0].text);
-      lines.push(rows[0].colors);
-    }
-
-    for (index = 1; index < rows.length; index += 1) {
+    for (index = 0; index < rows.length; index += 1) {
       lines.push(rows[index].text);
       lines.push(rows[index].colors);
       lines.push(rows[index].start + "," + rows[index].end);
@@ -238,6 +233,8 @@
 
   function buildCanvasEmbedCode(config, rows) {
     var defaultColorValues = splitColorPipe(config.defaultColor);
+    var fileName = getSequenceFileName();
+    var useMessageFile = !!(fileName && rows.length);
     var optionsConfig = {
       width: config.width,
       height: config.height,
@@ -256,13 +253,19 @@
     var lines = [];
     var index;
 
-    for (index = 0; index < rows.length; index += 1) {
-      entriesConfig.push({
-        start: rows[index].start,
-        end: rows[index].end,
-        text: rows[index].text,
-        colors: splitColorPipe(rows[index].colors)
-      });
+    if (!useMessageFile) {
+      for (index = 0; index < rows.length; index += 1) {
+        entriesConfig.push({
+          start: rows[index].start,
+          end: rows[index].end,
+          text: rows[index].text,
+          colors: splitColorPipe(rows[index].colors)
+        });
+      }
+    }
+
+    if (useMessageFile) {
+      optionsConfig.messageFile = fileName;
     }
 
     lines.push('<canvas id="dream-marquee" width="' + config.width + '" height="' + config.height + '" style="display:block;">');
@@ -274,7 +277,9 @@
     lines.push('  var canvas = document.getElementById("dream-marquee");');
     lines.push("  var marqueeApi = window.DreamMarquee;");
     lines.push("  var marqueeOptions = " + stringifyForCode(optionsConfig, 2) + ";");
-    lines.push("  var marqueeEntries = " + stringifyForCode(entriesConfig, 2) + ";");
+    if (!useMessageFile) {
+      lines.push("  var marqueeEntries = " + stringifyForCode(entriesConfig, 2) + ";");
+    }
     lines.push("");
     lines.push("  if (!canvas || !canvas.getContext || !marqueeApi) {");
     lines.push("    return;");
@@ -282,11 +287,13 @@
     lines.push("");
     lines.push("  marqueeOptions.canvas = canvas;");
     lines.push("  marqueeOptions.defaultColors = marqueeApi.parseColorList(marqueeOptions.defaultColors.join(\"|\"));");
-    lines.push("  marqueeOptions.entries = marqueeEntries.map(function (entry) {");
-    lines.push("    return marqueeApi.createEntry(entry.start + \",\" + entry.end, entry.text, entry.colors.join(\"|\"), {");
-    lines.push("      defaultColors: marqueeOptions.defaultColors");
-    lines.push("    });");
-    lines.push("  });");
+    if (!useMessageFile) {
+      lines.push("  marqueeOptions.entries = marqueeEntries.map(function (entry) {");
+      lines.push("    return marqueeApi.createEntry(entry.start + \",\" + entry.end, entry.text, entry.colors.join(\"|\"), {");
+      lines.push("      defaultColors: marqueeOptions.defaultColors");
+      lines.push("    });");
+      lines.push("  });");
+    }
     lines.push("");
     lines.push("  marqueeApi.createCanvasMarquee(marqueeOptions);");
     lines.push("}());");
