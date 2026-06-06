@@ -401,16 +401,16 @@
       var canvasMidX = canvas.width / 2;
       var textMidOffset;
       var enterFromCenter = entry.start === "<>" && progress < 1 && exitProgress === 0;
-      var collapseToCenter = entry.end === "<>" && exitProgress > 0;
-      var enterScale = enterFromCenter ? (0.1 + (0.9 * progress)) : 1;
-      var collapseAmount = collapseToCenter ? easeInCubic(exitProgress) : 0;
-      var scale = enterFromCenter ? enterScale : 1;
+      var zoomThroughCenter = entry.end === "<>" && exitProgress > 0;
+      var enterZoomScale = enterFromCenter ? (2.8 - (1.8 * easeOutCubic(progress))) : 1;
+      var zoomAmount = zoomThroughCenter ? easeInCubic(exitProgress) : 0;
+      var exitZoomScale = zoomThroughCenter ? (1 + (2.2 * zoomAmount)) : 1;
       var alpha = 1;
       var x;
 
       if (enterFromCenter) {
         alpha = 0.2 + (0.8 * progress);
-      } else if (collapseToCenter) {
+      } else if (zoomThroughCenter) {
         alpha = 1 - exitProgress;
       }
 
@@ -421,17 +421,17 @@
       for (index = 0; index < entry.characters.length; index += 1) {
         character = entry.characters[index];
         color = entry.colors[index] || settings.defaultColors[0];
-        wave = Math.sin((state.entryFrame / 4) + (index / 1.7)) * settings.waveHeight * scale;
+        wave = Math.sin((state.entryFrame / 4) + (index / 1.7)) * settings.waveHeight;
         textMidOffset = (character.offsetX + (character.width / 2)) - (metrics.width / 2);
         x = baseX + character.offsetX;
 
         if (enterFromCenter) {
-          x = canvasMidX + (textMidOffset * scale) - (character.width / 2);
+          x = canvasMidX + (textMidOffset * enterZoomScale) - (character.width / 2);
         }
 
-        if (collapseToCenter) {
-          x = canvasMidX + (textMidOffset * (1 - collapseAmount)) - (character.width / 2);
-          wave = wave * (1 - (0.85 * collapseAmount));
+        if (zoomThroughCenter) {
+          x = canvasMidX + (textMidOffset * exitZoomScale) - (character.width / 2);
+          wave = wave * (1 + (0.25 * zoomAmount));
         }
 
         context.fillStyle = color;
