@@ -327,13 +327,14 @@
       row = sequenceRows[index];
       html += [
         "<tr>",
-        '<td><span class="sequence-index">' + String(index + 1) + "</span></td>",
+        '<td><div class="sequence-index-cell"><span class="sequence-index">' + String(index + 1) + '</span><div class="sequence-move-controls">' +
+          buildMoveButton("up", index, index <= 0) +
+          buildMoveButton("down", index, index >= sequenceRows.length - 1) +
+          "</div></div></td>",
         '<td>' + buildTransitionSelect("start", index, row.start) + "</td>",
         '<td>' + buildTransitionSelect("end", index, row.end) + "</td>",
         "<td><div class=\"sequence-text\" title=\"" + escapeHtml(row.text) + "\" style=\"background:" + escapeHtml(resolvedBackground) + ";\">" + buildColorizedTextMarkup(row.text, row.colors) + "</div></td>",
         '<td><div class="sequence-cell-actions">',
-        '<button type="button" class="row-button row-up" data-index="' + index + '">Up</button>',
-        '<button type="button" class="row-button row-down" data-index="' + index + '">Down</button>',
         '<button type="button" class="row-button row-edit" data-index="' + index + '">Edit</button>',
         '<button type="button" class="row-button row-delete" data-index="' + index + '">Delete</button>',
         "</div></td>",
@@ -346,6 +347,14 @@
     }
 
     sequenceGridBody.innerHTML = html;
+  }
+
+  function buildMoveButton(direction, index, disabled) {
+    var isUp = direction === "up";
+    var symbol = isUp ? "&#9650;" : "&#9660;";
+    var label = isUp ? "Move row up" : "Move row down";
+
+    return '<button type="button" class="sequence-move-button row-button row-' + direction + '" data-index="' + index + '" aria-label="' + label + '"' + (disabled ? " disabled" : "") + ">" + symbol + "</button>";
   }
 
   function buildTransitionSelect(kind, index, token) {

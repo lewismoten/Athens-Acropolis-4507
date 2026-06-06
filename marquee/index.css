@@ -209,7 +209,7 @@ A {
 
 .sequence-table TH:nth-child(1),
 .sequence-table TD:nth-child(1) {
-  width: 34px;
+  width: 62px;
 }
 
 .sequence-table TH:nth-child(2),
@@ -230,6 +230,19 @@ A {
 .sequence-index {
   color: #ffff99;
   font-weight: bold;
+}
+
+.sequence-index-cell {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 6px;
+}
+
+.sequence-move-controls {
+  display: flex;
+  flex-direction: row;
+  gap: 4px;
 }
 
 .sequence-transition-select {
@@ -268,6 +281,25 @@ A {
   font: bold 12px "Times New Roman", Times, serif;
   cursor: pointer;
   white-space: nowrap;
+}
+
+.sequence-move-button {
+  width: 20px;
+  height: 20px;
+  padding: 0;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  background: linear-gradient(180deg, #12338c 0%, #00124d 100%);
+  font-size: 10px;
+  line-height: 1;
+}
+
+.sequence-move-button[disabled] {
+  border-color: #445588;
+  background: linear-gradient(180deg, #0a1338 0%, #050a1f 100%);
+  color: #5570aa;
+  cursor: default;
 }
 
 .modal-shell[hidden] {
