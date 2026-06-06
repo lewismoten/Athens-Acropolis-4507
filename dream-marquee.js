@@ -151,7 +151,7 @@
   }
 
   function normalizeBackgroundMode(value) {
-    if (value === "rain" || value === "snow" || value === "fireflies" || value === "dust" || value === "bubbles" || value === "bubble-pop" || value === "embers" || value === "sparkles" || value === "fog" || value === "comets" || value === "matrix" || value === "confetti") {
+    if (value === "rain" || value === "snow" || value === "fireflies" || value === "dust" || value === "bubbles" || value === "bubble-pop" || value === "embers" || value === "sparkles" || value === "fog" || value === "comets" || value === "matrix" || value === "confetti" || value === "balls") {
       return value;
     }
 
@@ -526,6 +526,11 @@
 
       if (settings.backgroundMode === "confetti") {
         drawConfetti();
+        return;
+      }
+
+      if (settings.backgroundMode === "balls") {
+        drawBalls();
         return;
       }
 
@@ -1094,6 +1099,46 @@
       context.globalAlpha = 1;
     }
 
+    function drawBalls() {
+      var index;
+      var dot;
+      var nextX;
+      var nextY;
+
+      for (index = 0; index < state.dots.length; index += 1) {
+        dot = state.dots[index];
+        nextX = dot.x + (dot.vx * settings.dotSpeed * 4.5);
+        nextY = dot.y + (dot.vy * settings.dotSpeed * 4.5);
+
+        if (nextX <= dot.radius || nextX >= canvas.width - dot.radius) {
+          dot.vx *= -1;
+          nextX = Math.max(dot.radius, Math.min(canvas.width - dot.radius, nextX));
+        }
+
+        if (nextY <= dot.radius || nextY >= canvas.height - dot.radius) {
+          dot.vy *= -1;
+          nextY = Math.max(dot.radius, Math.min(canvas.height - dot.radius, nextY));
+        }
+
+        dot.x = nextX;
+        dot.y = nextY;
+        syncDotRelativePosition(dot, canvas.width, canvas.height);
+
+        context.fillStyle = dot.color;
+        context.globalAlpha = 0.75;
+        context.beginPath();
+        context.arc(dot.x, dot.y, dot.radius, 0, Math.PI * 2, false);
+        context.fill();
+
+        context.globalAlpha = 0.28;
+        context.beginPath();
+        context.arc(dot.x - (dot.radius * 0.25), dot.y - (dot.radius * 0.25), dot.radius * 0.45, 0, Math.PI * 2, false);
+        context.fill();
+      }
+
+      context.globalAlpha = 1;
+    }
+
     function drawFogEllipse(centerX, centerY, width, height) {
       context.beginPath();
       if (typeof context.ellipse === "function") {
@@ -1306,6 +1351,8 @@
         sparkleFrame: 0,
         sparkleLifeDuration: 180,
         sparkleFadeDuration: 24,
+        vx: 0,
+        vy: 0,
         phase: nextRandom() * Math.PI * 2,
         color: settings.dotColor
       };
@@ -1356,6 +1403,9 @@
       } else if (settings.backgroundMode === "confetti") {
         dot.x = nextRandom() * canvas.width;
         dot.y = spawnOffscreen ? (-dot.length - (nextRandom() * canvas.height * 0.35)) : (nextRandom() * canvas.height);
+      } else if (settings.backgroundMode === "balls") {
+        dot.x = dot.radius + (nextRandom() * Math.max(canvas.width - (dot.radius * 2), 1));
+        dot.y = dot.radius + (nextRandom() * Math.max(canvas.height - (dot.radius * 2), 1));
       } else if (spawnOffscreen) {
         dot.x = canvas.width + dot.radius + (nextRandom() * (canvas.width * 0.35));
         dot.y = (nextRandom() * (canvas.height - 10)) + 5;
@@ -1373,6 +1423,11 @@
 
       if (settings.backgroundMode !== "sparkles") {
         dot.sparkleFrame = 0;
+      }
+
+      if (settings.backgroundMode !== "balls") {
+        dot.vx = 0;
+        dot.vy = 0;
       }
     }
 
@@ -1506,6 +1561,19 @@
         dot.glow = 1;
         dot.length = (nextRandom() * 7) + 6;
         dot.popDuration = 8;
+        return;
+      }
+
+      if (settings.backgroundMode === "balls") {
+        dot.radius = (nextRandom() * 4.5) + 3.5;
+        dot.speed = 1;
+        dot.wobble = 0;
+        dot.drift = 0;
+        dot.glow = 1;
+        dot.length = 0;
+        dot.popDuration = 8;
+        dot.vx = ((nextRandom() * 1.4) + 0.55) * (nextRandom() < 0.5 ? -1 : 1);
+        dot.vy = ((nextRandom() * 1.4) + 0.55) * (nextRandom() < 0.5 ? -1 : 1);
         return;
       }
 
