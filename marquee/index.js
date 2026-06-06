@@ -139,6 +139,9 @@
       previewCanvas.style.width = config.width + "px";
       previewCanvas.style.height = config.height + "px";
     }
+    if (fields.delayCount) {
+      fields.delayCount.value = String(rows.length);
+    }
     renderSequenceGrid(config.background);
     codeOutput.value = buildDreamersScript(config, rows);
     htmlCodeOutput.value = buildCanvasEmbedCode(config, rows);
@@ -168,15 +171,15 @@
   }
 
   function getPageConfig() {
-    var delayCount = marqueeApi.clampNumber(fields.delayCount.value, 0, 999, 7);
     var width = marqueeApi.clampNumber(fields.width.value, 120, 1200, 640);
     var height = marqueeApi.clampNumber(fields.height.value, 32, 240, 92);
     var fontSize = marqueeApi.clampNumber(fields.fontSize.value, 10, 72, 30);
     var defaultColor = marqueeApi.normalizeColor(fields.defaultColor.value, "#ffff66");
     var fontStyle = String(fields.fontStyle.value || "0");
+    var sequenceCount = sequenceRows.length;
 
     return {
-      delayCount: delayCount,
+      sequenceCount: sequenceCount,
       displayTime: marqueeApi.clampNumber(fields.displayTime.value, 1, 999, 100),
       width: width,
       height: height,
@@ -230,13 +233,13 @@
   }
 
   function buildDreamersScript(config, rows) {
-    var lines = [String(config.delayCount)];
+    var lines = [String(config.sequenceCount)];
     var index;
 
     for (index = 0; index < rows.length; index += 1) {
-      lines.push(rows[index].start + "," + rows[index].end);
       lines.push(rows[index].text);
       lines.push(rows[index].colors);
+      lines.push(rows[index].start + "," + rows[index].end);
     }
 
     return lines.join("\n");
@@ -267,8 +270,7 @@
         start: rows[index].start,
         end: rows[index].end,
         text: rows[index].text,
-        colors: splitColorPipe(rows[index].colors),
-        holdFrames: config.displayTime
+        colors: splitColorPipe(rows[index].colors)
       });
     }
 
@@ -291,8 +293,7 @@
     lines.push("  marqueeOptions.defaultColors = marqueeApi.parseColorList(marqueeOptions.defaultColors.join(\"|\"));");
     lines.push("  marqueeOptions.entries = marqueeEntries.map(function (entry) {");
     lines.push("    return marqueeApi.createEntry(entry.start + \",\" + entry.end, entry.text, entry.colors.join(\"|\"), {");
-    lines.push("      defaultColors: marqueeOptions.defaultColors,");
-    lines.push("      holdFrames: entry.holdFrames");
+    lines.push("      defaultColors: marqueeOptions.defaultColors");
     lines.push("    });");
     lines.push("  });");
     lines.push("");

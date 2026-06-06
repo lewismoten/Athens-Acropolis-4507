@@ -29,8 +29,8 @@
 
         <DIV CLASS="field-row field-row-3-equal">
           <LABEL CLASS="field">
-            <SPAN CLASS="field-label">Script Count (`dreamers.txt` line 1)</SPAN>
-            <INPUT ID="marquee-delay-count" CLASS="field-input" TYPE="number" MIN="0" MAX="999" VALUE="7">
+            <SPAN CLASS="field-label">Sequence Count (`dreamers.txt` line 1)</SPAN>
+            <INPUT ID="marquee-delay-count" CLASS="field-input" TYPE="number" MIN="0" MAX="999" VALUE="7" READONLY>
           </LABEL>
 
           <LABEL CLASS="field">
@@ -48,7 +48,7 @@
 
         <DIV CLASS="sequence-toolbar">
           <BUTTON ID="add-row" TYPE="button" CLASS="action-button">Add Row</BUTTON>
-          <SPAN CLASS="helper-copy">Line 1 stays the old script count. Every row after that becomes: `enter,exit` then `text` then `colors`.</SPAN>
+          <SPAN CLASS="helper-copy">Line 1 is sequence count. Each row then writes: `text`, `colors`, `enter,exit`.</SPAN>
         </DIV>
 
         <DIV CLASS="sequence-grid" ID="sequence-grid">
