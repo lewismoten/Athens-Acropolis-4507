@@ -420,7 +420,7 @@
 
       for (index = 0; index < entry.characters.length; index += 1) {
         character = entry.characters[index];
-        color = entry.colors[index % entry.colors.length] || settings.defaultColors[0];
+        color = entry.colors[index] || settings.defaultColors[0];
         wave = Math.sin((state.entryFrame / 4) + (index / 1.7)) * settings.waveHeight * scale;
         textMidOffset = (character.offsetX + (character.width / 2)) - (metrics.width / 2);
         x = baseX + character.offsetX;

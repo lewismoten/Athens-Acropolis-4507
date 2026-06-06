@@ -57,8 +57,9 @@ A {
 
 .marquee-preview-canvas {
   display: block;
-  width: 640px;
-  height: 92px;
+  width: auto;
+  height: auto;
+  max-width: 100%;
   border: 1px solid #6688ff;
   box-sizing: border-box;
   background: #000066;
@@ -93,6 +94,14 @@ A {
 .field-row {
   display: grid;
   grid-template-columns: 1fr 1fr;
+}
+
+.field-row-3 {
+  grid-template-columns: 0.7fr 1.6fr 1fr;
+}
+
+.field-row-4 {
+  grid-template-columns: repeat(4, 1fr);
 }
 
 .field-label {

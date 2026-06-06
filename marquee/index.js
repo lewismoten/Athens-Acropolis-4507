@@ -32,9 +32,10 @@
     waveHeight: document.getElementById("marquee-wave-height"),
     dotCount: document.getElementById("marquee-dot-count"),
     background: document.getElementById("marquee-background"),
+    defaultColor: document.getElementById("marquee-default-color"),
     dotColor: document.getElementById("marquee-dot-color"),
     fontFamily: document.getElementById("marquee-font-family"),
-    bold: document.getElementById("marquee-bold"),
+    fontStyle: document.getElementById("marquee-font-style"),
     modalText: document.getElementById("modal-row-text"),
     modalColors: document.getElementById("modal-row-colors"),
     modalColorTrigger: document.getElementById("modal-color-trigger"),
@@ -51,11 +52,11 @@
     dotColor: "#9999ff",
     dotCount: 50,
     waveHeight: 8,
-    font: "bold 30px Times New Roman, Times, serif",
+    font: "italic 30px Times New Roman, Times, serif",
     fontHeight: 30,
     fps: 30,
     displayFrames: 100,
-    defaultColors: marqueeApi.parseColorList("ffff66|ffee88|ffdd55|ffee88"),
+    defaultColors: marqueeApi.parseColorList("ffff66"),
     entries: [[">>,<<", "Welcome to Shoomi's marquee maker.", "#ffff66|#ffee88|#ffdd55|#ffee88"]]
   });
 
@@ -100,7 +101,7 @@
         start: ">>",
         end: ">>",
         text: "",
-        colors: "ffff66|ffee88|ffdd55|ffee88|"
+        colors: ""
       });
     });
   }
@@ -129,6 +130,10 @@
 
     if (previewFrame) {
       previewFrame.style.minHeight = Math.max(config.height + 38, 130) + "px";
+    }
+    if (previewCanvas) {
+      previewCanvas.style.width = config.width + "px";
+      previewCanvas.style.height = config.height + "px";
     }
     renderSequenceGrid(config.background);
     codeOutput.value = buildDreamersScript(config, rows);
@@ -160,25 +165,30 @@
 
   function getPageConfig() {
     var holdSeconds = marqueeApi.clampNumber(fields.delayCount.value, 0, 999, 7);
+    var width = marqueeApi.clampNumber(fields.width.value, 120, 1200, 640);
+    var height = marqueeApi.clampNumber(fields.height.value, 32, 240, 92);
+    var fontSize = marqueeApi.clampNumber(fields.fontSize.value, 10, 72, 30);
+    var defaultColor = marqueeApi.normalizeColor(fields.defaultColor.value, "#ffff66");
+    var fontStyle = String(fields.fontStyle.value || "0");
 
     return {
       holdSeconds: holdSeconds,
       holdFrames: holdSeconds * 30,
-      width: marqueeApi.clampNumber(fields.width.value, 120, 1200, 640),
-      height: marqueeApi.clampNumber(fields.height.value, 32, 240, 92),
-      fontSize: marqueeApi.clampNumber(fields.fontSize.value, 10, 72, 30),
+      width: width,
+      height: height,
+      fontSize: fontSize,
       waveHeight: marqueeApi.clampNumber(fields.waveHeight.value, 0, 24, 8),
       dotCount: marqueeApi.clampNumber(fields.dotCount.value, 0, 999, 50),
       background: marqueeApi.normalizeColor(fields.background.value, "#000066"),
+      defaultColor: defaultColor,
       dotColor: marqueeApi.normalizeColor(fields.dotColor.value, "#9999ff"),
       fontFamily: (fields.fontFamily.value || "Times New Roman, Times, serif").trim(),
-      bold: !!fields.bold.checked
+      fontStyle: fontStyle
     };
   }
 
   function getCanvasConfig(config, rows) {
-    var fontWeight = fields.bold.checked ? "bold " : "";
-    var defaultColors = marqueeApi.parseColorList((rows[0] && rows[0].colors) || "ffaa00|");
+    var defaultColors = marqueeApi.parseColorList(config.defaultColor);
 
     return {
       width: config.width,
@@ -187,7 +197,7 @@
       dotColor: config.dotColor,
       dotCount: config.dotCount,
       waveHeight: config.waveHeight,
-      font: fontWeight + config.fontSize + "px " + config.fontFamily,
+      font: buildFontDeclaration(config),
       fontHeight: config.fontSize,
       displayFrames: config.holdFrames,
       defaultColors: defaultColors
@@ -225,8 +235,7 @@
   }
 
   function buildCanvasEmbedCode(config, rows) {
-    var fontWeight = config.bold ? "bold " : "";
-    var defaultColorValues = splitColorPipe((rows[0] && rows[0].colors) || "ffaa00|");
+    var defaultColorValues = splitColorPipe(config.defaultColor);
     var optionsConfig = {
       width: config.width,
       height: config.height,
@@ -234,7 +243,7 @@
       dotColor: config.dotColor,
       dotCount: config.dotCount,
       waveHeight: config.waveHeight,
-      font: fontWeight + config.fontSize + "px " + config.fontFamily,
+      font: buildFontDeclaration(config),
       fontHeight: config.fontSize,
       fps: 30,
       displayFrames: config.holdFrames,
@@ -401,7 +410,7 @@
       start: ">>",
       end: ">>",
       text: "",
-      colors: "ffff66|ffee88|ffdd55|ffee88|"
+      colors: ""
     };
 
     editingRowIndex = typeof index === "number" ? index : -1;
@@ -439,7 +448,7 @@
       start: editingRowIndex >= 0 && sequenceRows[editingRowIndex] ? sequenceRows[editingRowIndex].start : ">>",
       end: editingRowIndex >= 0 && sequenceRows[editingRowIndex] ? sequenceRows[editingRowIndex].end : ">>",
       text: fields.modalText.value || "",
-      colors: normalizeColorPipeForText(fields.modalText.value || "", fields.modalColors.value, "ffff66|ffee88|ffdd55|ffee88|")
+      colors: normalizeColorPipeForText(fields.modalText.value || "", fields.modalColors.value, getDefaultFontColorPipe())
     };
 
     if (!record.text.trim()) {
@@ -461,7 +470,7 @@
     fields.modalColors.value = normalizeColorPipeForText(
       fields.modalText.value || "",
       fields.modalColors.value,
-      "ffff66|ffee88|ffdd55|ffee88|"
+      getDefaultFontColorPipe()
     );
     rememberModalSelection();
     pushModalHistoryState(getModalEditorState());
@@ -486,8 +495,8 @@
       return;
     }
 
-    colors = expandColorArrayForText(text, fields.modalColors.value, "ffff66|ffee88|ffdd55|ffee88|");
-    nextColor = marqueeApi.normalizeColor(fields.modalColorPicker.value, "#ffff66").replace(/^#/, "");
+    colors = expandColorArrayForText(text, fields.modalColors.value, getDefaultFontColorPipe());
+    nextColor = marqueeApi.normalizeColor(fields.modalColorPicker.value, getPageConfig().defaultColor).replace(/^#/, "");
 
     for (index = selectionStart; index < selectionEnd && index < colors.length; index += 1) {
       colors[index] = nextColor;
@@ -513,10 +522,10 @@
     fields.modalColors.value = normalizeColorPipeForText(
       fields.modalText.value || "",
       fields.modalColors.value,
-      "ffff66|ffee88|ffdd55|ffee88|"
+      getDefaultFontColorPipe()
     );
     fields.modalPreview.style.background = marqueeApi.normalizeColor(fields.background.value, "#000066");
-    fields.modalPreview.style.font = (fields.bold.checked ? "bold " : "") + config.fontSize + "px " + config.fontFamily;
+    fields.modalPreview.style.font = buildFontDeclaration(config);
     fields.modalText.style.font = fields.modalPreview.style.font;
     fields.modalText.style.background = fields.modalPreview.style.background;
     fields.modalText.style.color = "#ffffff";
@@ -541,10 +550,10 @@
   function detectModalSelectionColor() {
     var text = fields.modalText.value || "";
     var selectionStart = getModalSelectionRange().start;
-    var colors = expandColorArrayForText(text, fields.modalColors.value, "ffff66|ffee88|ffdd55|ffee88|");
+    var colors = expandColorArrayForText(text, fields.modalColors.value, getDefaultFontColorPipe());
 
     if (!colors.length) {
-      return "#ffff66";
+      return getPageConfig().defaultColor;
     }
 
     if (selectionStart >= 0 && selectionStart < colors.length) {
@@ -648,7 +657,7 @@
   function getModalEditorState() {
     return {
       text: fields.modalText.value || "",
-      colors: normalizeColorPipeForText(fields.modalText.value || "", fields.modalColors.value, "ffff66|ffee88|ffdd55|ffee88|"),
+      colors: normalizeColorPipeForText(fields.modalText.value || "", fields.modalColors.value, getDefaultFontColorPipe()),
       selectionStart: modalSelectionStart,
       selectionEnd: modalSelectionEnd
     };
@@ -779,7 +788,7 @@
   }
 
   function buildColorizedTextMarkup(text, colorPipe) {
-    var colors = expandColorArrayForText(text, colorPipe, "ffff66|ffee88|ffdd55|ffee88|");
+    var colors = expandColorArrayForText(text, colorPipe, getDefaultFontColorPipe());
     var safeText = String(text || "");
     var html = "";
     var index;
@@ -820,12 +829,12 @@
   function expandColorArrayForText(text, colorPipe, fallback) {
     var safeText = String(text || "");
     var parsedColors = marqueeApi.parseColorList(colorPipe || "");
-    var baseColors = parsedColors.length ? parsedColors : marqueeApi.parseColorList(fallback || "ffff66|");
     var expandedColors = [];
     var index;
+    var fallbackColor = marqueeApi.parseColorList(fallback || getDefaultFontColorPipe())[0] || "#ffff66";
 
     for (index = 0; index < safeText.length; index += 1) {
-      expandedColors.push(baseColors[index % baseColors.length]);
+      expandedColors.push(parsedColors[index] || fallbackColor);
     }
 
     return expandedColors;
@@ -841,6 +850,25 @@
     }
 
     return values.join("|") + (values.length ? "|" : "");
+  }
+
+  function getDefaultFontColorPipe() {
+    return marqueeApi.normalizeColor((fields.defaultColor && fields.defaultColor.value) || "#ffff66", "#ffff66").replace(/^#/, "") + "|";
+  }
+
+  function buildFontDeclaration(config) {
+    var styleValue = String(config.fontStyle || "0");
+    var prefix = "";
+
+    if (styleValue === "1") {
+      prefix = "bold ";
+    } else if (styleValue === "2") {
+      prefix = "italic ";
+    } else if (styleValue === "3") {
+      prefix = "bold italic ";
+    }
+
+    return prefix + config.fontSize + "px " + config.fontFamily;
   }
 
   function getPreviewCharIndexFromNode(node, offset, isStart) {
