@@ -151,7 +151,7 @@
   }
 
   function normalizeBackgroundMode(value) {
-    if (value === "rain" || value === "snow" || value === "fireflies" || value === "dust" || value === "bubbles" || value === "bubble-pop" || value === "embers" || value === "sparkles" || value === "fog" || value === "comets" || value === "matrix" || value === "confetti" || value === "balls" || value === "static" || value === "leaves") {
+    if (value === "rain" || value === "snow" || value === "fireflies" || value === "dust" || value === "bubbles" || value === "bubble-pop" || value === "embers" || value === "sparkles" || value === "fog" || value === "comets" || value === "matrix" || value === "confetti" || value === "balls" || value === "static" || value === "leaves" || value === "fireworks") {
       return value;
     }
 
@@ -541,6 +541,11 @@
 
       if (settings.backgroundMode === "leaves") {
         drawLeaves();
+        return;
+      }
+
+      if (settings.backgroundMode === "fireworks") {
+        drawFireworks();
         return;
       }
 
@@ -1221,6 +1226,123 @@
       context.globalAlpha = 1;
     }
 
+    function drawFireworks() {
+      var index;
+      var dot;
+      var lifeProgress;
+      var alpha;
+      var launchX;
+      var launchY;
+      var trailLength;
+      var particleIndex;
+      var angle;
+      var radius;
+      var burstAlpha;
+      var burstCount;
+      var spread;
+      var launchScale;
+      var previousLifeProgress;
+      var particleTravel;
+      var previousTravel;
+      var currentX;
+      var currentY;
+      var previousX;
+      var previousY;
+      var gravityDrop;
+      var previousGravityDrop;
+      var particleRadius;
+
+      for (index = 0; index < state.dots.length; index += 1) {
+        dot = state.dots[index];
+
+        if (dot.fireworkState === "launch") {
+          launchX = dot.x;
+          launchY = dot.y;
+          launchScale = Math.max(1, 0.75 + (settings.dotSpeed * 2.5));
+
+          dot.x += dot.vx * launchScale;
+          dot.y += dot.vy * launchScale;
+          dot.vy += 0.085 * launchScale;
+
+          trailLength = Math.max(8, dot.fireworkBurstSize * 0.22);
+          context.strokeStyle = dot.color;
+          context.globalAlpha = 0.35;
+          context.lineWidth = Math.max(1, dot.radius * 0.35);
+          context.beginPath();
+          context.moveTo(launchX, launchY + trailLength);
+          context.lineTo(dot.x, dot.y);
+          context.stroke();
+
+          context.fillStyle = dot.color;
+          context.globalAlpha = 0.9;
+          context.beginPath();
+          context.arc(dot.x, dot.y, Math.max(0.75, dot.radius * 0.45), 0, Math.PI * 2, false);
+          context.fill();
+
+          if (dot.y <= dot.fireworkTargetY) {
+            dot.fireworkState = "burst";
+            dot.sparkleFrame = 0;
+          } else if (dot.vy >= 0) {
+            if (dot.y <= canvas.height * 0.5) {
+              dot.fireworkState = "burst";
+              dot.sparkleFrame = 0;
+            } else {
+              resetDot(dot, true);
+            }
+          } else if (dot.y < -40) {
+            resetDot(dot, true);
+          } else if (dot.y > canvas.height + 40) {
+            resetDot(dot, true);
+          }
+          continue;
+        }
+
+        dot.sparkleFrame += 1;
+        lifeProgress = dot.sparkleFrame / Math.max(dot.sparkleLifeDuration || 1, 1);
+
+        if (lifeProgress >= 1) {
+          resetDot(dot, true);
+          continue;
+        }
+
+        alpha = 1 - lifeProgress;
+        burstAlpha = alpha * 0.85;
+        burstCount = dot.fireworkBurstCount;
+        previousLifeProgress = Math.max(0, (dot.sparkleFrame - 1) / Math.max(dot.sparkleLifeDuration || 1, 1));
+
+        context.fillStyle = dot.color;
+        for (particleIndex = 0; particleIndex < burstCount; particleIndex += 1) {
+          angle = ((Math.PI * 2) * (particleIndex / burstCount)) + dot.phase;
+          spread = 0.72 + (((particleIndex % 5) / 4) * 0.42);
+          radius = dot.fireworkBurstSize * (0.22 + (spread * 0.1));
+          particleTravel = radius * easeOutCubic(Math.min(lifeProgress, 1));
+          previousTravel = radius * easeOutCubic(Math.min(previousLifeProgress, 1));
+          gravityDrop = (lifeProgress * lifeProgress) * dot.fireworkBurstSize * 0.42;
+          previousGravityDrop = (previousLifeProgress * previousLifeProgress) * dot.fireworkBurstSize * 0.42;
+          currentX = dot.x + (Math.cos(angle) * particleTravel);
+          currentY = dot.y + (Math.sin(angle) * particleTravel) + gravityDrop;
+          previousX = dot.x + (Math.cos(angle) * previousTravel);
+          previousY = dot.y + (Math.sin(angle) * previousTravel) + previousGravityDrop;
+          particleRadius = dot.radius * (0.7 - (lifeProgress * 0.2));
+
+          context.strokeStyle = dot.color;
+          context.globalAlpha = burstAlpha * 0.58;
+          context.lineWidth = Math.max(1, dot.radius * 0.22);
+          context.beginPath();
+          context.moveTo(previousX, previousY);
+          context.lineTo(currentX, currentY);
+          context.stroke();
+
+          context.globalAlpha = burstAlpha * (0.8 + (0.15 * Math.sin(dot.phase + particleIndex)));
+          context.beginPath();
+          context.arc(currentX, currentY, Math.max(0.45, particleRadius), 0, Math.PI * 2, false);
+          context.fill();
+        }
+      }
+
+      context.globalAlpha = 1;
+    }
+
     function drawLeafShape(width, height) {
       context.beginPath();
       context.moveTo(0, -height / 2);
@@ -1446,6 +1568,10 @@
         sparkleFadeDuration: 24,
         vx: 0,
         vy: 0,
+        fireworkState: "",
+        fireworkTargetY: 0,
+        fireworkBurstSize: 0,
+        fireworkBurstCount: 0,
         phase: nextRandom() * Math.PI * 2,
         color: settings.dotColor
       };
@@ -1505,6 +1631,12 @@
       } else if (settings.backgroundMode === "leaves") {
         dot.x = nextRandom() * canvas.width;
         dot.y = spawnOffscreen ? (-dot.length - (nextRandom() * canvas.height * 0.3)) : (nextRandom() * canvas.height);
+      } else if (settings.backgroundMode === "fireworks") {
+        dot.x = canvas.width * (0.04 + (nextRandom() * 0.92));
+        dot.y = canvas.height + (nextRandom() * (canvas.height * 0.14));
+        dot.fireworkState = "launch";
+        dot.fireworkTargetY = canvas.height * (0.12 + (nextRandom() * 0.38));
+        dot.sparkleFrame = 0;
       } else if (spawnOffscreen) {
         dot.x = canvas.width + dot.radius + (nextRandom() * (canvas.width * 0.35));
         dot.y = (nextRandom() * (canvas.height - 10)) + 5;
@@ -1524,9 +1656,16 @@
         dot.sparkleFrame = 0;
       }
 
-      if (settings.backgroundMode !== "balls") {
+      if (settings.backgroundMode !== "balls" && settings.backgroundMode !== "fireworks") {
         dot.vx = 0;
         dot.vy = 0;
+      }
+
+      if (settings.backgroundMode !== "fireworks") {
+        dot.fireworkState = "";
+        dot.fireworkTargetY = 0;
+        dot.fireworkBurstSize = 0;
+        dot.fireworkBurstCount = 0;
       }
     }
 
@@ -1695,6 +1834,23 @@
         dot.glow = 1;
         dot.length = (nextRandom() * 8) + 10;
         dot.popDuration = 8;
+        return;
+      }
+
+      if (settings.backgroundMode === "fireworks") {
+        dot.radius = (nextRandom() * 1.6) + 1.1;
+        dot.speed = 1;
+        dot.wobble = 0;
+        dot.drift = 0;
+        dot.glow = 1;
+        dot.length = 0;
+        dot.popDuration = 8;
+        dot.sparkleLifeDuration = 22 + Math.floor(nextRandom() * 24);
+        dot.sparkleFrame = 0;
+        dot.vx = (nextRandom() * 0.8) - 0.4;
+        dot.vy = -((nextRandom() * 1.4) + 2.3);
+        dot.fireworkBurstSize = 18 + (nextRandom() * 38);
+        dot.fireworkBurstCount = 10 + Math.floor(nextRandom() * 18);
         return;
       }
 
