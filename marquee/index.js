@@ -37,6 +37,7 @@
     bold: document.getElementById("marquee-bold"),
     modalText: document.getElementById("modal-row-text"),
     modalColors: document.getElementById("modal-row-colors"),
+    modalColorTrigger: document.getElementById("modal-color-trigger"),
     modalColorPicker: document.getElementById("modal-row-color-picker"),
     modalUndo: document.getElementById("modal-undo"),
     modalPreview: document.getElementById("modal-row-preview")
@@ -75,10 +76,14 @@
     fields.modalUndo.addEventListener("click", undoModalChange);
   }
 
+  if (fields.modalColorTrigger) {
+    fields.modalColorTrigger.addEventListener("mousedown", onModalColorTriggerMouseDown);
+    fields.modalColorTrigger.addEventListener("click", onModalColorTriggerClick);
+  }
+
   if (fields.modalColorPicker) {
-    fields.modalColorPicker.addEventListener("pointerdown", rememberModalSelection);
-    fields.modalColorPicker.addEventListener("mousedown", rememberModalSelection);
     fields.modalColorPicker.addEventListener("input", onModalColorPickerInput);
+    fields.modalColorPicker.addEventListener("change", onModalColorPickerInput);
   }
 
   if (copyButton) {
@@ -516,10 +521,12 @@
   }
 
   function updateModalColorControls() {
-    var selection = getModalSelectionRange();
-
     if (fields.modalColorPicker) {
       fields.modalColorPicker.value = detectModalSelectionColor();
+    }
+
+    if (fields.modalColorTrigger && fields.modalColorPicker) {
+      fields.modalColorTrigger.style.background = fields.modalColorPicker.value;
     }
 
     if (fields.modalUndo) {
@@ -546,6 +553,27 @@
   function onModalSelectionChange() {
     rememberModalSelection();
     updateModalColorControls();
+  }
+
+  function onModalColorTriggerMouseDown(event) {
+    rememberModalSelection();
+    event.preventDefault();
+  }
+
+  function onModalColorTriggerClick() {
+    if (!fields.modalColorPicker) {
+      return;
+    }
+
+    rememberModalSelection();
+    fields.modalColorPicker.value = detectModalSelectionColor();
+    fields.modalColorPicker.click();
+    setTimeout(function () {
+      if (!rowModal.hidden) {
+        fields.modalText.focus();
+        restoreModalSelection();
+      }
+    }, 0);
   }
 
   function onModalTextKeyDown(event) {

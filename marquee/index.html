@@ -144,10 +144,8 @@
 
       <DIV CLASS="modal-footer">
         <DIV CLASS="modal-toolbar">
-          <LABEL CLASS="modal-color-control">
-            <SPAN CLASS="field-label">Selection Color</SPAN>
-            <INPUT ID="modal-row-color-picker" CLASS="field-input field-color modal-color-input" TYPE="color" VALUE="#ffff66">
-          </LABEL>
+          <BUTTON TYPE="button" ID="modal-color-trigger" CLASS="action-button modal-color-trigger" TITLE="Change selected text color" ARIA-LABEL="Change selected text color"></BUTTON>
+          <INPUT ID="modal-row-color-picker" CLASS="modal-color-native-input" TYPE="color" VALUE="#ffff66" TABINDEX="-1" ARIA-HIDDEN="true">
           <BUTTON TYPE="button" ID="modal-undo" CLASS="action-button">Undo</BUTTON>
         </DIV>
 
