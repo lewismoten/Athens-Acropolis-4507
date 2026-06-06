@@ -15,6 +15,10 @@
   var previewMarquee;
   var sequenceRows = [];
   var editingRowIndex = -1;
+  var modalHistory = [];
+  var modalHistoryIndex = -1;
+  var modalSelectionStart = 0;
+  var modalSelectionEnd = 0;
 
   if (!form || !previewCanvas || !codeOutput || !htmlCodeOutput || !marqueeApi || !sequenceGridBody || !rowModal || !rowModalForm) {
     return;
@@ -34,7 +38,7 @@
     modalText: document.getElementById("modal-row-text"),
     modalColors: document.getElementById("modal-row-colors"),
     modalColorPicker: document.getElementById("modal-row-color-picker"),
-    modalApplyColor: document.getElementById("modal-apply-color"),
+    modalUndo: document.getElementById("modal-undo"),
     modalPreview: document.getElementById("modal-row-preview")
   };
 
@@ -62,16 +66,19 @@
   rowModal.addEventListener("click", onModalShellClick);
   rowModalForm.addEventListener("submit", onModalSubmit);
   fields.modalText.addEventListener("input", onModalTextInput);
-  fields.modalText.addEventListener("select", updateModalColorControls);
-  fields.modalText.addEventListener("click", updateModalColorControls);
-  fields.modalText.addEventListener("keyup", updateModalColorControls);
+  fields.modalText.addEventListener("select", onModalSelectionChange);
+  fields.modalText.addEventListener("click", onModalSelectionChange);
+  fields.modalText.addEventListener("keyup", onModalSelectionChange);
+  fields.modalText.addEventListener("keydown", onModalTextKeyDown);
 
-  if (fields.modalApplyColor) {
-    fields.modalApplyColor.addEventListener("click", applyColorToModalSelection);
+  if (fields.modalUndo) {
+    fields.modalUndo.addEventListener("click", undoModalChange);
   }
 
   if (fields.modalColorPicker) {
-    fields.modalColorPicker.addEventListener("input", updateModalColorControls);
+    fields.modalColorPicker.addEventListener("pointerdown", rememberModalSelection);
+    fields.modalColorPicker.addEventListener("mousedown", rememberModalSelection);
+    fields.modalColorPicker.addEventListener("input", onModalColorPickerInput);
   }
 
   if (copyButton) {
@@ -391,16 +398,27 @@
     editingRowIndex = typeof index === "number" ? index : -1;
     fields.modalText.value = values.text || "";
     fields.modalColors.value = normalizeColorPipeForText(values.text || "", values.colors || "", "ffff66|ffee88|ffdd55|ffee88|");
-    fields.modalColorPicker.value = detectModalSelectionColor();
+    modalHistory = [];
+    modalHistoryIndex = -1;
+    modalSelectionStart = 0;
+    modalSelectionEnd = fields.modalText.value.length;
+    pushModalHistoryState({
+      text: fields.modalText.value,
+      colors: fields.modalColors.value,
+      selectionStart: modalSelectionStart,
+      selectionEnd: modalSelectionEnd
+    });
     updateModalEditorPreview();
     rowModal.hidden = false;
     fields.modalText.focus();
-    fields.modalText.select();
+    restoreModalSelection();
   }
 
   function closeRowModal() {
     rowModal.hidden = true;
     editingRowIndex = -1;
+    modalHistory = [];
+    modalHistoryIndex = -1;
   }
 
   function onModalSubmit(event) {
@@ -436,13 +454,20 @@
       fields.modalColors.value,
       "ffff66|ffee88|ffdd55|ffee88|"
     );
+    rememberModalSelection();
+    pushModalHistoryState(getModalEditorState());
     updateModalEditorPreview();
+  }
+
+  function onModalColorPickerInput() {
+    applyColorToModalSelection();
   }
 
   function applyColorToModalSelection() {
     var text = fields.modalText.value || "";
-    var selectionStart = fields.modalText.selectionStart;
-    var selectionEnd = fields.modalText.selectionEnd;
+    var selection = getModalSelectionRange();
+    var selectionStart = selection.start;
+    var selectionEnd = selection.end;
     var colors;
     var index;
     var nextColor;
@@ -460,9 +485,12 @@
     }
 
     fields.modalColors.value = colors.join("|") + (colors.length ? "|" : "");
+    modalSelectionStart = selectionStart;
+    modalSelectionEnd = selectionEnd;
+    pushModalHistoryState(getModalEditorState());
     updateModalEditorPreview();
     fields.modalText.focus();
-    fields.modalText.setSelectionRange(selectionStart, selectionEnd);
+    restoreModalSelection();
   }
 
   function updateModalEditorPreview() {
@@ -482,21 +510,20 @@
   }
 
   function updateModalColorControls() {
-    var selectionStart = fields.modalText.selectionStart;
-    var selectionEnd = fields.modalText.selectionEnd;
-
-    if (fields.modalApplyColor) {
-      fields.modalApplyColor.disabled = !fields.modalText.value || selectionStart === selectionEnd;
-    }
+    var selection = getModalSelectionRange();
 
     if (fields.modalColorPicker) {
       fields.modalColorPicker.value = detectModalSelectionColor();
+    }
+
+    if (fields.modalUndo) {
+      fields.modalUndo.disabled = modalHistoryIndex <= 0;
     }
   }
 
   function detectModalSelectionColor() {
     var text = fields.modalText.value || "";
-    var selectionStart = fields.modalText.selectionStart;
+    var selectionStart = getModalSelectionRange().start;
     var colors = expandColorArrayForText(text, fields.modalColors.value, "ffff66|ffee88|ffdd55|ffee88|");
 
     if (!colors.length) {
@@ -508,6 +535,99 @@
     }
 
     return colors[0].charAt(0) === "#" ? colors[0] : ("#" + colors[0]);
+  }
+
+  function onModalSelectionChange() {
+    rememberModalSelection();
+    updateModalColorControls();
+  }
+
+  function onModalTextKeyDown(event) {
+    if ((event.metaKey || event.ctrlKey) && !event.shiftKey && String(event.key).toLowerCase() === "z") {
+      event.preventDefault();
+      undoModalChange();
+    }
+  }
+
+  function rememberModalSelection() {
+    if (!fields.modalText) {
+      return;
+    }
+
+    modalSelectionStart = typeof fields.modalText.selectionStart === "number" ? fields.modalText.selectionStart : 0;
+    modalSelectionEnd = typeof fields.modalText.selectionEnd === "number" ? fields.modalText.selectionEnd : modalSelectionStart;
+  }
+
+  function restoreModalSelection() {
+    if (!fields.modalText || typeof fields.modalText.setSelectionRange !== "function") {
+      return;
+    }
+
+    fields.modalText.setSelectionRange(modalSelectionStart, modalSelectionEnd);
+    updateModalColorControls();
+  }
+
+  function getModalSelectionRange() {
+    return {
+      start: modalSelectionStart,
+      end: modalSelectionEnd
+    };
+  }
+
+  function getModalEditorState() {
+    return {
+      text: fields.modalText.value || "",
+      colors: normalizeColorPipeForText(fields.modalText.value || "", fields.modalColors.value, "ffff66|ffee88|ffdd55|ffee88|"),
+      selectionStart: modalSelectionStart,
+      selectionEnd: modalSelectionEnd
+    };
+  }
+
+  function pushModalHistoryState(state) {
+    var nextState = state || getModalEditorState();
+    var previousState = modalHistoryIndex >= 0 ? modalHistory[modalHistoryIndex] : null;
+
+    if (previousState &&
+      previousState.text === nextState.text &&
+      previousState.colors === nextState.colors &&
+      previousState.selectionStart === nextState.selectionStart &&
+      previousState.selectionEnd === nextState.selectionEnd) {
+      return;
+    }
+
+    modalHistory = modalHistory.slice(0, modalHistoryIndex + 1);
+    modalHistory.push({
+      text: nextState.text,
+      colors: nextState.colors,
+      selectionStart: nextState.selectionStart,
+      selectionEnd: nextState.selectionEnd
+    });
+    modalHistoryIndex = modalHistory.length - 1;
+    updateModalColorControls();
+  }
+
+  function restoreModalHistoryState(state) {
+    if (!state) {
+      return;
+    }
+
+    fields.modalText.value = state.text || "";
+    fields.modalColors.value = state.colors || "";
+    modalSelectionStart = state.selectionStart || 0;
+    modalSelectionEnd = typeof state.selectionEnd === "number" ? state.selectionEnd : modalSelectionStart;
+    updateModalEditorPreview();
+    fields.modalText.focus();
+    restoreModalSelection();
+  }
+
+  function undoModalChange() {
+    if (modalHistoryIndex <= 0) {
+      updateModalColorControls();
+      return;
+    }
+
+    modalHistoryIndex -= 1;
+    restoreModalHistoryState(modalHistory[modalHistoryIndex]);
   }
 
   function onModalShellClick(event) {
