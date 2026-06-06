@@ -1,0 +1,193 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 3.2//EN">
+<HTML>
+<HEAD>
+  <TITLE>HTML Text Marquee</TITLE>
+  <LINK REL="stylesheet" HREF="index.css?v=20260606">
+</HEAD>
+<BODY>
+<CENTER>
+  <DIV CLASS="page-shell">
+    <DIV CLASS="panel panel-preview">
+      <DIV CLASS="panel-heading">Shoomi's Color Marquee</DIV>
+      <DIV CLASS="preview-frame" ID="preview-frame">
+        <CANVAS
+          ID="marquee-preview-canvas"
+          CLASS="marquee-preview-canvas"
+          WIDTH="640"
+          HEIGHT="92"
+        >
+          Welcome to Shoomi's marquee maker.
+        </CANVAS>
+      </DIV>
+    </DIV>
+
+    <DIV CLASS="layout-grid">
+      <FORM CLASS="panel control-panel" ID="marquee-form">
+        <DIV CLASS="panel-heading">Controls</DIV>
+
+        <DIV CLASS="subheading">Script Header</DIV>
+
+        <DIV CLASS="field-row">
+          <LABEL CLASS="field">
+            <SPAN CLASS="field-label">Initial Delay / Count</SPAN>
+            <INPUT ID="marquee-delay-count" CLASS="field-input" TYPE="number" MIN="0" MAX="999" VALUE="7">
+          </LABEL>
+
+          <LABEL CLASS="field">
+            <SPAN CLASS="field-label">Hold Frames</SPAN>
+            <INPUT ID="marquee-hold-frames" CLASS="field-input" TYPE="number" MIN="20" MAX="400" VALUE="100">
+          </LABEL>
+        </DIV>
+
+        <LABEL CLASS="field">
+          <SPAN CLASS="field-label">Title / First Message</SPAN>
+          <INPUT ID="marquee-title-text" CLASS="field-input" TYPE="text" VALUE="Shoomi's HomePage">
+        </LABEL>
+
+        <LABEL CLASS="field">
+          <SPAN CLASS="field-label">Title Color List</SPAN>
+          <INPUT ID="marquee-title-colors" CLASS="field-input" TYPE="text" VALUE="0000ff|0000ee|0000dd|0000cc|0000bb|0000aa|000099|000088|000000|000088|000099|0000aa|0000bb|0000cc|0000dd|0000ee|0000ff|">
+        </LABEL>
+        <DIV CLASS="color-preview-strip" ID="title-color-preview"></DIV>
+
+        <DIV CLASS="subheading">Sequence Rows</DIV>
+
+        <DIV CLASS="sequence-toolbar">
+          <BUTTON ID="add-row" TYPE="button" CLASS="action-button">Add Row</BUTTON>
+          <SPAN CLASS="helper-copy">Each row becomes: `enter,exit` then `text` then `colors`.</SPAN>
+        </DIV>
+
+        <DIV CLASS="sequence-grid" ID="sequence-grid">
+          <TABLE CLASS="sequence-table">
+            <THEAD>
+              <TR>
+                <TH>#</TH>
+                <TH>Enter</TH>
+                <TH>Exit</TH>
+                <TH>Text</TH>
+                <TH>Actions</TH>
+              </TR>
+            </THEAD>
+            <TBODY ID="sequence-grid-body"></TBODY>
+          </TABLE>
+        </DIV>
+
+        <DIV CLASS="field-row">
+          <LABEL CLASS="field">
+            <SPAN CLASS="field-label">Width</SPAN>
+            <INPUT ID="marquee-width" CLASS="field-input" TYPE="number" MIN="120" MAX="1200" VALUE="640">
+          </LABEL>
+
+          <LABEL CLASS="field">
+            <SPAN CLASS="field-label">Height</SPAN>
+            <INPUT ID="marquee-height" CLASS="field-input" TYPE="number" MIN="32" MAX="240" VALUE="92">
+          </LABEL>
+        </DIV>
+
+        <DIV CLASS="field-row">
+          <LABEL CLASS="field">
+            <SPAN CLASS="field-label">Font Size</SPAN>
+            <INPUT ID="marquee-font-size" CLASS="field-input" TYPE="number" MIN="10" MAX="72" VALUE="30">
+          </LABEL>
+
+          <LABEL CLASS="field">
+            <SPAN CLASS="field-label">Font Family</SPAN>
+            <INPUT ID="marquee-font-family" CLASS="field-input" TYPE="text" VALUE="Times New Roman, Times, serif">
+          </LABEL>
+        </DIV>
+
+        <DIV CLASS="field-row">
+          <LABEL CLASS="field">
+            <SPAN CLASS="field-label">Wave Height</SPAN>
+            <INPUT ID="marquee-wave-height" CLASS="field-input" TYPE="number" MIN="0" MAX="24" VALUE="8">
+          </LABEL>
+
+          <LABEL CLASS="field">
+            <SPAN CLASS="field-label">Star Count</SPAN>
+            <INPUT ID="marquee-dot-count" CLASS="field-input" TYPE="number" MIN="0" MAX="999" VALUE="50">
+          </LABEL>
+        </DIV>
+
+        <DIV CLASS="field-row">
+          <LABEL CLASS="field">
+            <SPAN CLASS="field-label">Background</SPAN>
+            <INPUT ID="marquee-background" CLASS="field-input field-color" TYPE="color" VALUE="#000066">
+          </LABEL>
+
+          <LABEL CLASS="field">
+            <SPAN CLASS="field-label">Star Color</SPAN>
+            <INPUT ID="marquee-dot-color" CLASS="field-input field-color" TYPE="color" VALUE="#9999ff">
+          </LABEL>
+        </DIV>
+
+        <DIV CLASS="field-row">
+          <LABEL CLASS="field field-check">
+            <SPAN CLASS="field-label">Bold</SPAN>
+            <INPUT ID="marquee-bold" TYPE="checkbox" CHECKED>
+          </LABEL>
+        </DIV>
+      </FORM>
+
+      <DIV CLASS="panel code-panel">
+        <DIV CLASS="panel-heading">Generated `dreamers.txt`</DIV>
+        <TEXTAREA ID="marquee-code" CLASS="code-output" ROWS="18" READONLY></TEXTAREA>
+        <DIV CLASS="button-row">
+          <BUTTON ID="copy-code" TYPE="button" CLASS="action-button">Copy Script</BUTTON>
+          <SPAN ID="copy-status" CLASS="copy-status"></SPAN>
+        </DIV>
+        <DIV CLASS="subheading subheading-output">Generated HTML Marquee</DIV>
+        <TEXTAREA ID="marquee-html-code" CLASS="code-output code-output-secondary" ROWS="10" READONLY></TEXTAREA>
+      </DIV>
+    </DIV>
+  </DIV>
+</CENTER>
+<DIV CLASS="modal-shell" ID="row-modal" HIDDEN>
+  <DIV CLASS="modal-backdrop" DATA-MODAL-CLOSE="1"></DIV>
+  <DIV CLASS="modal-card" ROLE="dialog" ARIA-MODAL="true" ARIA-LABELLEDBY="row-modal-title">
+    <DIV CLASS="panel-heading" ID="row-modal-title">Edit Sequence Row</DIV>
+    <FORM ID="row-modal-form" CLASS="modal-form">
+      <DIV CLASS="field-row">
+        <LABEL CLASS="field">
+          <SPAN CLASS="field-label">Enter From</SPAN>
+          <SELECT ID="modal-row-start" CLASS="field-input">
+            <OPTION VALUE="right">right</OPTION>
+            <OPTION VALUE="left">left</OPTION>
+            <OPTION VALUE="top">top</OPTION>
+            <OPTION VALUE="bottom">bottom</OPTION>
+          </SELECT>
+        </LABEL>
+
+        <LABEL CLASS="field">
+          <SPAN CLASS="field-label">Exit Toward</SPAN>
+          <SELECT ID="modal-row-end" CLASS="field-input">
+            <OPTION VALUE="left">left</OPTION>
+            <OPTION VALUE="right">right</OPTION>
+            <OPTION VALUE="top">top</OPTION>
+            <OPTION VALUE="bottom">bottom</OPTION>
+            <OPTION VALUE="center">center</OPTION>
+          </SELECT>
+        </LABEL>
+      </DIV>
+
+      <LABEL CLASS="field">
+        <SPAN CLASS="field-label">Text</SPAN>
+        <TEXTAREA ID="modal-row-text" CLASS="field-input field-textarea" ROWS="4"></TEXTAREA>
+      </LABEL>
+
+      <LABEL CLASS="field">
+        <SPAN CLASS="field-label">Color List</SPAN>
+        <INPUT ID="modal-row-colors" CLASS="field-input" TYPE="text">
+      </LABEL>
+      <DIV CLASS="color-preview-strip color-preview-modal" ID="modal-row-color-preview"></DIV>
+
+      <DIV CLASS="modal-actions">
+        <BUTTON TYPE="button" ID="modal-cancel" CLASS="row-button">Cancel</BUTTON>
+        <BUTTON TYPE="submit" CLASS="action-button">Save Row</BUTTON>
+      </DIV>
+    </FORM>
+  </DIV>
+</DIV>
+<SCRIPT SRC="../dream-marquee.js?v=20260606"></SCRIPT>
+<SCRIPT SRC="index.js?v=20260606"></SCRIPT>
+</BODY>
+</HTML>
