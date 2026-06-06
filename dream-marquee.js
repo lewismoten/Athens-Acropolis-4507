@@ -151,7 +151,7 @@
   }
 
   function normalizeBackgroundMode(value) {
-    if (value === "rain" || value === "snow" || value === "fireflies") {
+    if (value === "rain" || value === "snow" || value === "fireflies" || value === "dust") {
       return value;
     }
 
@@ -482,6 +482,11 @@
         return;
       }
 
+      if (settings.backgroundMode === "dust") {
+        drawDust();
+        return;
+      }
+
       drawStars();
     }
 
@@ -610,6 +615,39 @@
         context.fill();
 
         context.globalAlpha = 0.5 + (0.45 * pulse);
+        context.beginPath();
+        context.arc(dot.x, dot.y, dot.radius, 0, Math.PI * 2, false);
+        context.fill();
+      }
+
+      context.globalAlpha = 1;
+    }
+
+    function drawDust() {
+      var index;
+      var dot;
+      var driftX;
+      var driftY;
+      var pulse;
+
+      for (index = 0; index < state.dots.length; index += 1) {
+        dot = state.dots[index];
+        driftX = (dot.speed * settings.dotSpeed * 1.8) + (Math.sin((state.entryFrame / 40) + dot.phase) * dot.drift * settings.dotSpeed);
+        driftY = Math.cos((state.entryFrame / 34) + dot.phase) * dot.wobble * settings.dotSpeed;
+        pulse = 0.18 + (0.16 * (0.5 + (Math.sin((state.entryFrame / 28) + dot.phase) / 2)));
+
+        dot.x -= driftX;
+        dot.y += driftY;
+
+        if (dot.x < -dot.radius - 12) {
+          resetDot(dot, true);
+        } else if (dot.y < -18 || dot.y > canvas.height + 18) {
+          dot.y = Math.max(2, Math.min(canvas.height - 2, nextRandom() * canvas.height));
+          syncDotRelativePosition(dot, canvas.width, canvas.height);
+        }
+
+        context.fillStyle = dot.color;
+        context.globalAlpha = pulse;
         context.beginPath();
         context.arc(dot.x, dot.y, dot.radius, 0, Math.PI * 2, false);
         context.fill();
@@ -831,6 +869,9 @@
       } else if (settings.backgroundMode === "fireflies") {
         dot.x = nextRandom() * canvas.width;
         dot.y = nextRandom() * canvas.height;
+      } else if (settings.backgroundMode === "dust") {
+        dot.x = spawnOffscreen ? (canvas.width + dot.radius + (nextRandom() * (canvas.width * 0.2))) : (nextRandom() * canvas.width);
+        dot.y = nextRandom() * canvas.height;
       } else if (spawnOffscreen) {
         dot.x = canvas.width + dot.radius + (nextRandom() * (canvas.width * 0.35));
         dot.y = (nextRandom() * (canvas.height - 10)) + 5;
@@ -871,6 +912,16 @@
         dot.wobble = (nextRandom() * 0.9) + 0.35;
         dot.drift = (nextRandom() * 0.9) + 0.3;
         dot.glow = (nextRandom() * 0.5) + 0.8;
+        dot.length = 0;
+        return;
+      }
+
+      if (settings.backgroundMode === "dust") {
+        dot.radius = (nextRandom() * 2.2) + 0.9;
+        dot.speed = (nextRandom() * 0.5) + 0.25;
+        dot.wobble = (nextRandom() * 0.7) + 0.2;
+        dot.drift = (nextRandom() * 0.8) + 0.2;
+        dot.glow = 0.4 + (nextRandom() * 0.25);
         dot.length = 0;
         return;
       }
