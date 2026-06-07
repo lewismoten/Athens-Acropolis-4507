@@ -247,6 +247,8 @@
   function createCanvasMarquee(rawOptions) {
     var options = rawOptions || {};
     var canvas = options.canvas;
+    var TARGET_RENDER_MS = 25;
+    var RECOVERY_RENDER_MS = 17;
 
     if (!canvas || !canvas.getContext) {
       return null;
@@ -277,6 +279,10 @@
       entryFrame: 0,
       backgroundFrame: 0,
       dots: createDots(settings.dotCount),
+      renderDotCount: settings.dotCount,
+      lastRenderDuration: 0,
+      fastFrameStreak: 0,
+      slowFrameStreak: 0,
       lastTimestamp: 0,
       entries: []
     };
@@ -369,11 +375,12 @@
       settings.defaultColors = Array.isArray(next.defaultColors) && next.defaultColors.length ? next.defaultColors : settings.defaultColors;
 
       if (settings.dotCount !== previousDotCount) {
-        state.dots = resizeDots(settings.dotCount);
+        state.renderDotCount = Math.min(state.renderDotCount, settings.dotCount);
+        setRenderDotCount(settings.dotCount);
       }
 
       if (settings.backgroundMode !== previousBackgroundMode) {
-        state.dots = createDots(settings.dotCount);
+        state.dots = createDots(state.renderDotCount);
       }
 
       if (settings.dotColor !== previousDotColor) {
@@ -422,13 +429,20 @@
     }
 
     function tick(timestamp) {
+      var renderStart;
+      var renderDuration;
+
       if (!state.lastTimestamp) {
         state.lastTimestamp = timestamp;
       }
 
       if (timestamp - state.lastTimestamp >= 1000 / settings.fps) {
         state.lastTimestamp = timestamp;
+        renderStart = now();
         drawFrame();
+        renderDuration = now() - renderStart;
+        state.lastRenderDuration = renderDuration;
+        adaptDotCount(renderDuration);
         state.backgroundFrame += 1;
         state.entryFrame += 1;
 
@@ -1531,6 +1545,62 @@
       return dots;
     }
 
+    function getMinimumAdaptiveDotCount() {
+      return Math.min(100, settings.dotCount);
+    }
+
+    function setRenderDotCount(nextCount) {
+      var minimumCount = getMinimumAdaptiveDotCount();
+      var clampedCount = Math.max(minimumCount, Math.min(settings.dotCount, Math.round(nextCount)));
+
+      if (clampedCount === state.renderDotCount) {
+        return;
+      }
+
+      state.renderDotCount = clampedCount;
+      state.dots = resizeDots(clampedCount);
+    }
+
+    function adaptDotCount(renderDuration) {
+      var reductionRatio;
+      var decreaseBy;
+      var increaseBy;
+
+      if (settings.dotCount <= getMinimumAdaptiveDotCount()) {
+        state.fastFrameStreak = 0;
+        state.slowFrameStreak = 0;
+        return;
+      }
+
+      if (renderDuration > TARGET_RENDER_MS) {
+        state.slowFrameStreak += 1;
+        state.fastFrameStreak = 0;
+
+        reductionRatio = Math.min(0.45, Math.max(0.1, (renderDuration - TARGET_RENDER_MS) / TARGET_RENDER_MS));
+        decreaseBy = Math.max(25, Math.round(state.renderDotCount * reductionRatio));
+        setRenderDotCount(state.renderDotCount - decreaseBy);
+        return;
+      }
+
+      state.slowFrameStreak = 0;
+
+      if (state.renderDotCount >= settings.dotCount) {
+        state.fastFrameStreak = 0;
+        return;
+      }
+
+      if (renderDuration < RECOVERY_RENDER_MS) {
+        state.fastFrameStreak += 1;
+        if (state.fastFrameStreak >= 3) {
+          increaseBy = Math.max(10, Math.round((settings.dotCount - state.renderDotCount) * 0.12));
+          setRenderDotCount(state.renderDotCount + increaseBy);
+          state.fastFrameStreak = 0;
+        }
+      } else {
+        state.fastFrameStreak = 0;
+      }
+    }
+
     function recolorDots(nextColor) {
       var index;
 
@@ -1993,6 +2063,14 @@
     function nextRandom() {
       randomSeed = (Math.imul(randomSeed, 1664525) + 1013904223) >>> 0;
       return randomSeed / 4294967296;
+    }
+
+    function now() {
+      if (typeof performance !== "undefined" && performance && typeof performance.now === "function") {
+        return performance.now();
+      }
+
+      return Date.now();
     }
   }
 
