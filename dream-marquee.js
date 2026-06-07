@@ -1590,6 +1590,73 @@
       return dot;
     }
 
+    function getFireworkLaunchScale() {
+      return Math.max(1, 0.75 + (settings.dotSpeed * 2.5));
+    }
+
+    function initializeFirework(dot) {
+      dot.x = canvas.width * (0.04 + (nextRandom() * 0.92));
+      dot.y = canvas.height + (nextRandom() * (canvas.height * 0.42));
+      dot.fireworkState = "idle";
+      dot.fireworkDelay = 12 + Math.floor(nextRandom() * 90);
+      dot.fireworkTargetY = canvas.height * (0.12 + (nextRandom() * 0.38));
+      dot.sparkleFrame = 0;
+    }
+
+    function restartFirework(dot) {
+      applyDotStyle(dot);
+      initializeFirework(dot);
+    }
+
+    function stepFirework(dot) {
+      var launchScale;
+
+      if (dot.fireworkState === "idle") {
+        dot.fireworkDelay -= 1;
+        if (dot.fireworkDelay <= 0) {
+          dot.fireworkState = "launch";
+        }
+        return;
+      }
+
+      if (dot.fireworkState === "launch") {
+        launchScale = getFireworkLaunchScale();
+        dot.x += dot.vx * launchScale;
+        dot.y += dot.vy * launchScale;
+        dot.vy += 0.085 * launchScale;
+
+        if (dot.y <= dot.fireworkTargetY) {
+          dot.fireworkState = "burst";
+          dot.sparkleFrame = 0;
+        } else if (dot.vy >= 0) {
+          if (dot.y <= canvas.height * 0.5) {
+            dot.fireworkState = "burst";
+            dot.sparkleFrame = 0;
+          } else {
+            restartFirework(dot);
+          }
+        } else if (dot.y < -40 || dot.y > canvas.height + 40) {
+          restartFirework(dot);
+        }
+        return;
+      }
+
+      dot.sparkleFrame += 1;
+
+      if ((dot.sparkleFrame / Math.max(dot.sparkleLifeDuration || 1, 1)) >= 1) {
+        restartFirework(dot);
+      }
+    }
+
+    function warmupFirework(dot, frameCount) {
+      var remaining = Math.max(0, frameCount || 0);
+      var frame;
+
+      for (frame = 0; frame < remaining; frame += 1) {
+        stepFirework(dot);
+      }
+    }
+
     function resetDot(dot, spawnOffscreen, initialSpawn) {
       var initialAge;
       var risePerFrame;
@@ -1598,16 +1665,9 @@
       var cycleFrames;
       var simX;
       var simY;
-      var simVx;
-      var simVy;
       var simFrame;
-      var launchScale;
-      var launchFrames;
-      var burstX;
-      var burstY;
       var startX;
-      var totalFrames;
-      var idleFrames;
+      var warmupFrames;
 
       applyDotStyle(dot);
 
@@ -1685,78 +1745,10 @@
         dot.x = nextRandom() * canvas.width;
         dot.y = spawnOffscreen ? (-dot.length - (nextRandom() * canvas.height * 0.3)) : (initialSpawn ? ((nextRandom() * (canvas.height * 1.65)) - (canvas.height * 0.3)) : (nextRandom() * canvas.height));
       } else if (settings.backgroundMode === "fireworks") {
-        dot.x = canvas.width * (0.04 + (nextRandom() * 0.92));
-        dot.y = canvas.height + (nextRandom() * (canvas.height * 0.42));
-        dot.fireworkState = "idle";
-        dot.fireworkDelay = 12 + Math.floor(nextRandom() * 90);
-        dot.fireworkTargetY = canvas.height * (0.12 + (nextRandom() * 0.38));
-        dot.sparkleFrame = 0;
-        if (initialSpawn || spawnOffscreen) {
-          launchScale = Math.max(1, 0.75 + (settings.dotSpeed * 2.5));
-          simX = dot.x;
-          simY = dot.y;
-          simVx = dot.vx;
-          simVy = dot.vy;
-          burstX = simX;
-          burstY = simY;
-          launchFrames = 0;
-
-          for (simFrame = 0; simFrame < 240; simFrame += 1) {
-            simX += simVx * launchScale;
-            simY += simVy * launchScale;
-            simVy += 0.085 * launchScale;
-
-            if (simY <= dot.fireworkTargetY || (simVy >= 0 && simY <= canvas.height * 0.5)) {
-              burstX = simX;
-              burstY = simY;
-              launchFrames = simFrame + 1;
-              break;
-            }
-          }
-
-          if (!launchFrames) {
-            burstX = canvas.width * (0.04 + (nextRandom() * 0.92));
-            burstY = canvas.height * (0.12 + (nextRandom() * 0.38));
-            launchFrames = 1;
-          }
-
-          idleFrames = dot.fireworkDelay;
-
-          if (initialSpawn) {
-            totalFrames = idleFrames + launchFrames + Math.max(dot.sparkleLifeDuration || 1, 1);
-            initialAge = Math.floor(nextRandom() * Math.max(totalFrames, 1));
-          } else if (nextRandom() < 0.72) {
-            initialAge = idleFrames + Math.floor(nextRandom() * Math.max(launchFrames, 1));
-          } else {
-            initialAge = 0;
-          }
-
-          if (initialAge < idleFrames) {
-            dot.fireworkState = "idle";
-            dot.fireworkDelay = idleFrames - initialAge;
-          } else if (initialAge < idleFrames + launchFrames) {
-            dot.fireworkState = "launch";
-            simX = dot.x;
-            simY = dot.y;
-            simVx = dot.vx;
-            simVy = dot.vy;
-
-            for (simFrame = 0; simFrame < initialAge - idleFrames; simFrame += 1) {
-              simX += simVx * launchScale;
-              simY += simVy * launchScale;
-              simVy += 0.085 * launchScale;
-            }
-
-            dot.x = simX;
-            dot.y = simY;
-            dot.vx = simVx;
-            dot.vy = simVy;
-          } else {
-            dot.fireworkState = "burst";
-            dot.x = burstX;
-            dot.y = Math.min(burstY, canvas.height * 0.5);
-            dot.sparkleFrame = initialAge - idleFrames - launchFrames;
-          }
+        initializeFirework(dot);
+        if (initialSpawn) {
+          warmupFrames = Math.max(1, Math.round(settings.fps * 2));
+          warmupFirework(dot, warmupFrames + Math.floor(nextRandom() * warmupFrames));
         }
       } else if (spawnOffscreen) {
         dot.x = canvas.width + dot.radius + (nextRandom() * (canvas.width * 0.35));
