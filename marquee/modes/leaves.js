@@ -1,0 +1,75 @@
+(function () {
+  var api = window.DreamMarquee;
+
+  if (!api || !api.registerMode) {
+    return;
+  }
+
+  api.registerMode("leaves", {
+    style: function (dot, runtime) {
+      var nextRandom = runtime.nextRandom;
+
+      dot.radius = (nextRandom() * 3.2) + 2.2;
+      dot.speed = (nextRandom() * 0.7) + 0.45;
+      dot.wobble = 0;
+      dot.drift = (nextRandom() * 1.1) + 0.45;
+      dot.glow = 1;
+      dot.length = (nextRandom() * 8) + 10;
+      dot.popDuration = 8;
+    },
+    reset: function (dot, spawnOffscreen, initialSpawn, runtime) {
+      var nextRandom = runtime.nextRandom;
+      var canvas = runtime.canvas;
+
+      dot.popFrame = -1;
+      dot.popTargetY = -1;
+      dot.sparkleFrame = 0;
+      dot.vx = 0;
+      dot.vy = 0;
+      dot.fireworkState = "";
+      dot.x = nextRandom() * canvas.width;
+      dot.y = spawnOffscreen ? (-dot.length - (nextRandom() * canvas.height * 0.3)) : (initialSpawn ? ((nextRandom() * (canvas.height * 1.65)) - (canvas.height * 0.3)) : (nextRandom() * canvas.height));
+    },
+    draw: function (runtime) {
+      var state = runtime.state;
+      var settings = runtime.settings;
+      var context = runtime.context;
+      var canvas = runtime.canvas;
+      var drawLeafShape = runtime.drawLeafShape;
+      var index;
+      var dot;
+      var fall;
+      var sway;
+      var width;
+      var height;
+      var rotation;
+
+      for (index = 0; index < state.dots.length; index += 1) {
+        dot = state.dots[index];
+        fall = dot.speed * settings.dotSpeed * 5.6;
+        sway = Math.sin((state.backgroundFrame / 22) + dot.phase) * dot.drift * (settings.dotSpeed * 3.4);
+        width = dot.radius * 1.55;
+        height = dot.length;
+        rotation = Math.sin((state.backgroundFrame / 20) + dot.phase) * 0.85;
+
+        dot.x += sway;
+        dot.y += fall;
+
+        if (dot.y - height > canvas.height + 18 || dot.x < -28 || dot.x > canvas.width + 28) {
+          runtime.resetDot(dot, true);
+          continue;
+        }
+
+        context.save();
+        context.translate(dot.x, dot.y);
+        context.rotate(rotation);
+        context.fillStyle = dot.color;
+        context.globalAlpha = 0.78;
+        drawLeafShape(width, height);
+        context.restore();
+      }
+
+      context.globalAlpha = 1;
+    }
+  });
+}());

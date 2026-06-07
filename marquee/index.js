@@ -1,4 +1,23 @@
 (function () {
+  var MODE_SCRIPT_PATHS = {
+    stars: "marquee/modes/stars.js",
+    rain: "marquee/modes/rain.js",
+    snow: "marquee/modes/snow.js",
+    fireflies: "marquee/modes/fireflies.js",
+    dust: "marquee/modes/dust.js",
+    bubbles: "marquee/modes/bubbles.js",
+    "bubble-pop": "marquee/modes/bubbles.js",
+    embers: "marquee/modes/embers.js",
+    sparkles: "marquee/modes/sparkles.js",
+    fog: "marquee/modes/fog.js",
+    comets: "marquee/modes/comets.js",
+    matrix: "marquee/modes/matrix.js",
+    confetti: "marquee/modes/confetti.js",
+    balls: "marquee/modes/balls.js",
+    static: "marquee/modes/static.js",
+    leaves: "marquee/modes/leaves.js",
+    fireworks: "marquee/modes/fireworks.js"
+  };
   var form = document.getElementById("marquee-form");
   var previewCanvas = document.getElementById("marquee-preview-canvas");
   var previewFrame = document.getElementById("preview-frame");
@@ -239,6 +258,7 @@
     var defaultColorValues = splitColorPipe(config.defaultColor);
     var fileName = getSequenceFileName();
     var useMessageFile = !!(fileName && rows.length);
+    var modeScripts = getEmbedModeScripts(config.backgroundMode);
     var optionsConfig = {
       width: config.width,
       height: config.height,
@@ -276,7 +296,10 @@
     lines.push('<canvas id="dream-marquee" width="' + config.width + '" height="' + config.height + '" style="display:block;">');
     lines.push(escapeForInlineText((rows[0] && rows[0].text) || "Dream marquee"));
     lines.push("</canvas>");
-    lines.push('<script src="../dream-marquee.js"><\/script>');
+    lines.push('<script src="dream-marquee.js"><\/script>');
+    for (index = 0; index < modeScripts.length; index += 1) {
+      lines.push('<script src="' + modeScripts[index] + '"><\/script>');
+    }
     lines.push("<script>");
     lines.push("(function () {");
     lines.push('  var canvas = document.getElementById("dream-marquee");');
@@ -894,6 +917,21 @@
     }
 
     return "stars";
+  }
+
+  function getModeScriptPath(modeName) {
+    return MODE_SCRIPT_PATHS[normalizeBackgroundMode(modeName)] || MODE_SCRIPT_PATHS.stars;
+  }
+
+  function getEmbedModeScripts(modeName) {
+    var scripts = [MODE_SCRIPT_PATHS.stars];
+    var selectedPath = getModeScriptPath(modeName);
+
+    if (selectedPath !== MODE_SCRIPT_PATHS.stars) {
+      scripts.push(selectedPath);
+    }
+
+    return scripts;
   }
 
   function buildFontDeclaration(config) {
