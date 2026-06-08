@@ -30,7 +30,7 @@
   var rowModal = document.getElementById("row-modal");
   var rowModalForm = document.getElementById("row-modal-form");
   var modalCancel = document.getElementById("modal-cancel");
-  var marqueeApi = window.DreamMarquee;
+  var marqueeApi = window.ShoomiColorMarquee;
   var previewMarquee;
   var sequenceRows = [];
   var editingRowIndex = -1;
@@ -303,7 +303,7 @@
     lines.push("<script>");
     lines.push("(function () {");
     lines.push('  var canvas = document.getElementById("dream-marquee");');
-    lines.push("  var marqueeApi = window.DreamMarquee;");
+    lines.push("  var marqueeApi = window.ShoomiColorMarquee;");
     lines.push("  var marqueeOptions = " + stringifyForCode(optionsConfig, 2) + ";");
     if (!useMessageFile) {
       lines.push("  var marqueeEntries = " + stringifyForCode(entriesConfig, 2) + ";");

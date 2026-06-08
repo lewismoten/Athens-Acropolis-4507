@@ -3,7 +3,7 @@
   var soundtrack = document.getElementById("soundtrack");
   var soundToggle = document.getElementById("sound-toggle");
   var soundStatus = document.getElementById("sound-status");
-  var marqueeApi = window.DreamMarquee;
+  var marqueeApi = window.ShoomiColorMarquee;
 
   if (!canvas || !canvas.getContext || !marqueeApi) {
     return;

@@ -911,7 +911,7 @@
     return value * value * value;
   }
 
-  window.DreamMarquee = {
+  window.ShoomiColorMarquee = {
     parseColorList: parseColorList,
     parseEntries: parseEntries,
     parseMessageFile: parseMessageFile,

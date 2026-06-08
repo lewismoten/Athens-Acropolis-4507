@@ -1,5 +1,5 @@
 (function () {
-  var api = window.DreamMarquee;
+  var api = window.ShoomiColorMarquee;
 
   if (!api || !api.registerMode) {
     return;
