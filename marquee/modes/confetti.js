@@ -20,6 +20,7 @@
     reset: function (dot, spawnOffscreen, initialSpawn, runtime) {
       var nextRandom = runtime.nextRandom;
       var canvas = runtime.canvas;
+      var reverse = runtime.settings.dotSpeed < 0;
 
       dot.popFrame = -1;
       dot.popTargetY = -1;
@@ -28,7 +29,9 @@
       dot.vy = 0;
       dot.fireworkState = "";
       dot.x = nextRandom() * canvas.width;
-      dot.y = spawnOffscreen ? (-dot.length - (nextRandom() * canvas.height * 0.35)) : (initialSpawn ? ((nextRandom() * (canvas.height * 1.65)) - (canvas.height * 0.3)) : (nextRandom() * canvas.height));
+      dot.y = spawnOffscreen
+        ? (reverse ? (canvas.height + dot.length + (nextRandom() * 24)) : (-dot.length - (nextRandom() * 24)))
+        : (initialSpawn ? ((nextRandom() * (canvas.height * 1.65)) - (canvas.height * 0.3)) : (nextRandom() * canvas.height));
     },
     draw: function (runtime) {
       var state = runtime.state;
@@ -42,6 +45,7 @@
       var flicker;
       var width;
       var height;
+      var reverse = settings.dotSpeed < 0;
 
       for (index = 0; index < state.dots.length; index += 1) {
         dot = state.dots[index];
@@ -54,7 +58,9 @@
         dot.x += sway;
         dot.y += fall;
 
-        if (dot.y - height > canvas.height + 18 || dot.x < -24 || dot.x > canvas.width + 24) {
+        if ((!reverse && dot.y - height > canvas.height + 18) ||
+          (reverse && dot.y + height < -18) ||
+          dot.x < -24 || dot.x > canvas.width + 24) {
           runtime.resetDot(dot, true);
           continue;
         }

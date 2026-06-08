@@ -554,6 +554,7 @@
     function setOptions(nextOptions) {
       var next = nextOptions || {};
       var previousDotCount = settings.dotCount;
+      var previousDotSpeed = settings.dotSpeed;
       var previousDotColor = settings.dotColor;
       var previousBackgroundImage = settings.backgroundImage;
       var previousBackgroundImagePlacement = settings.backgroundImagePlacement;
@@ -620,6 +621,8 @@
       }
 
       if (settings.backgroundMode !== previousBackgroundMode) {
+        state.dots = createDots(state.renderDotCount);
+      } else if (getSpeedDirection(settings.dotSpeed) !== getSpeedDirection(previousDotSpeed)) {
         state.dots = createDots(state.renderDotCount);
       }
 
@@ -988,6 +991,18 @@
       }
 
       return dots;
+    }
+
+    function getSpeedDirection(value) {
+      if (value > 0) {
+        return 1;
+      }
+
+      if (value < 0) {
+        return -1;
+      }
+
+      return 0;
     }
 
     function resizeDots(nextCount) {

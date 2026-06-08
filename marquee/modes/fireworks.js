@@ -267,8 +267,8 @@
           context.globalAlpha = 0.35 * launchAlpha;
           context.lineWidth = Math.max(1, dot.radius * 0.35);
           context.beginPath();
-          context.moveTo(launchX, launchY - trailLength);
-          context.lineTo(dot.x, dot.y);
+          context.moveTo(launchX, launchY);
+          context.lineTo(dot.x, dot.y + trailLength);
           context.stroke();
 
           context.fillStyle = dot.color;

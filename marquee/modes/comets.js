@@ -20,6 +20,7 @@
     reset: function (dot, spawnOffscreen, initialSpawn, runtime) {
       var nextRandom = runtime.nextRandom;
       var canvas = runtime.canvas;
+      var reverse = runtime.settings.dotSpeed < 0;
 
       dot.popFrame = -1;
       dot.popTargetY = -1;
@@ -27,7 +28,9 @@
       dot.vx = 0;
       dot.vy = 0;
       dot.fireworkState = "";
-      dot.x = spawnOffscreen ? (canvas.width + dot.length + (nextRandom() * canvas.width * 0.8)) : (initialSpawn ? ((nextRandom() * (canvas.width + dot.length + (canvas.width * 0.8))) - (canvas.width * 0.35)) : (nextRandom() * (canvas.width + dot.length)));
+      dot.x = spawnOffscreen
+        ? (reverse ? (-dot.length - (nextRandom() * 56)) : (canvas.width + dot.length + (nextRandom() * 56)))
+        : (initialSpawn ? ((nextRandom() * (canvas.width + dot.length + (canvas.width * 0.8))) - (canvas.width * 0.35)) : (nextRandom() * (canvas.width + dot.length)));
       dot.y = initialSpawn ? ((nextRandom() * (canvas.height * 1.3)) - (canvas.height * 0.15)) : (nextRandom() * canvas.height);
     },
     draw: function (runtime) {
@@ -40,6 +43,7 @@
       var driftX;
       var driftY;
       var alpha;
+      var reverse = settings.dotSpeed < 0;
 
       context.lineWidth = 1.2;
 
@@ -52,7 +56,9 @@
         dot.x -= driftX;
         dot.y += driftY;
 
-        if (dot.x < -dot.length - 28 || dot.y > canvas.height + 28 || dot.y < -28) {
+        if ((!reverse && dot.x < -dot.length - 28) ||
+          (reverse && dot.x > canvas.width + dot.length + 28) ||
+          dot.y > canvas.height + 28 || dot.y < -28) {
           runtime.resetDot(dot, true);
           continue;
         }

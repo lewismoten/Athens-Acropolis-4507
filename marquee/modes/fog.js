@@ -20,6 +20,7 @@
     reset: function (dot, spawnOffscreen, initialSpawn, runtime) {
       var nextRandom = runtime.nextRandom;
       var canvas = runtime.canvas;
+      var reverse = runtime.settings.dotSpeed < 0;
 
       dot.popFrame = -1;
       dot.popTargetY = -1;
@@ -27,7 +28,9 @@
       dot.vx = 0;
       dot.vy = 0;
       dot.fireworkState = "";
-      dot.x = spawnOffscreen ? (canvas.width + (dot.radius * 8.5) + (nextRandom() * (canvas.width * 0.18))) : (nextRandom() * canvas.width);
+      dot.x = spawnOffscreen
+        ? (reverse ? (-((dot.radius * 8.5) + (nextRandom() * 42))) : (canvas.width + (dot.radius * 8.5) + (nextRandom() * 42)))
+        : (nextRandom() * canvas.width);
       dot.y = nextRandom() * canvas.height;
     },
     draw: function (runtime) {
@@ -43,6 +46,7 @@
       var alpha;
       var width;
       var height;
+      var reverse = settings.dotSpeed < 0;
 
       for (index = 0; index < state.dots.length; index += 1) {
         dot = state.dots[index];
@@ -55,7 +59,7 @@
         dot.x -= driftX;
         dot.y += driftY;
 
-        if (dot.x < -width - 24) {
+        if ((!reverse && dot.x < -width - 24) || (reverse && dot.x > canvas.width + width + 24)) {
           runtime.resetDot(dot, true);
         } else if (dot.y < -height) {
           dot.y = 6;

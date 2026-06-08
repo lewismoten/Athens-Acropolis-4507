@@ -20,6 +20,7 @@
     reset: function (dot, spawnOffscreen, initialSpawn, runtime) {
       var nextRandom = runtime.nextRandom;
       var canvas = runtime.canvas;
+      var reverse = runtime.settings.dotSpeed < 0;
 
       dot.popFrame = -1;
       dot.popTargetY = -1;
@@ -31,7 +32,9 @@
       if (initialSpawn) {
         dot.x += (nextRandom() * 6) - 3;
       }
-      dot.y = spawnOffscreen ? (-dot.length * dot.glow - (nextRandom() * canvas.height * 0.35)) : (initialSpawn ? ((nextRandom() * (canvas.height * 1.8)) - (dot.length * dot.glow * 0.9)) : (nextRandom() * canvas.height));
+      dot.y = spawnOffscreen
+        ? (reverse ? (canvas.height + (dot.length * dot.glow) + (nextRandom() * 24)) : (-dot.length * dot.glow - (nextRandom() * 24)))
+        : (initialSpawn ? ((nextRandom() * (canvas.height * 1.8)) - (dot.length * dot.glow * 0.9)) : (nextRandom() * canvas.height));
     },
     draw: function (runtime) {
       var state = runtime.state;
@@ -47,6 +50,7 @@
       var segmentY;
       var alpha;
       var width;
+      var reverse = settings.dotSpeed < 0;
 
       for (index = 0; index < state.dots.length; index += 1) {
         dot = state.dots[index];
@@ -57,7 +61,8 @@
 
         dot.y += fall;
 
-        if (dot.y - (trailStep * segmentCount) > canvas.height + 18) {
+        if ((!reverse && dot.y - (trailStep * segmentCount) > canvas.height + 18) ||
+          (reverse && dot.y + trailStep < -18)) {
           runtime.resetDot(dot, true);
           continue;
         }

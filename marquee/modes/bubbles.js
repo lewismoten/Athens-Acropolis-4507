@@ -18,6 +18,7 @@
   function resetBubble(dot, spawnOffscreen, initialSpawn, runtime, withPop) {
     var nextRandom = runtime.nextRandom;
     var canvas = runtime.canvas;
+    var reverse = runtime.settings.dotSpeed < 0;
     var risePerFrame;
     var startY;
     var riseFrames;
@@ -33,7 +34,9 @@
     dot.vy = 0;
     dot.fireworkState = "";
     dot.x = nextRandom() * canvas.width;
-    dot.y = spawnOffscreen ? (canvas.height + dot.radius + (nextRandom() * (canvas.height * 0.25))) : (initialSpawn ? ((nextRandom() * (canvas.height * 1.8)) - (canvas.height * 0.45)) : (nextRandom() * canvas.height));
+    dot.y = spawnOffscreen
+      ? (reverse ? (-dot.radius - (nextRandom() * 20)) : (canvas.height + dot.radius + (nextRandom() * 20)))
+      : (initialSpawn ? ((nextRandom() * (canvas.height * 1.8)) - (canvas.height * 0.45)) : (nextRandom() * canvas.height));
 
     if (!withPop) {
       dot.popTargetY = -1;
@@ -43,6 +46,12 @@
     dot.popTargetY = (canvas.height * (0.08 + (nextRandom() * 0.42))) + dot.radius;
 
     if (!initialSpawn) {
+      if (reverse) {
+        if (nextRandom() < 0.45) {
+          dot.popFrame = Math.floor(nextRandom() * Math.max(dot.popDuration, 1));
+          dot.y = dot.popTargetY + ((nextRandom() * dot.radius * 2) - dot.radius);
+        }
+      }
       return;
     }
 
@@ -64,6 +73,11 @@
 
     if (initialAge >= riseFrames) {
       dot.popFrame = Math.min(initialAge - riseFrames, Math.max(dot.popDuration, 1));
+      dot.y = dot.popTargetY + ((nextRandom() * dot.radius * 2) - dot.radius);
+    }
+
+    if (reverse && dot.popFrame < 0 && nextRandom() < 0.35) {
+      dot.popFrame = Math.floor(nextRandom() * Math.max(dot.popDuration, 1));
       dot.y = dot.popTargetY + ((nextRandom() * dot.radius * 2) - dot.radius);
     }
   }
@@ -107,6 +121,7 @@
       var rise;
       var sway;
       var pulse;
+      var reverse = settings.dotSpeed < 0;
 
       context.lineWidth = 1;
 
@@ -119,7 +134,9 @@
         dot.x += sway;
         dot.y -= rise;
 
-        if (dot.y < -dot.radius - 10 || dot.x < -24 || dot.x > canvas.width + 24) {
+        if ((!reverse && dot.y < -dot.radius - 10) ||
+          (reverse && dot.y > canvas.height + dot.radius + 10) ||
+          dot.x < -24 || dot.x > canvas.width + 24) {
           runtime.resetDot(dot, true);
         }
 
@@ -155,6 +172,7 @@
       var pulse;
       var popProgress;
       var popRadius;
+      var reverse = settings.dotSpeed < 0;
 
       context.lineWidth = 1;
 
@@ -163,6 +181,9 @@
 
         if (dot.popFrame >= 0) {
           popProgress = Math.min(dot.popFrame / dot.popDuration, 1);
+          if (reverse) {
+            popProgress = 1 - popProgress;
+          }
           popRadius = dot.radius * (1 + (1.35 * popProgress));
 
           context.strokeStyle = dot.color;
@@ -178,7 +199,12 @@
 
           dot.popFrame += 1;
           if (dot.popFrame > dot.popDuration) {
-            runtime.resetDot(dot, true);
+            if (reverse) {
+              dot.popFrame = -1;
+              dot.y = dot.popTargetY;
+            } else {
+              runtime.resetDot(dot, true);
+            }
           }
           continue;
         }
@@ -190,12 +216,14 @@
         dot.x += sway;
         dot.y -= rise;
 
-        if (dot.popTargetY >= 0 && dot.y <= dot.popTargetY) {
+        if (!reverse && dot.popTargetY >= 0 && dot.y <= dot.popTargetY) {
           dot.popFrame = 0;
           continue;
         }
 
-        if (dot.y < -dot.radius - 10 || dot.x < -24 || dot.x > canvas.width + 24) {
+        if ((!reverse && dot.y < -dot.radius - 10) ||
+          (reverse && dot.y > canvas.height + dot.radius + 10) ||
+          dot.x < -24 || dot.x > canvas.width + 24) {
           runtime.resetDot(dot, true);
           continue;
         }

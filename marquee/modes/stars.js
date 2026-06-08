@@ -20,6 +20,7 @@
     reset: function (dot, spawnOffscreen, initialSpawn, runtime) {
       var nextRandom = runtime.nextRandom;
       var canvas = runtime.canvas;
+      var reverse = runtime.settings.dotSpeed < 0;
 
       dot.popFrame = -1;
       dot.popTargetY = -1;
@@ -33,7 +34,9 @@
       dot.fireworkBurstCount = 0;
 
       if (spawnOffscreen) {
-        dot.x = canvas.width + dot.radius + (nextRandom() * (canvas.width * 0.35));
+        dot.x = reverse
+          ? (-dot.radius - (nextRandom() * 26))
+          : (canvas.width + dot.radius + (nextRandom() * 26));
         dot.y = (nextRandom() * (canvas.height - 10)) + 5;
       } else if (initialSpawn) {
         dot.x = (nextRandom() * (canvas.width + dot.radius + (canvas.width * 0.35))) - (canvas.width * 0.2);
@@ -47,11 +50,13 @@
       var state = runtime.state;
       var settings = runtime.settings;
       var context = runtime.context;
+      var canvas = runtime.canvas;
       var index;
       var dot;
       var drift;
       var twinkle;
       var shimmerY;
+      var reverse = settings.dotSpeed < 0;
 
       for (index = 0; index < state.dots.length; index += 1) {
         dot = state.dots[index];
@@ -61,7 +66,7 @@
 
         dot.x -= drift;
 
-        if (dot.x < -dot.radius) {
+        if ((!reverse && dot.x < -dot.radius) || (reverse && dot.x > canvas.width + dot.radius)) {
           runtime.resetDot(dot, true);
         }
 
