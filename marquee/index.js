@@ -178,6 +178,8 @@
     background: document.getElementById("marquee-background"),
     backgroundImage: document.getElementById("marquee-background-image"),
     backgroundImagePlacement: document.getElementById("marquee-background-image-placement"),
+    backgroundImageX: document.getElementById("marquee-background-image-x"),
+    backgroundImageY: document.getElementById("marquee-background-image-y"),
     fileName: document.getElementById("sequence-file-name"),
     defaultColor: document.getElementById("marquee-default-color"),
     dotColor: document.getElementById("marquee-dot-color"),
@@ -198,6 +200,8 @@
     backgroundColor: "#000066",
     backgroundImage: resolvePreviewBackgroundImagePath("banner_geocities.gif"),
     backgroundImagePlacement: "tile",
+    backgroundImageXPercent: 50,
+    backgroundImageYPercent: 50,
     backgroundMode: "stars",
     dotColor: "#9999ff",
     dotCount: 50,
@@ -334,6 +338,8 @@
       background: marqueeApi.normalizeColor(fields.background.value, "#000066"),
       backgroundImage: normalizeAssetPath(fields.backgroundImage.value, ""),
       backgroundImagePlacement: normalizeBackgroundImagePlacement(fields.backgroundImagePlacement.value),
+      backgroundImageXPercent: marqueeApi.clampNumber(fields.backgroundImageX.value, 0, 100, 50),
+      backgroundImageYPercent: marqueeApi.clampNumber(fields.backgroundImageY.value, 0, 100, 50),
       defaultColor: defaultColor,
       dotColor: marqueeApi.normalizeColor(fields.dotColor.value, "#9999ff"),
       fontFamilyId: fontFamilyId,
@@ -349,6 +355,8 @@
       backgroundColor: config.background,
       backgroundImage: resolvePreviewBackgroundImagePath(config.backgroundImage),
       backgroundImagePlacement: config.backgroundImagePlacement,
+      backgroundImageXPercent: config.backgroundImageXPercent,
+      backgroundImageYPercent: config.backgroundImageYPercent,
       backgroundMode: config.backgroundMode,
       dotColor: config.dotColor,
       dotCount: config.dotCount,
@@ -404,6 +412,8 @@
       backgroundColor: config.background,
       backgroundImage: config.backgroundImage,
       backgroundImagePlacement: config.backgroundImagePlacement,
+      backgroundImageXPercent: config.backgroundImageXPercent,
+      backgroundImageYPercent: config.backgroundImageYPercent,
       backgroundMode: config.backgroundMode,
       dotColor: config.dotColor,
       dotCount: config.dotCount,
@@ -1072,7 +1082,17 @@
   }
 
   function normalizeBackgroundImagePlacement(value) {
-    if (value === "center" || value === "top-left" || value === "bottom-right") {
+    if (value === "center" ||
+      value === "top-left" ||
+      value === "top-center" ||
+      value === "top-right" ||
+      value === "left-center" ||
+      value === "right-center" ||
+      value === "bottom-left" ||
+      value === "bottom-center" ||
+      value === "bottom-right" ||
+      value === "fit" ||
+      value === "xy") {
       return value;
     }
 

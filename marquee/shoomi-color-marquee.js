@@ -185,7 +185,17 @@
   }
 
   function normalizeBackgroundImagePlacement(value) {
-    if (value === "center" || value === "top-left" || value === "bottom-right") {
+    if (value === "center" ||
+      value === "top-left" ||
+      value === "top-center" ||
+      value === "top-right" ||
+      value === "left-center" ||
+      value === "right-center" ||
+      value === "bottom-left" ||
+      value === "bottom-center" ||
+      value === "bottom-right" ||
+      value === "fit" ||
+      value === "xy") {
       return value;
     }
 
@@ -352,6 +362,8 @@
       backgroundColor: normalizeColor(options.backgroundColor, "#000033"),
       backgroundImage: String(options.backgroundImage || ""),
       backgroundImagePlacement: normalizeBackgroundImagePlacement(options.backgroundImagePlacement),
+      backgroundImageXPercent: clampNumber(options.backgroundImageXPercent, 0, 100, 50),
+      backgroundImageYPercent: clampNumber(options.backgroundImageYPercent, 0, 100, 50),
       messageFile: String(options.messageFile || ""),
       message: typeof options.message === "string" ? options.message : "",
       colors: typeof options.colors !== "undefined" ? options.colors : null,
@@ -482,6 +494,8 @@
       var previousDotColor = settings.dotColor;
       var previousBackgroundImage = settings.backgroundImage;
       var previousBackgroundImagePlacement = settings.backgroundImagePlacement;
+      var previousBackgroundImageXPercent = settings.backgroundImageXPercent;
+      var previousBackgroundImageYPercent = settings.backgroundImageYPercent;
       var previousMessageFile = settings.messageFile;
       var previousBackgroundMode = settings.backgroundMode;
 
@@ -490,6 +504,8 @@
       settings.backgroundColor = typeof next.backgroundColor !== "undefined" ? normalizeColor(next.backgroundColor, settings.backgroundColor) : settings.backgroundColor;
       settings.backgroundImage = typeof next.backgroundImage === "string" ? next.backgroundImage : settings.backgroundImage;
       settings.backgroundImagePlacement = typeof next.backgroundImagePlacement === "string" ? normalizeBackgroundImagePlacement(next.backgroundImagePlacement) : settings.backgroundImagePlacement;
+      settings.backgroundImageXPercent = typeof next.backgroundImageXPercent === "number" ? clampNumber(next.backgroundImageXPercent, 0, 100, settings.backgroundImageXPercent) : settings.backgroundImageXPercent;
+      settings.backgroundImageYPercent = typeof next.backgroundImageYPercent === "number" ? clampNumber(next.backgroundImageYPercent, 0, 100, settings.backgroundImageYPercent) : settings.backgroundImageYPercent;
       settings.messageFile = typeof next.messageFile === "string" ? next.messageFile : settings.messageFile;
       settings.message = typeof next.message === "string" ? next.message : settings.message;
       settings.colors = typeof next.colors !== "undefined" ? next.colors : settings.colors;
@@ -514,7 +530,10 @@
         setRenderDotCount(Math.min(state.renderDotCount, settings.dotCount));
       }
 
-      if (settings.backgroundImage !== previousBackgroundImage || settings.backgroundImagePlacement !== previousBackgroundImagePlacement) {
+      if (settings.backgroundImage !== previousBackgroundImage ||
+        settings.backgroundImagePlacement !== previousBackgroundImagePlacement ||
+        settings.backgroundImageXPercent !== previousBackgroundImageXPercent ||
+        settings.backgroundImageYPercent !== previousBackgroundImageYPercent) {
         updateBackgroundImage(settings.backgroundImage);
       } else {
         applyCanvasBackgroundStyle();
@@ -1050,9 +1069,41 @@
         canvas.style.backgroundRepeat = "no-repeat";
         canvas.style.backgroundPosition = "left top";
         canvas.style.backgroundSize = "auto";
+      } else if (settings.backgroundImagePlacement === "top-center") {
+        canvas.style.backgroundRepeat = "no-repeat";
+        canvas.style.backgroundPosition = "center top";
+        canvas.style.backgroundSize = "auto";
+      } else if (settings.backgroundImagePlacement === "top-right") {
+        canvas.style.backgroundRepeat = "no-repeat";
+        canvas.style.backgroundPosition = "right top";
+        canvas.style.backgroundSize = "auto";
+      } else if (settings.backgroundImagePlacement === "left-center") {
+        canvas.style.backgroundRepeat = "no-repeat";
+        canvas.style.backgroundPosition = "left center";
+        canvas.style.backgroundSize = "auto";
+      } else if (settings.backgroundImagePlacement === "right-center") {
+        canvas.style.backgroundRepeat = "no-repeat";
+        canvas.style.backgroundPosition = "right center";
+        canvas.style.backgroundSize = "auto";
+      } else if (settings.backgroundImagePlacement === "bottom-left") {
+        canvas.style.backgroundRepeat = "no-repeat";
+        canvas.style.backgroundPosition = "left bottom";
+        canvas.style.backgroundSize = "auto";
+      } else if (settings.backgroundImagePlacement === "bottom-center") {
+        canvas.style.backgroundRepeat = "no-repeat";
+        canvas.style.backgroundPosition = "center bottom";
+        canvas.style.backgroundSize = "auto";
       } else if (settings.backgroundImagePlacement === "bottom-right") {
         canvas.style.backgroundRepeat = "no-repeat";
         canvas.style.backgroundPosition = "right bottom";
+        canvas.style.backgroundSize = "auto";
+      } else if (settings.backgroundImagePlacement === "fit") {
+        canvas.style.backgroundRepeat = "no-repeat";
+        canvas.style.backgroundPosition = "center center";
+        canvas.style.backgroundSize = "100% 100%";
+      } else if (settings.backgroundImagePlacement === "xy") {
+        canvas.style.backgroundRepeat = "no-repeat";
+        canvas.style.backgroundPosition = settings.backgroundImageXPercent + "% " + settings.backgroundImageYPercent + "%";
         canvas.style.backgroundSize = "auto";
       } else {
         canvas.style.backgroundRepeat = "repeat";
