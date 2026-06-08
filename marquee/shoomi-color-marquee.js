@@ -1,14 +1,31 @@
 (function () {
   var registeredModes = {};
 
+  function normalizeHexColor(rawValue) {
+    var value = String(rawValue || "").trim();
+
+    if (/^#[0-9a-f]{6}$/i.test(value)) {
+      return value;
+    }
+
+    if (/^[0-9a-f]{6}$/i.test(value)) {
+      return "#" + value;
+    }
+
+    return "";
+  }
+
   function parseColorList(rawValue) {
     var values = String(rawValue || "").split("|");
     var colors = [];
     var index;
+    var normalized;
 
     for (index = 0; index < values.length; index += 1) {
-      if (values[index]) {
-        colors.push(values[index].charAt(0) === "#" ? values[index] : ("#" + values[index]));
+      normalized = normalizeHexColor(values[index]);
+
+      if (normalized) {
+        colors.push(normalized);
       }
     }
 
@@ -18,7 +35,7 @@
   function createEntry(actionText, text, colorText, options) {
     var actions = String(actionText || "<>,<>").split(",");
     var settings = options || {};
-    var defaultColors = settings.defaultColors || ["#ffaa00"];
+    var defaultColor = normalizeColor(settings.defaultColor, "#ffaa00");
     var holdFrames = typeof settings.holdFrames === "number" ? settings.holdFrames : 100;
     var travel = Math.max(35, Math.round(String(text || "").length * 1.6));
     var colors = Array.isArray(colorText) ? colorText : parseColorList(colorText);
@@ -27,7 +44,8 @@
       start: actions[0] || "<>",
       end: actions[1] || "<>",
       text: String(text || ""),
-      colors: colors.length ? colors : defaultColors,
+      colors: colors,
+      defaultColor: defaultColor,
       holdFrames: holdFrames,
       transitionFrames: travel,
       holdStartFrame: travel + holdFrames,
@@ -145,11 +163,13 @@
   }
 
   function normalizeColor(rawValue, fallback) {
-    if (/^#[0-9a-f]{6}$/i.test(rawValue || "")) {
-      return rawValue;
+    var normalized = normalizeHexColor(rawValue);
+
+    if (normalized) {
+      return normalized;
     }
 
-    return fallback;
+    return normalizeHexColor(fallback) || "#000000";
   }
 
   function normalizeBackgroundMode(value) {
@@ -270,6 +290,38 @@
     ].join("\n");
   }
 
+  function buildCanvasFont(settings) {
+    var prefix = "";
+    var styleValue = String(settings.fontStyle || "0");
+
+    if (styleValue === "1") {
+      prefix = "bold ";
+    } else if (styleValue === "2") {
+      prefix = "italic ";
+    } else if (styleValue === "3") {
+      prefix = "bold italic ";
+    }
+
+    return prefix + settings.fontSize + "px " + (settings.fontName || '"Times New Roman", Times, serif');
+  }
+
+  function extractFontNameFromDeclaration(fontValue) {
+    var value = String(fontValue || "").trim();
+    var match;
+
+    if (!value) {
+      return '"Times New Roman", Times, serif';
+    }
+
+    match = value.match(/(?:^|\s)\d+px\s+(.+)$/i);
+
+    if (match && match[1]) {
+      return match[1].trim();
+    }
+
+    return value;
+  }
+
   function createCanvasMarquee(rawOptions) {
     var options = rawOptions || {};
     var canvas = options.canvas;
@@ -281,10 +333,15 @@
     }
 
     var context = canvas.getContext("2d");
+    var initialFontSize = typeof options.fontSize === "number" ? options.fontSize : (typeof options.fontHeight === "number" ? options.fontHeight : 29);
+    var initialFontStyle = typeof options.fontStyle !== "undefined" ? String(options.fontStyle) : "2";
+    var initialFontName = typeof options.fontName === "string" && options.fontName.trim()
+      ? options.fontName.trim()
+      : extractFontNameFromDeclaration(options.font || "italic 29px Times New Roman, Times, serif");
     var settings = {
       width: options.width || canvas.width || 500,
       height: options.height || canvas.height || 78,
-      backgroundColor: options.backgroundColor || "#000033",
+      backgroundColor: normalizeColor(options.backgroundColor, "#000033"),
       backgroundImage: String(options.backgroundImage || ""),
       messageFile: String(options.messageFile || ""),
       message: typeof options.message === "string" ? options.message : "",
@@ -293,16 +350,18 @@
       end: options.end || "<<",
       staticMessage: !!options.staticMessage,
       backgroundMode: normalizeBackgroundMode(options.backgroundMode),
-      dotColor: options.dotColor || "#9999ff",
+      dotColor: normalizeColor(options.dotColor, "#9999ff"),
       dotCount: typeof options.dotCount === "number" ? options.dotCount : 50,
       waveHeight: typeof options.waveHeight === "number" ? options.waveHeight : 8,
-      font: options.font || "italic 29px Times New Roman, Times, serif",
-      fontHeight: typeof options.fontHeight === "number" ? options.fontHeight : 29,
+      fontName: initialFontName || '"Times New Roman", Times, serif',
+      fontSize: initialFontSize,
+      fontStyle: initialFontStyle,
+      fontHeight: initialFontSize,
       fps: typeof options.fps === "number" ? options.fps : 30,
       displayFrames: typeof options.displayFrames === "number" ? options.displayFrames : 100,
       edgePadding: typeof options.edgePadding === "number" ? options.edgePadding : 18,
       dotSpeed: typeof options.dotSpeed === "number" ? options.dotSpeed : 0.18,
-      defaultColors: Array.isArray(options.defaultColors) && options.defaultColors.length ? options.defaultColors : parseColorList("ffaa00")
+      defaultColor: normalizeColor(options.defaultColor, "#ffaa00")
     };
 
     var randomSeed = typeof options.randomSeed === "number" ? (options.randomSeed >>> 0) : 0x1a2b3c4d;
@@ -374,7 +433,8 @@
           start: settings.start || ">>",
           end: settings.end || "<<",
           text: settings.message,
-          colors: typeof settings.colors === "string" ? parseColorList(settings.colors) : (settings.colors || settings.defaultColors)
+          colors: typeof settings.colors === "string" ? parseColorList(settings.colors) : (settings.colors || []),
+          defaultColor: settings.defaultColor
         }];
       }
 
@@ -387,7 +447,7 @@
       }
 
       loadMessageFile(settings.messageFile, {
-        defaultColors: settings.defaultColors,
+        defaultColor: settings.defaultColor,
         holdFrames: settings.displayFrames,
         firstEntryAction: options.firstEntryAction,
         defaultEntryAction: options.defaultEntryAction
@@ -417,7 +477,7 @@
 
       settings.width = next.width || settings.width;
       settings.height = next.height || settings.height;
-      settings.backgroundColor = next.backgroundColor || settings.backgroundColor;
+      settings.backgroundColor = typeof next.backgroundColor !== "undefined" ? normalizeColor(next.backgroundColor, settings.backgroundColor) : settings.backgroundColor;
       settings.backgroundImage = typeof next.backgroundImage === "string" ? next.backgroundImage : settings.backgroundImage;
       settings.messageFile = typeof next.messageFile === "string" ? next.messageFile : settings.messageFile;
       settings.message = typeof next.message === "string" ? next.message : settings.message;
@@ -426,16 +486,18 @@
       settings.end = typeof next.end === "string" ? next.end : settings.end;
       settings.staticMessage = typeof next.staticMessage === "boolean" ? next.staticMessage : settings.staticMessage;
       settings.backgroundMode = next.backgroundMode ? normalizeBackgroundMode(next.backgroundMode) : settings.backgroundMode;
-      settings.dotColor = next.dotColor || settings.dotColor;
+      settings.dotColor = typeof next.dotColor !== "undefined" ? normalizeColor(next.dotColor, settings.dotColor) : settings.dotColor;
       settings.dotCount = typeof next.dotCount === "number" ? next.dotCount : settings.dotCount;
       settings.waveHeight = typeof next.waveHeight === "number" ? next.waveHeight : settings.waveHeight;
-      settings.font = next.font || settings.font;
-      settings.fontHeight = typeof next.fontHeight === "number" ? next.fontHeight : settings.fontHeight;
+      settings.fontName = typeof next.fontName === "string" && next.fontName.trim() ? next.fontName.trim() : (next.font ? extractFontNameFromDeclaration(next.font) : settings.fontName);
+      settings.fontSize = typeof next.fontSize === "number" ? next.fontSize : (typeof next.fontHeight === "number" ? next.fontHeight : settings.fontSize);
+      settings.fontStyle = typeof next.fontStyle !== "undefined" ? String(next.fontStyle) : settings.fontStyle;
+      settings.fontHeight = settings.fontSize;
       settings.fps = typeof next.fps === "number" ? next.fps : settings.fps;
       settings.displayFrames = typeof next.displayFrames === "number" ? next.displayFrames : settings.displayFrames;
       settings.edgePadding = typeof next.edgePadding === "number" ? next.edgePadding : settings.edgePadding;
       settings.dotSpeed = typeof next.dotSpeed === "number" ? next.dotSpeed : settings.dotSpeed;
-      settings.defaultColors = Array.isArray(next.defaultColors) && next.defaultColors.length ? next.defaultColors : settings.defaultColors;
+      settings.defaultColor = typeof next.defaultColor !== "undefined" ? normalizeColor(next.defaultColor, settings.defaultColor) : settings.defaultColor;
 
       if (settings.dotCount !== previousDotCount) {
         state.renderDotCount = Math.min(state.renderDotCount, settings.dotCount);
@@ -475,7 +537,7 @@
 
         if (Array.isArray(entry)) {
           list.push(createEntry(entry[0], entry[1], entry[2], {
-            defaultColors: settings.defaultColors,
+            defaultColor: settings.defaultColor,
             holdFrames: settings.displayFrames
           }));
           continue;
@@ -484,17 +546,17 @@
         list.push(createEntry(
           (entry.start || "<>") + "," + (entry.end || "<>"),
           entry.text || "",
-          entry.colors || settings.defaultColors,
+          entry.colors || [],
           {
-            defaultColors: settings.defaultColors,
+            defaultColor: typeof entry.defaultColor !== "undefined" ? entry.defaultColor : settings.defaultColor,
             holdFrames: typeof entry.holdFrames === "number" ? entry.holdFrames : settings.displayFrames
           }
         ));
       }
 
       if (!list.length) {
-        list.push(createEntry("<>,<>", "", settings.defaultColors, {
-          defaultColors: settings.defaultColors,
+        list.push(createEntry("<>,<>", "", [], {
+          defaultColor: settings.defaultColor,
           holdFrames: settings.displayFrames
         }));
       }
@@ -640,13 +702,13 @@
         alpha = 1 - exitProgress;
       }
 
-      context.font = settings.font;
+      context.font = buildCanvasFont(settings);
       context.textBaseline = "middle";
       context.globalAlpha = alpha;
 
       for (index = 0; index < entry.characters.length; index += 1) {
         character = entry.characters[index];
-        color = entry.colors[index] || settings.defaultColors[0];
+        color = entry.colors[index] || entry.defaultColor || settings.defaultColor;
         wave = Math.sin((waveFrame / 4) + (index / 1.7)) * settings.waveHeight;
         textMidOffset = (character.offsetX + (character.width / 2)) - (metrics.width / 2);
         x = baseX + character.offsetX;
@@ -674,7 +736,7 @@
       var value;
       var width;
 
-      context.font = settings.font;
+      context.font = buildCanvasFont(settings);
 
       for (index = 0; index < entry.text.length; index += 1) {
         value = entry.text.charAt(index);
@@ -846,7 +908,7 @@
 
       canvas.width = settings.width;
       canvas.height = settings.height;
-      context.font = settings.font;
+      context.font = buildCanvasFont(settings);
 
       for (index = 0; index < state.dots.length; index += 1) {
         dot = state.dots[index];

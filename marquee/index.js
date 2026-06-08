@@ -201,11 +201,12 @@
     dotCount: 50,
     waveHeight: 8,
     dotSpeed: toDotSpeed(3),
-    font: "italic 30px " + resolveFontFamilyStack(DEFAULT_FONT_ID),
-    fontHeight: 30,
+    fontName: resolveFontFamilyStack(DEFAULT_FONT_ID),
+    fontSize: 30,
+    fontStyle: "2",
     fps: 20,
     displayFrames: 100,
-    defaultColors: marqueeApi.parseColorList("ffff66"),
+    defaultColor: "#ffff66",
     entries: [[">>,<<", "Welcome to Shoomi's marquee maker.", "#ffff66|#ffee88|#ffdd55|#ffee88"]]
   });
 
@@ -339,8 +340,6 @@
   }
 
   function getCanvasConfig(config, rows) {
-    var defaultColors = marqueeApi.parseColorList(config.defaultColor);
-
     return {
       width: config.width,
       height: config.height,
@@ -351,12 +350,13 @@
       dotCount: config.dotCount,
       dotSpeed: toDotSpeed(config.backgroundSpeed),
       waveHeight: config.waveHeight,
-      font: buildFontDeclaration(config),
-      fontHeight: config.fontSize,
+      fontName: config.fontFamily,
+      fontSize: config.fontSize,
+      fontStyle: config.fontStyle,
       fps: config.animationSpeed,
       displayFrames: config.displayTime,
       staticMessage: !config.messageFile,
-      defaultColors: defaultColors
+      defaultColor: config.defaultColor
     };
   }
 
@@ -391,7 +391,6 @@
   }
 
   function buildCanvasEmbedCode(config, rows) {
-    var defaultColorValues = splitColorPipe(config.defaultColor);
     var fileName = getSequenceFileName();
     var useMessageFile = !!fileName;
     var modeScripts = getEmbedModeScripts(config.backgroundMode);
@@ -405,14 +404,15 @@
       dotCount: config.dotCount,
       dotSpeed: toDotSpeed(config.backgroundSpeed),
       waveHeight: config.waveHeight,
-      font: buildFontDeclaration(config),
-      fontHeight: config.fontSize,
+      fontName: config.fontFamily,
+      fontSize: config.fontSize,
+      fontStyle: config.fontStyle,
       fps: config.animationSpeed,
       displayFrames: config.displayTime,
       staticMessage: !useMessageFile,
       message: defaultMessageRow.text,
       colors: defaultMessageRow.colors,
-      defaultColors: defaultColorValues
+      defaultColor: config.defaultColor
     };
     var lines = [];
     var index;
@@ -439,7 +439,6 @@
     lines.push("  }");
     lines.push("");
     lines.push("  marqueeOptions.canvas = canvas;");
-    lines.push("  marqueeOptions.defaultColors = marqueeApi.parseColorList(marqueeOptions.defaultColors.join(\"|\"));");
     lines.push("");
     lines.push("  marqueeApi.createCanvasMarquee(marqueeOptions);");
     lines.push("}());");
@@ -1371,18 +1370,6 @@
       .replace(/&/g, "&amp;")
       .replace(/</g, "&lt;")
       .replace(/>/g, "&gt;");
-  }
-
-  function splitColorPipe(colorPipe) {
-    var colors = marqueeApi.parseColorList(colorPipe || "");
-    var values = [];
-    var index;
-
-    for (index = 0; index < colors.length; index += 1) {
-      values.push(colors[index].replace(/^#/, ""));
-    }
-
-    return values;
   }
 
   function stringifyForCode(value, indentSize) {
