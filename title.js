@@ -22,6 +22,7 @@
     fps: 30,
     displayFrames: 100,
     defaultColors: marqueeApi.parseColorList("ffaa00"),
+    entries: [[">>,<<", (canvas.textContent || "Shoomi's HomePage").trim(), "ffaa00"]],
     messageFile: "dreamers.txt"
   });
 

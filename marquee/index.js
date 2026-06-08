@@ -26,20 +26,28 @@
   var generatedFileHeading = document.getElementById("generated-file-heading");
   var copyButton = document.getElementById("copy-code");
   var copyStatus = document.getElementById("copy-status");
+  var defaultMessageCard = document.getElementById("default-message-card");
   var sequenceGridBody = document.getElementById("sequence-grid-body");
   var rowModal = document.getElementById("row-modal");
   var rowModalForm = document.getElementById("row-modal-form");
   var modalCancel = document.getElementById("modal-cancel");
   var marqueeApi = window.ShoomiColorMarquee;
   var previewMarquee;
+  var defaultMessageRow = {
+    start: ">>",
+    end: "<<",
+    text: "Welcome to Shoomi's marquee maker.",
+    colors: "ffff66|ffee88|ffdd55|ffee88|"
+  };
   var sequenceRows = [];
   var editingRowIndex = -1;
+  var editingDefaultMessage = false;
   var modalHistory = [];
   var modalHistoryIndex = -1;
   var modalSelectionStart = 0;
   var modalSelectionEnd = 0;
 
-  if (!form || !previewCanvas || !codeOutput || !htmlCodeOutput || !marqueeApi || !sequenceGridBody || !rowModal || !rowModalForm) {
+  if (!form || !previewCanvas || !codeOutput || !htmlCodeOutput || !marqueeApi || !sequenceGridBody || !rowModal || !rowModalForm || !defaultMessageCard) {
     return;
   }
 
@@ -89,6 +97,7 @@
 
   form.addEventListener("input", onFormFieldInput);
   form.addEventListener("change", onFormFieldChange);
+  defaultMessageCard.addEventListener("click", onDefaultMessageClick);
   sequenceGridBody.addEventListener("click", onSequenceGridClick);
   sequenceGridBody.addEventListener("input", onSequenceGridInput);
   sequenceGridBody.addEventListener("change", onSequenceGridChange);
@@ -152,6 +161,7 @@
       previewCanvas.style.height = config.height + "px";
     }
     updateGeneratedFileHeading();
+    renderDefaultMessageCard(config.background);
     renderSequenceGrid(config.background);
     codeOutput.value = buildDreamersScript(config, rows);
     htmlCodeOutput.value = buildCanvasEmbedCode(config, rows);
@@ -231,14 +241,15 @@
 
   function buildCanvasEntries(config, rows) {
     var entries = [];
+    var sourceRows = rows.length ? rows : [defaultMessageRow];
     var index;
 
-    for (index = 0; index < rows.length; index += 1) {
+    for (index = 0; index < sourceRows.length; index += 1) {
       entries.push({
-        start: rows[index].start,
-        end: rows[index].end,
-        text: rows[index].text,
-        colors: marqueeApi.parseColorList(rows[index].colors)
+        start: sourceRows[index].start,
+        end: sourceRows[index].end,
+        text: sourceRows[index].text,
+        colors: marqueeApi.parseColorList(sourceRows[index].colors)
       });
     }
 
@@ -283,23 +294,19 @@
     var lines = [];
     var index;
 
-    if (!useMessageFile) {
-      for (index = 0; index < rows.length; index += 1) {
-        entriesConfig.push({
-          start: rows[index].start,
-          end: rows[index].end,
-          text: rows[index].text,
-          colors: splitColorPipe(rows[index].colors)
-        });
-      }
-    }
+    entriesConfig.push({
+      start: defaultMessageRow.start,
+      end: defaultMessageRow.end,
+      text: defaultMessageRow.text,
+      colors: splitColorPipe(defaultMessageRow.colors)
+    });
 
     if (useMessageFile) {
       optionsConfig.messageFile = fileName;
     }
 
     lines.push('<canvas id="dream-marquee" width="' + config.width + '" height="' + config.height + '" style="display:block;">');
-    lines.push(escapeForInlineText((rows[0] && rows[0].text) || "Dream marquee"));
+    lines.push(escapeForInlineText(defaultMessageRow.text || "Dream marquee"));
     lines.push("</canvas>");
     lines.push('<script src="marquee/shoomi-color-marquee.js"><\/script>');
     for (index = 0; index < modeScripts.length; index += 1) {
@@ -310,9 +317,7 @@
     lines.push('  var canvas = document.getElementById("dream-marquee");');
     lines.push("  var marqueeApi = window.ShoomiColorMarquee;");
     lines.push("  var marqueeOptions = " + stringifyForCode(optionsConfig, 2) + ";");
-    if (!useMessageFile) {
-      lines.push("  var marqueeEntries = " + stringifyForCode(entriesConfig, 2) + ";");
-    }
+    lines.push("  var marqueeEntries = " + stringifyForCode(entriesConfig, 2) + ";");
     lines.push("");
     lines.push("  if (!canvas || !canvas.getContext || !marqueeApi) {");
     lines.push("    return;");
@@ -320,13 +325,11 @@
     lines.push("");
     lines.push("  marqueeOptions.canvas = canvas;");
     lines.push("  marqueeOptions.defaultColors = marqueeApi.parseColorList(marqueeOptions.defaultColors.join(\"|\"));");
-    if (!useMessageFile) {
-      lines.push("  marqueeOptions.entries = marqueeEntries.map(function (entry) {");
-      lines.push("    return marqueeApi.createEntry(entry.start + \",\" + entry.end, entry.text, entry.colors.join(\"|\"), {");
-      lines.push("      defaultColors: marqueeOptions.defaultColors");
-      lines.push("    });");
-      lines.push("  });");
-    }
+    lines.push("  marqueeOptions.entries = marqueeEntries.map(function (entry) {");
+    lines.push("    return marqueeApi.createEntry(entry.start + \",\" + entry.end, entry.text, entry.colors.join(\"|\"), {");
+    lines.push("      defaultColors: marqueeOptions.defaultColors");
+    lines.push("    });");
+    lines.push("  });");
     lines.push("");
     lines.push("  marqueeApi.createCanvasMarquee(marqueeOptions);");
     lines.push("}());");
@@ -415,6 +418,16 @@
     sequenceGridBody.innerHTML = html;
   }
 
+  function renderDefaultMessageCard(backgroundColor) {
+    defaultMessageCard.innerHTML = [
+      '<div class="sequence-text default-message-preview" title="' + escapeHtml(defaultMessageRow.text || "") + '" style="background:' + escapeHtml(backgroundColor || "#000066") + ';">' + buildColorizedTextMarkup(defaultMessageRow.text || "", defaultMessageRow.colors || "") + "</div>",
+      '<div class="sequence-cell-actions">',
+      '<button type="button" class="row-button default-message-edit">Edit</button>',
+      '<button type="button" class="row-button default-message-clear">Clear</button>',
+      "</div>"
+    ].join("");
+  }
+
   function buildMoveButton(direction, index, disabled) {
     var isUp = direction === "up";
     var symbol = isUp ? "&#9650;" : "&#9660;";
@@ -460,6 +473,7 @@
     };
 
     editingRowIndex = typeof index === "number" ? index : -1;
+    editingDefaultMessage = index === -2;
     fields.modalText.value = values.text || "";
     fields.modalColors.value = normalizeColorPipeForText(values.text || "", values.colors || "", "ffff66|ffee88|ffdd55|ffee88|");
     modalHistory = [];
@@ -481,6 +495,7 @@
   function closeRowModal() {
     rowModal.hidden = true;
     editingRowIndex = -1;
+    editingDefaultMessage = false;
     modalHistory = [];
     modalHistoryIndex = -1;
   }
@@ -502,7 +517,10 @@
       return;
     }
 
-    if (editingRowIndex >= 0) {
+    if (editingDefaultMessage) {
+      defaultMessageRow.text = record.text;
+      defaultMessageRow.colors = record.colors;
+    } else if (editingRowIndex >= 0) {
       sequenceRows[editingRowIndex] = record;
     } else {
       sequenceRows.push(record);
@@ -809,6 +827,21 @@
 
     if (target.classList.contains("row-edit")) {
       openRowModal(index);
+    }
+  }
+
+  function onDefaultMessageClick(event) {
+    var target = event.target;
+
+    if (target.classList.contains("default-message-edit")) {
+      openRowModal(-2, defaultMessageRow);
+      return;
+    }
+
+    if (target.classList.contains("default-message-clear")) {
+      defaultMessageRow.text = "";
+      defaultMessageRow.colors = "";
+      updateMarquee();
     }
   }
 
