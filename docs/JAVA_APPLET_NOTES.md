@@ -103,6 +103,47 @@ Based on how the page was configured and what the restored behavior looks like n
 - `BackGroundAction=3` with `BackGroundDotNum=50` and `BackGroundSpeed=3` appears to be the starry field effect I remember from the page.
 - `NamiHeight=8` is consistent with the visible vertical wave motion in the letters.
 
+### What `ImageFiles` Appears To Do
+
+From embedded strings and bytecode structure in `jsTextAnimation_Nami.class`, `jsTA_MsgParser.class`, and `jsTA_ImageReder.class`, my current best reading is:
+
+- `ImageFiles` is read as an applet parameter by the main applet
+- it is passed into `jsTA_ImageReder`
+- `jsTA_ImageReder` tokenizes that value into an internal image list / array
+- `jsTA_MsgParser` supports inline image references inside message text
+- the parser can ask the image reader for both:
+  - `getImage(imageId)`
+  - `getImageWidth(imageId)`
+
+That makes the feature look like inline image embedding within a text message, not just a background-image system.
+
+#### Most Likely `ImageFiles` Format
+
+The strongest evidence still points to a pipe-delimited list:
+
+- `ImageFiles="star.gif|heart.gif|moon.gif"`
+
+Reasons:
+
+- the image-reader class uses `StringTokenizer`
+- the recovered strings include a standalone `|`
+- the applet already uses pipe-delimited values elsewhere
+
+#### Most Likely Inline Image Syntax
+
+The parser bytecode strongly suggests that:
+
+- `$<digits>` inserts an image by numeric index from `ImageFiles`
+- `$$` escapes to a literal dollar sign
+
+Examples of the most likely message syntax:
+
+- `Welcome $0 Home`
+- `Stars: $1 $2 $3`
+- `Cost is $$5`
+
+I have much higher confidence in the `$<digits>` behavior than I do in the exact human-facing documentation the original applet may have used.
+
 ### What `BackGroundAction` Probably Means
 
 This is one of the more interesting parameters because the class strings give a few direct clues:
