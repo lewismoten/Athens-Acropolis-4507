@@ -34,6 +34,7 @@
       var settings = runtime.settings;
       var context = runtime.context;
       var canvas = runtime.canvas;
+      var drawDotImage = runtime.drawDotImage;
       var index;
       var dot;
       var driftX;
@@ -54,6 +55,14 @@
         } else if (dot.y < -18 || dot.y > canvas.height + 18) {
           dot.y = Math.max(2, Math.min(canvas.height - 2, runtime.nextRandom() * canvas.height));
           runtime.syncDotRelativePosition(dot, canvas.width, canvas.height);
+        }
+
+        if (drawDotImage(dot, {
+          width: dot.radius * 3.8,
+          height: dot.radius * 3.8,
+          alpha: pulse
+        })) {
+          continue;
         }
 
         context.fillStyle = dot.color;

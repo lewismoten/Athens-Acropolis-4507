@@ -39,6 +39,7 @@
       var context = runtime.context;
       var canvas = runtime.canvas;
       var drawFogEllipse = runtime.drawFogEllipse;
+      var drawDotImage = runtime.drawDotImage;
       var index;
       var dot;
       var driftX;
@@ -67,6 +68,14 @@
         } else if (dot.y > canvas.height + height) {
           dot.y = canvas.height - 6;
           runtime.syncDotRelativePosition(dot, canvas.width, canvas.height);
+        }
+
+        if (drawDotImage(dot, {
+          width: width,
+          height: height * 1.2,
+          alpha: alpha * 1.8
+        })) {
+          continue;
         }
 
         context.fillStyle = dot.color;

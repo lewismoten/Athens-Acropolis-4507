@@ -43,6 +43,7 @@
       var state = runtime.state;
       var context = runtime.context;
       var canvas = runtime.canvas;
+      var drawDotImage = runtime.drawDotImage;
       var index;
       var dot;
       var twinkle;
@@ -79,6 +80,15 @@
         twinkle = 0.18 + (0.82 * Math.max(0, Math.sin((state.backgroundFrame / dot.speed) + dot.phase)));
         sparkleSize = dot.radius * (0.6 + (0.9 * twinkle));
         offset = sparkleSize * 1.6;
+
+        if (drawDotImage(dot, {
+          width: sparkleSize * 4.2,
+          height: sparkleSize * 4.2,
+          alpha: (0.3 + (0.6 * twinkle)) * fadeAlpha
+        })) {
+          dot.sparkleFrame += 1;
+          continue;
+        }
 
         context.strokeStyle = dot.color;
         context.globalAlpha = (0.2 + (0.55 * twinkle)) * fadeAlpha;

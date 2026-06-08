@@ -39,6 +39,7 @@
       var context = runtime.context;
       var canvas = runtime.canvas;
       var drawLeafShape = runtime.drawLeafShape;
+      var drawDotImage = runtime.drawDotImage;
       var index;
       var dot;
       var fall;
@@ -63,6 +64,15 @@
           (reverse && dot.y + height < -18) ||
           dot.x < -28 || dot.x > canvas.width + 28) {
           runtime.resetDot(dot, true);
+          continue;
+        }
+
+        if (drawDotImage(dot, {
+          width: width * 1.55,
+          height: height * 1.05,
+          rotation: rotation,
+          alpha: 0.78
+        })) {
           continue;
         }
 

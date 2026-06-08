@@ -38,6 +38,7 @@
       var settings = runtime.settings;
       var context = runtime.context;
       var canvas = runtime.canvas;
+      var drawDotImage = runtime.drawDotImage;
       var index;
       var dot;
       var fall;
@@ -62,6 +63,15 @@
           (reverse && dot.y + height < -18) ||
           dot.x < -24 || dot.x > canvas.width + 24) {
           runtime.resetDot(dot, true);
+          continue;
+        }
+
+        if (drawDotImage(dot, {
+          width: width * 2.2,
+          height: height * 1.15,
+          rotation: Math.sin((state.backgroundFrame / 20) + dot.phase) * 0.9,
+          alpha: flicker
+        })) {
           continue;
         }
 

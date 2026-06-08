@@ -38,6 +38,7 @@
       var settings = runtime.settings;
       var context = runtime.context;
       var canvas = runtime.canvas;
+      var drawDotImage = runtime.drawDotImage;
       var index;
       var dot;
       var drift;
@@ -60,6 +61,15 @@
           (reverse && dot.y + dot.radius < 0) ||
           dot.x > canvas.width + 18 || dot.x < -18) {
           runtime.resetDot(dot, true);
+        }
+
+        if (drawDotImage(dot, {
+          x: dot.x + sway,
+          width: dot.radius * 3.1,
+          height: dot.radius * 3.1,
+          alpha: alpha
+        })) {
+          continue;
         }
 
         context.fillStyle = dot.color;

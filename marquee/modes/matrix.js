@@ -41,6 +41,7 @@
       var settings = runtime.settings;
       var context = runtime.context;
       var canvas = runtime.canvas;
+      var drawDotImage = runtime.drawDotImage;
       var index;
       var dot;
       var fall;
@@ -75,9 +76,29 @@
             continue;
           }
 
+          if (drawDotImage(dot, {
+            x: dot.x + (width / 2),
+            y: segmentY + ((trailStep * 0.72) / 2),
+            width: Math.max(width * 2.4, trailStep * 0.7),
+            height: trailStep * 0.72,
+            alpha: alpha
+          })) {
+            continue;
+          }
+
           context.fillStyle = dot.color;
           context.globalAlpha = alpha;
           context.fillRect(dot.x, segmentY, width, trailStep * 0.72);
+        }
+
+        if (drawDotImage(dot, {
+          x: dot.x + (width / 2),
+          y: dot.y + ((trailStep * 0.78) / 2),
+          width: Math.max(width * 2.4, trailStep * 0.7),
+          height: trailStep * 0.78,
+          alpha: 0.85
+        })) {
+          continue;
         }
 
         context.globalAlpha = 0.85;
