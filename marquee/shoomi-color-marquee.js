@@ -250,7 +250,8 @@
   }
 
   function normalizeBackgroundImagePlacement(value) {
-    if (value === "center" ||
+    if (value === "tile" ||
+      value === "center" ||
       value === "top-left" ||
       value === "top-center" ||
       value === "top-right" ||
