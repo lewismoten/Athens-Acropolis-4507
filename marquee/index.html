@@ -170,6 +170,18 @@
           </DIV>
         </DIV>
 
+        <DIV CLASS="field-row">
+          <DIV CLASS="field">
+            <SPAN CLASS="field-label">Images</SPAN>
+            <DIV CLASS="image-library-card">
+              <DIV ID="image-library-preview" CLASS="image-library-preview"></DIV>
+              <DIV CLASS="sequence-cell-actions">
+                <BUTTON TYPE="button" ID="manage-images" CLASS="row-button">Manage Images</BUTTON>
+              </DIV>
+            </DIV>
+          </DIV>
+        </DIV>
+
         <DIV CLASS="field-row field-row-2-equal">
           <LABEL CLASS="field">
             <SPAN CLASS="field-label">Message File</SPAN>
@@ -286,6 +298,7 @@
           <BUTTON TYPE="button" ID="modal-color-trigger" CLASS="action-button modal-color-trigger" TITLE="Change selected text color" ARIA-LABEL="Change selected text color"></BUTTON>
           <INPUT ID="modal-row-color-picker" CLASS="modal-color-native-input" TYPE="color" VALUE="#ffff66" TABINDEX="-1" ARIA-HIDDEN="true">
           <BUTTON TYPE="button" ID="modal-undo" CLASS="action-button">Undo</BUTTON>
+          <BUTTON TYPE="button" ID="modal-insert-image" CLASS="action-button">Insert Image</BUTTON>
         </DIV>
 
         <DIV CLASS="modal-actions">
@@ -294,6 +307,28 @@
         </DIV>
       </DIV>
     </FORM>
+  </DIV>
+</DIV>
+<DIV CLASS="modal-shell" ID="image-modal" HIDDEN>
+  <DIV CLASS="modal-backdrop" DATA-IMAGE-MODAL-CLOSE="1"></DIV>
+  <DIV CLASS="modal-card modal-card-image" ROLE="dialog" ARIA-MODAL="true" ARIA-LABELLEDBY="image-modal-title">
+    <DIV CLASS="panel-heading" ID="image-modal-title">Image Library</DIV>
+    <DIV CLASS="field">
+      <SPAN CLASS="field-label">Selected Images</SPAN>
+      <DIV ID="image-modal-selected" CLASS="image-library-preview image-library-preview-selected"></DIV>
+    </DIV>
+    <DIV CLASS="field">
+      <SPAN CLASS="field-label">Available Images</SPAN>
+      <DIV ID="image-modal-grid" CLASS="image-modal-grid"></DIV>
+    </DIV>
+    <DIV CLASS="modal-footer">
+      <DIV CLASS="modal-toolbar">
+        <SPAN ID="image-modal-help" CLASS="helper-copy">Toggle images for the active library, or insert one while editing text.</SPAN>
+      </DIV>
+      <DIV CLASS="modal-actions">
+        <BUTTON TYPE="button" ID="image-modal-close" CLASS="row-button">Close</BUTTON>
+      </DIV>
+    </DIV>
   </DIV>
 </DIV>
 <SCRIPT SRC="shoomi-color-marquee.js?v=20260607"></SCRIPT>

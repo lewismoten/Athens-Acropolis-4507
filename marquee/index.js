@@ -27,12 +27,30 @@
   var copyButton = document.getElementById("copy-code");
   var copyStatus = document.getElementById("copy-status");
   var defaultMessageCard = document.getElementById("default-message-card");
+  var imageLibraryPreview = document.getElementById("image-library-preview");
+  var manageImagesButton = document.getElementById("manage-images");
   var sequenceGridBody = document.getElementById("sequence-grid-body");
   var rowModal = document.getElementById("row-modal");
   var rowModalForm = document.getElementById("row-modal-form");
   var modalCancel = document.getElementById("modal-cancel");
+  var imageModal = document.getElementById("image-modal");
+  var imageModalGrid = document.getElementById("image-modal-grid");
+  var imageModalSelected = document.getElementById("image-modal-selected");
+  var imageModalClose = document.getElementById("image-modal-close");
   var marqueeApi = window.ShoomiColorMarquee;
   var previewMarquee;
+  var AVAILABLE_IMAGE_FILES = [
+    "blue_ball.gif",
+    "black_ball.gif",
+    "green_ball.gif",
+    "grey_ball.gif",
+    "orange_ball.gif",
+    "pink_ball.gif",
+    "purple_ball.gif",
+    "red_ball.gif",
+    "white_ball.gif",
+    "yellow_ball.gif"
+  ];
   var DEFAULT_FONT_ID = "times-new-roman";
   var FALLBACK_FONT_CATALOG = [{
     id: "burtons-nightmare",
@@ -150,18 +168,20 @@
   var defaultMessageRow = {
     start: ">>",
     end: "<<",
-    text: "Welcome to Shoomi's marquee maker.",
+    text: "$0 $1 Shoomi's marquee maker $2 $3",
     colors: "ffff66|ffee88|ffdd55|ffee88|"
   };
+  var selectedImageFiles = AVAILABLE_IMAGE_FILES.slice(0);
   var sequenceRows = [];
   var editingRowIndex = -1;
   var editingDefaultMessage = false;
+  var imageModalMode = "manage";
   var modalHistory = [];
   var modalHistoryIndex = -1;
   var modalSelectionStart = 0;
   var modalSelectionEnd = 0;
 
-  if (!form || !previewCanvas || !codeOutput || !htmlCodeOutput || !marqueeApi || !sequenceGridBody || !rowModal || !rowModalForm || !defaultMessageCard) {
+  if (!form || !previewCanvas || !codeOutput || !htmlCodeOutput || !marqueeApi || !sequenceGridBody || !rowModal || !rowModalForm || !defaultMessageCard || !imageLibraryPreview || !imageModal || !imageModalGrid || !imageModalSelected) {
     return;
   }
 
@@ -191,6 +211,7 @@
     modalColors: document.getElementById("modal-row-colors"),
     modalColorTrigger: document.getElementById("modal-color-trigger"),
     modalColorPicker: document.getElementById("modal-row-color-picker"),
+    modalInsertImage: document.getElementById("modal-insert-image"),
     modalUndo: document.getElementById("modal-undo"),
     modalPreview: document.getElementById("modal-row-preview")
   };
@@ -217,12 +238,14 @@
     fps: 20,
     displayFrames: 100,
     defaultColor: "#ffff66",
-    entries: [[">>,<<", "Welcome to Shoomi's marquee maker.", "#ffff66|#ffee88|#ffdd55|#ffee88"]]
+    imageFiles: selectedImageFiles.slice(0),
+    entries: [[">>,<<", defaultMessageRow.text, "#ffff66|#ffee88|#ffdd55|#ffee88"]]
   });
 
   form.addEventListener("input", onFormFieldInput);
   form.addEventListener("change", onFormFieldChange);
   defaultMessageCard.addEventListener("click", onDefaultMessageClick);
+  imageLibraryPreview.addEventListener("click", onImageLibraryPreviewClick);
   sequenceGridBody.addEventListener("click", onSequenceGridClick);
   sequenceGridBody.addEventListener("input", onSequenceGridInput);
   sequenceGridBody.addEventListener("change", onSequenceGridChange);
@@ -260,8 +283,30 @@
     modalCancel.addEventListener("click", closeRowModal);
   }
 
+  if (manageImagesButton) {
+    manageImagesButton.addEventListener("click", openImageManager);
+  }
+
+  if (imageModal) {
+    imageModal.addEventListener("click", onImageModalShellClick);
+  }
+
+  if (imageModalGrid) {
+    imageModalGrid.addEventListener("click", onImageModalGridClick);
+  }
+
+  if (imageModalClose) {
+    imageModalClose.addEventListener("click", closeImageModal);
+  }
+
+  if (fields.modalInsertImage) {
+    fields.modalInsertImage.addEventListener("click", openImageInsertPicker);
+  }
+
   document.addEventListener("keydown", function (event) {
-    if (event.key === "Escape" && !rowModal.hidden) {
+    if (event.key === "Escape" && !imageModal.hidden) {
+      closeImageModal();
+    } else if (event.key === "Escape" && !rowModal.hidden) {
       closeRowModal();
     }
   });
@@ -289,7 +334,9 @@
     }
     updateGeneratedFileHeading();
     renderDefaultMessageCard(config.background);
+    renderImageLibraryPreview();
     renderSequenceGrid(config.background);
+    renderImageModal();
     codeOutput.value = buildDreamersScript(config, rows);
     htmlCodeOutput.value = buildCanvasEmbedCode(config, rows);
     copyStatus.textContent = "";
@@ -346,6 +393,7 @@
       backgroundImageY: marqueeApi.clampNumber(fields.backgroundImageY.value, -4000, 4000, 0),
       backgroundImageWidth: marqueeApi.clampNumber(fields.backgroundImageWidth.value, 0, 4000, 0),
       backgroundImageHeight: marqueeApi.clampNumber(fields.backgroundImageHeight.value, 0, 4000, 0),
+      imageFiles: selectedImageFiles.slice(0),
       defaultColor: defaultColor,
       dotColor: marqueeApi.normalizeColor(fields.dotColor.value, "#9999ff"),
       fontFamilyId: fontFamilyId,
@@ -376,7 +424,8 @@
       fps: config.animationSpeed,
       displayFrames: config.displayTime,
       staticMessage: !config.messageFile,
-      defaultColor: config.defaultColor
+      defaultColor: config.defaultColor,
+      imageFiles: config.imageFiles.map(resolvePreviewBackgroundImagePath)
     };
   }
 
@@ -435,6 +484,7 @@
       fps: config.animationSpeed,
       displayFrames: config.displayTime,
       staticMessage: !useMessageFile,
+      imageFiles: config.imageFiles.slice(0),
       message: defaultMessageRow.text,
       colors: defaultMessageRow.colors,
       defaultColor: config.defaultColor
@@ -562,6 +612,68 @@
     ].join("");
   }
 
+  function renderImageLibraryPreview() {
+    var html = "";
+    var index;
+
+    if (!selectedImageFiles.length) {
+      imageLibraryPreview.innerHTML = '<span class="image-chip-empty">No images selected</span>';
+      return;
+    }
+
+    for (index = 0; index < selectedImageFiles.length; index += 1) {
+      html += buildImageChipMarkup(selectedImageFiles[index], index, true);
+    }
+
+    imageLibraryPreview.innerHTML = html;
+  }
+
+  function renderImageModal() {
+    var selectedHtml = "";
+    var gridHtml = "";
+    var index;
+    var fileName;
+    var selectedIndex;
+
+    for (index = 0; index < selectedImageFiles.length; index += 1) {
+      selectedHtml += buildImageChipMarkup(selectedImageFiles[index], index, true);
+    }
+
+    if (!selectedHtml) {
+      selectedHtml = '<span class="image-chip-empty">No images selected</span>';
+    }
+
+    for (index = 0; index < AVAILABLE_IMAGE_FILES.length; index += 1) {
+      fileName = AVAILABLE_IMAGE_FILES[index];
+      selectedIndex = selectedImageFiles.indexOf(fileName);
+      gridHtml += [
+        '<button type="button" class="image-picker-button',
+        selectedIndex >= 0 ? ' is-selected' : '',
+        '" data-image-file="', escapeHtml(fileName),
+        '" data-selected-index="', String(selectedIndex),
+        '">',
+        '<img src="', escapeHtml(resolvePreviewBackgroundImagePath(fileName)), '" alt="', escapeHtml(fileName), '">',
+        '<span class="image-picker-label">', escapeHtml(fileName), '</span>',
+        '</button>'
+      ].join("");
+    }
+
+    imageModalSelected.innerHTML = selectedHtml;
+    imageModalGrid.innerHTML = gridHtml;
+  }
+
+  function buildImageChipMarkup(fileName, index, includeToken) {
+    var label = typeof index === "number" ? ("$" + index) : fileName;
+    var token = includeToken && typeof index === "number" ? ('<span class="image-picker-label">' + escapeHtml(label) + "</span>") : "";
+
+    return [
+      '<span class="image-chip" title="', escapeHtml(fileName), '">',
+      '<img src="', escapeHtml(resolvePreviewBackgroundImagePath(fileName)), '" alt="', escapeHtml(fileName), '">',
+      token,
+      "</span>"
+    ].join("");
+  }
+
   function buildMoveButton(direction, index, disabled) {
     var isUp = direction === "up";
     var symbol = isUp ? "&#9650;" : "&#9660;";
@@ -682,8 +794,8 @@
   function applyColorToModalSelection() {
     var text = fields.modalText.value || "";
     var selection = getModalSelectionRange();
-    var selectionStart = selection.start;
-    var selectionEnd = selection.end;
+    var selectionStart = rawIndexToPlainTextIndex(text, selection.start);
+    var selectionEnd = rawIndexToPlainTextIndex(text, selection.end);
     var colors;
     var index;
     var nextColor;
@@ -747,7 +859,7 @@
 
   function detectModalSelectionColor() {
     var text = fields.modalText.value || "";
-    var selectionStart = getModalSelectionRange().start;
+    var selectionStart = rawIndexToPlainTextIndex(text, getModalSelectionRange().start);
     var colors = expandColorArrayForText(text, fields.modalColors.value, getDefaultFontColorPipe());
 
     if (!colors.length) {
@@ -979,6 +1091,94 @@
     }
   }
 
+  function onImageLibraryPreviewClick(event) {
+    if (event.target && event.target.closest && event.target.closest(".image-chip")) {
+      openImageManager();
+    }
+  }
+
+  function openImageManager() {
+    imageModalMode = "manage";
+    renderImageModal();
+    imageModal.hidden = false;
+  }
+
+  function openImageInsertPicker() {
+    imageModalMode = "insert";
+    renderImageModal();
+    imageModal.hidden = false;
+  }
+
+  function closeImageModal() {
+    imageModal.hidden = true;
+    imageModalMode = "manage";
+    if (!rowModal.hidden) {
+      fields.modalText.focus();
+      restoreModalSelection();
+    }
+  }
+
+  function onImageModalShellClick(event) {
+    if (event.target.hasAttribute("data-image-modal-close")) {
+      closeImageModal();
+    }
+  }
+
+  function onImageModalGridClick(event) {
+    var button = event.target.closest ? event.target.closest(".image-picker-button") : null;
+    var fileName;
+    var selectedIndex;
+    var wasSelected;
+
+    if (!button) {
+      return;
+    }
+
+    fileName = button.getAttribute("data-image-file");
+    selectedIndex = selectedImageFiles.indexOf(fileName);
+    wasSelected = selectedIndex >= 0;
+
+    if (!wasSelected) {
+      selectedImageFiles.push(fileName);
+      selectedIndex = selectedImageFiles.length - 1;
+    }
+
+    if (imageModalMode === "insert" && !rowModal.hidden) {
+      insertImageTokenIntoModal(selectedIndex);
+      closeImageModal();
+      updateMarquee();
+      return;
+    }
+
+    if (wasSelected) {
+      selectedImageFiles.splice(selectedIndex, 1);
+    }
+
+    renderImageLibraryPreview();
+    renderImageModal();
+    updateMarquee();
+  }
+
+  function insertImageTokenIntoModal(imageIndex) {
+    var token = "$" + imageIndex;
+    var text = fields.modalText.value || "";
+    var selection = getModalSelectionRange();
+    var start = selection.start;
+    var end = selection.end;
+    var nextText = text.slice(0, start) + token + text.slice(end);
+
+    fields.modalText.value = nextText;
+    fields.modalColors.value = normalizeColorPipeForText(
+      nextText,
+      fields.modalColors.value,
+      getDefaultFontColorPipe()
+    );
+    modalSelectionStart = start + token.length;
+    modalSelectionEnd = modalSelectionStart;
+    pushModalHistoryState(getModalEditorState());
+    updateModalEditorPreview();
+  }
+
   function onSequenceGridInput(event) {
     if (event.stopPropagation) {
       event.stopPropagation();
@@ -1011,23 +1211,35 @@
   }
 
   function buildColorizedTextMarkup(text, colorPipe) {
-    var colors = expandColorArrayForText(text, colorPipe, getDefaultFontColorPipe());
     var safeText = String(text || "");
+    var parsed = parseInlineMessageText(safeText);
+    var colors = expandColorArrayForText(parsed.plainText, colorPipe, getDefaultFontColorPipe());
     var html = "";
-    var index;
+    var itemIndex;
+    var colorIndex = 0;
     var color;
+    var item;
+    var imageFile;
 
     if (!safeText) {
       return '<span class="sequence-text-char"> </span>';
     }
 
-    if (!colors.length) {
-      return escapeHtml(safeText);
-    }
+    for (itemIndex = 0; itemIndex < parsed.items.length; itemIndex += 1) {
+      item = parsed.items[itemIndex];
+      if (item.type === "image") {
+        imageFile = selectedImageFiles[item.imageIndex];
+        if (imageFile) {
+          html += '<span class="image-token" title="' + escapeHtml("$" + item.imageIndex + " " + imageFile) + '"><img src="' + escapeHtml(resolvePreviewBackgroundImagePath(imageFile)) + '" alt="' + escapeHtml(imageFile) + '"></span>';
+        } else {
+          html += '<span class="sequence-text-char">' + escapeHtml("$" + item.imageIndex) + "</span>";
+        }
+        continue;
+      }
 
-    for (index = 0; index < safeText.length; index += 1) {
-      color = colors[index] || colors[colors.length - 1];
-      html += '<span class="sequence-text-char" data-char-index="' + index + '" style="color:' + escapeHtml(color) + ';">' + escapeHtml(safeText.charAt(index)) + '</span>';
+      color = colors[colorIndex] || colors[colors.length - 1] || ("#" + getDefaultFontColorPipe().replace(/\|$/, ""));
+      html += '<span class="sequence-text-char" data-char-index="' + colorIndex + '" style="color:' + escapeHtml(color) + ';">' + escapeHtml(item.value) + '</span>';
+      colorIndex += 1;
     }
 
     return html;
@@ -1049,8 +1261,81 @@
     return values.join("|") + "|";
   }
 
+  function parseInlineMessageText(text) {
+    var source = String(text || "");
+    var items = [];
+    var plainText = "";
+    var index = 0;
+    var nextIndex;
+    var imageIndex;
+
+    while (index < source.length) {
+      if (source.charAt(index) === "$") {
+        if (source.charAt(index + 1) === "$") {
+          items.push({ type: "text", value: "$" });
+          plainText += "$";
+          index += 2;
+          continue;
+        }
+
+        nextIndex = index + 1;
+        while (nextIndex < source.length && /[0-9]/.test(source.charAt(nextIndex))) {
+          nextIndex += 1;
+        }
+
+        if (nextIndex > index + 1) {
+          imageIndex = parseInt(source.slice(index + 1, nextIndex), 10);
+          items.push({ type: "image", imageIndex: imageIndex });
+          index = nextIndex;
+          continue;
+        }
+      }
+
+      items.push({ type: "text", value: source.charAt(index) });
+      plainText += source.charAt(index);
+      index += 1;
+    }
+
+    return {
+      items: items,
+      plainText: plainText
+    };
+  }
+
+  function rawIndexToPlainTextIndex(text, rawIndex) {
+    var source = String(text || "");
+    var plainIndex = 0;
+    var index = 0;
+    var nextIndex;
+
+    while (index < source.length && index < rawIndex) {
+      if (source.charAt(index) === "$") {
+        if (source.charAt(index + 1) === "$") {
+          plainIndex += 1;
+          index += 2;
+          continue;
+        }
+
+        nextIndex = index + 1;
+        while (nextIndex < source.length && /[0-9]/.test(source.charAt(nextIndex))) {
+          nextIndex += 1;
+        }
+
+        if (nextIndex > index + 1) {
+          index = nextIndex;
+          continue;
+        }
+      }
+
+      plainIndex += 1;
+      index += 1;
+    }
+
+    return plainIndex;
+  }
+
   function expandColorArrayForText(text, colorPipe, fallback) {
-    var safeText = String(text || "");
+    var safeText = parseInlineMessageText(text).plainText;
     var parsedColors = marqueeApi.parseColorList(colorPipe || "");
     var expandedColors = [];
     var index;

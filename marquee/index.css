@@ -345,6 +345,71 @@ A {
   background: #000033;
 }
 
+.image-library-card {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 10px;
+  padding: 10px 12px;
+  border: 1px solid #3355aa;
+  background: #000033;
+}
+
+.image-library-preview {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  align-items: center;
+  min-height: 36px;
+  flex: 1 1 auto;
+}
+
+.image-library-preview-selected {
+  min-height: 46px;
+}
+
+.image-chip,
+.image-chip-empty {
+  width: 36px;
+  height: 36px;
+  border: 1px solid #5577cc;
+  background: #000022;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  box-sizing: border-box;
+}
+
+.image-chip {
+  padding: 3px;
+}
+
+.image-chip img {
+  max-width: 28px;
+  max-height: 28px;
+}
+
+.image-chip-empty {
+  width: auto;
+  padding: 0 8px;
+  color: #88aadd;
+  font-size: 12px;
+}
+
+.image-token {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 1.1em;
+  height: 1.1em;
+  vertical-align: middle;
+}
+
+.image-token img {
+  max-width: 100%;
+  max-height: 100%;
+}
+
 .default-message-preview {
   flex: 1 1 auto;
   min-width: 0;
@@ -404,6 +469,10 @@ A {
   box-shadow: 0 0 0 1px #111155 inset, 0 20px 50px rgba(0, 0, 0, 0.55);
 }
 
+.modal-card-image {
+  width: min(780px, calc(100% - 32px));
+}
+
 .modal-form {
   padding-bottom: 14px;
 }
@@ -421,6 +490,47 @@ A {
   align-items: center;
   gap: 10px;
   flex: 0 0 auto;
+}
+
+.image-modal-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(96px, 1fr));
+  gap: 10px;
+  max-height: 320px;
+  overflow-y: auto;
+}
+
+.image-picker-button {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 6px;
+  width: 100%;
+  min-height: 88px;
+  padding: 10px 6px;
+  border: 1px solid #5577cc;
+  background: #000022;
+  color: #ffffff;
+  cursor: pointer;
+}
+
+.image-picker-button.is-selected {
+  border-color: #ffff99;
+  box-shadow: inset 0 0 0 1px #ffff99;
+  background: #00154d;
+}
+
+.image-picker-button img {
+  width: 32px;
+  height: 32px;
+  object-fit: contain;
+}
+
+.image-picker-label {
+  font-size: 12px;
+  line-height: 1.2;
+  text-align: center;
+  word-break: break-word;
 }
 
 .modal-color-trigger {

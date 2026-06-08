@@ -54,6 +54,47 @@
     };
   }
 
+  function parseInlineMessageItems(text) {
+    var source = String(text || "");
+    var items = [];
+    var plainText = "";
+    var index = 0;
+    var nextIndex;
+    var imageIndex;
+
+    while (index < source.length) {
+      if (source.charAt(index) === "$") {
+        if (source.charAt(index + 1) === "$") {
+          items.push({ type: "text", value: "$" });
+          plainText += "$";
+          index += 2;
+          continue;
+        }
+
+        nextIndex = index + 1;
+        while (nextIndex < source.length && /[0-9]/.test(source.charAt(nextIndex))) {
+          nextIndex += 1;
+        }
+
+        if (nextIndex > index + 1) {
+          imageIndex = parseInt(source.slice(index + 1, nextIndex), 10);
+          items.push({ type: "image", imageIndex: imageIndex });
+          index = nextIndex;
+          continue;
+        }
+      }
+
+      items.push({ type: "text", value: source.charAt(index) });
+      plainText += source.charAt(index);
+      index += 1;
+    }
+
+    return {
+      items: items,
+      plainText: plainText
+    };
+  }
+
   function parseEntries(rawEntries, options) {
     var results = [];
     var index;
@@ -385,7 +426,8 @@
       displayFrames: typeof options.displayFrames === "number" ? options.displayFrames : 100,
       edgePadding: typeof options.edgePadding === "number" ? options.edgePadding : 18,
       dotSpeed: typeof options.dotSpeed === "number" ? options.dotSpeed : 0.18,
-      defaultColor: normalizeColor(options.defaultColor, "#ffaa00")
+      defaultColor: normalizeColor(options.defaultColor, "#ffaa00"),
+      imageFiles: Array.isArray(options.imageFiles) ? options.imageFiles.slice(0) : []
     };
 
     var randomSeed = typeof options.randomSeed === "number" ? (options.randomSeed >>> 0) : 0x1a2b3c4d;
@@ -400,12 +442,14 @@
       fastFrameStreak: 0,
       slowFrameStreak: 0,
       backgroundImageSource: "",
+      inlineImages: [],
       lastTimestamp: 0,
       entries: []
     };
 
     resizeCanvas();
     updateBackgroundImage(settings.backgroundImage);
+    loadInlineImages(settings.imageFiles);
     setEntries(options.entries || buildFallbackEntries(), false);
     loadOptionalMessageFile();
     requestAnimationFrame(tick);
@@ -501,6 +545,7 @@
       var previousBackgroundImageY = settings.backgroundImageY;
       var previousBackgroundImageWidth = settings.backgroundImageWidth;
       var previousBackgroundImageHeight = settings.backgroundImageHeight;
+      var previousImageFiles = settings.imageFiles.join("|");
       var previousMessageFile = settings.messageFile;
       var previousBackgroundMode = settings.backgroundMode;
 
@@ -532,6 +577,7 @@
       settings.edgePadding = typeof next.edgePadding === "number" ? next.edgePadding : settings.edgePadding;
       settings.dotSpeed = typeof next.dotSpeed === "number" ? next.dotSpeed : settings.dotSpeed;
       settings.defaultColor = typeof next.defaultColor !== "undefined" ? normalizeColor(next.defaultColor, settings.defaultColor) : settings.defaultColor;
+      settings.imageFiles = Array.isArray(next.imageFiles) ? next.imageFiles.slice(0) : settings.imageFiles;
 
       if (settings.dotCount !== previousDotCount) {
         setRenderDotCount(Math.min(state.renderDotCount, settings.dotCount));
@@ -546,6 +592,10 @@
         updateBackgroundImage(settings.backgroundImage);
       } else {
         applyCanvasBackgroundStyle();
+      }
+
+      if (settings.imageFiles.join("|") !== previousImageFiles) {
+        loadInlineImages(settings.imageFiles);
       }
 
       if (settings.messageFile !== previousMessageFile) {
@@ -675,6 +725,27 @@
       }
     }
 
+    function loadInlineImages(imageFiles) {
+      var nextFiles = Array.isArray(imageFiles) ? imageFiles : [];
+      var nextImages = [];
+      var index;
+      var fileName;
+      var image;
+
+      for (index = 0; index < nextFiles.length; index += 1) {
+        fileName = String(nextFiles[index] || "").trim();
+        if (!fileName) {
+          continue;
+        }
+        image = new Image();
+        image.onload = drawFrame;
+        image.src = fileName;
+        nextImages.push(image);
+      }
+
+      state.inlineImages = nextImages;
+    }
+
     function getModeRuntime() {
       return {
         canvas: canvas,
@@ -733,6 +804,11 @@
       var exitZoomScale = zoomThroughCenter ? (1 + (2.2 * zoomAmount)) : 1;
       var alpha = 1;
       var x;
+      var image;
+      var drawWidth;
+      var drawHeight;
+      var imageY;
+      var textColorIndex = 0;
 
       if (enterFromCenter) {
         alpha = 0.2 + (0.8 * progress);
@@ -746,7 +822,6 @@
 
       for (index = 0; index < entry.characters.length; index += 1) {
         character = entry.characters[index];
-        color = entry.colors[index] || entry.defaultColor || settings.defaultColor;
         wave = Math.sin((waveFrame / 4) + (index / 1.7)) * settings.waveHeight;
         textMidOffset = (character.offsetX + (character.width / 2)) - (metrics.width / 2);
         x = baseX + character.offsetX;
@@ -760,8 +835,20 @@
           wave = wave * (1 + (0.25 * zoomAmount));
         }
 
-        context.fillStyle = color;
-        context.fillText(character.value, x, baseY + wave);
+        if (character.type === "image") {
+          image = state.inlineImages[character.imageIndex];
+          if (image && image.complete && image.naturalWidth > 0 && image.naturalHeight > 0) {
+            drawHeight = settings.fontHeight;
+            drawWidth = drawHeight * (image.naturalWidth / image.naturalHeight);
+            imageY = (baseY + wave) - (drawHeight / 2);
+            context.drawImage(image, x, imageY, drawWidth, drawHeight);
+          }
+        } else {
+          color = entry.colors[textColorIndex] || entry.defaultColor || settings.defaultColor;
+          context.fillStyle = color;
+          context.fillText(character.value, x, baseY + wave);
+          textColorIndex += 1;
+        }
       }
 
       context.globalAlpha = 1;
@@ -770,17 +857,40 @@
     function measureEntry(entry) {
       var offsetX = 0;
       var characters = [];
+      var parsed = parseInlineMessageItems(entry.text);
       var index;
+      var item;
       var value;
       var width;
+      var image;
 
       context.font = buildCanvasFont(settings);
 
-      for (index = 0; index < entry.text.length; index += 1) {
-        value = entry.text.charAt(index);
+      for (index = 0; index < parsed.items.length; index += 1) {
+        item = parsed.items[index];
+        if (item.type === "image") {
+          image = state.inlineImages[item.imageIndex];
+          if (image && image.complete && image.naturalWidth > 0 && image.naturalHeight > 0) {
+            width = settings.fontHeight * (image.naturalWidth / image.naturalHeight);
+          } else {
+            width = settings.fontHeight;
+          }
+
+          characters.push({
+            type: "image",
+            imageIndex: item.imageIndex,
+            width: width,
+            offsetX: offsetX
+          });
+          offsetX += width;
+          continue;
+        }
+
+        value = item.value;
         width = context.measureText(value).width;
 
         characters.push({
+          type: "text",
           value: value,
           width: width,
           offsetX: offsetX
