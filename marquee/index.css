@@ -65,13 +65,23 @@ A {
     #000022;
 }
 
+.preview-surface {
+  display: inline-flex;
+  align-items: stretch;
+  justify-content: center;
+  background: #000066;
+  background-repeat: no-repeat;
+  background-position: center center;
+  background-size: auto;
+}
+
 .marquee-preview-canvas {
   display: block;
   width: auto;
   height: auto;
   max-width: 100%;
   box-sizing: border-box;
-  background: #000066;
+  background: transparent;
 }
 
 .control-panel,
@@ -107,6 +117,10 @@ A {
 
 .field-row-3 {
   grid-template-columns: 0.7fr 1.6fr 1fr;
+}
+
+.field-row-background {
+  grid-template-columns: 0.8fr 0.8fr 1.4fr;
 }
 
 .field-row-2-equal {

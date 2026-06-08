@@ -21,6 +21,7 @@
   var form = document.getElementById("marquee-form");
   var previewCanvas = document.getElementById("marquee-preview-canvas");
   var previewFrame = document.getElementById("preview-frame");
+  var previewSurface = document.getElementById("preview-surface");
   var codeOutput = document.getElementById("marquee-code");
   var htmlCodeOutput = document.getElementById("marquee-html-code");
   var generatedFileHeading = document.getElementById("generated-file-heading");
@@ -50,6 +51,11 @@
     "grey_ball.gif",
     "white_ball.gif",
     "black_ball.gif"
+  ];
+  var AVAILABLE_BANNER_FILES = [
+    "banner_geocities.gif",
+    "banner_linkexchange.gif",
+    "banner_lpage.gif"
   ];
   var DEFAULT_FONT_ID = "times-new-roman";
   var FALLBACK_FONT_CATALOG = [{
@@ -181,7 +187,7 @@
   var modalSelectionStart = 0;
   var modalSelectionEnd = 0;
 
-  if (!form || !previewCanvas || !codeOutput || !htmlCodeOutput || !marqueeApi || !sequenceGridBody || !rowModal || !rowModalForm || !defaultMessageCard || !imageLibraryPreview || !imageModal || !imageModalGrid || !imageModalSelected) {
+  if (!form || !previewCanvas || !previewSurface || !codeOutput || !htmlCodeOutput || !marqueeApi || !sequenceGridBody || !rowModal || !rowModalForm || !defaultMessageCard || !imageLibraryPreview || !imageModal || !imageModalGrid || !imageModalSelected) {
     return;
   }
 
@@ -219,10 +225,11 @@
 
   previewMarquee = marqueeApi.createCanvasMarquee({
     canvas: previewCanvas,
+    backgroundElement: previewSurface,
     width: 640,
     height: 92,
     backgroundColor: "#000066",
-    backgroundImage: resolvePreviewBackgroundImagePath("banner_geocities.gif"),
+    backgroundImage: "",
     backgroundImagePlacement: "center",
     backgroundImageX: 0,
     backgroundImageY: 0,
@@ -247,6 +254,11 @@
 
   form.addEventListener("input", onFormFieldInput);
   form.addEventListener("change", onFormFieldChange);
+  if (fields.backgroundImage) {
+    fields.backgroundImage.addEventListener("change", function () {
+      updateMarquee();
+    });
+  }
   defaultMessageCard.addEventListener("click", onDefaultMessageClick);
   imageLibraryPreview.addEventListener("click", onImageLibraryPreviewClick);
   sequenceGridBody.addEventListener("click", onSequenceGridClick);
@@ -331,6 +343,10 @@
     if (previewFrame) {
       previewFrame.style.minHeight = Math.max(config.height + 38, 130) + "px";
     }
+    if (previewSurface) {
+      previewSurface.style.width = config.width + "px";
+      previewSurface.style.height = config.height + "px";
+    }
     if (previewCanvas) {
       previewCanvas.style.width = config.width + "px";
       previewCanvas.style.height = config.height + "px";
@@ -391,7 +407,7 @@
       dotImageMode: normalizeDotImageMode(fields.dotImageMode.value),
       animationSpeed: marqueeApi.clampNumber(fields.animationSpeed.value, 1, 120, 20),
       background: marqueeApi.normalizeColor(fields.background.value, "#000066"),
-      backgroundImage: normalizeAssetPath(fields.backgroundImage.value, ""),
+      backgroundImage: normalizeBackgroundBanner(fields.backgroundImage.value),
       backgroundImagePlacement: normalizeBackgroundImagePlacement(fields.backgroundImagePlacement.value),
       backgroundImageX: marqueeApi.clampNumber(fields.backgroundImageX.value, -4000, 4000, 0),
       backgroundImageY: marqueeApi.clampNumber(fields.backgroundImageY.value, -4000, 4000, 0),
@@ -1421,6 +1437,16 @@
     return "none";
   }
 
+  function normalizeBackgroundBanner(value) {
+    var normalized = normalizeAssetPath(value, "");
+
+    if (AVAILABLE_BANNER_FILES.indexOf(normalized) >= 0) {
+      return normalized;
+    }
+
+    return "";
+  }
+
   function normalizeBackgroundImagePlacement(value) {
     if (value === "center" ||
       value === "top-left" ||
@@ -1452,6 +1478,7 @@
 
   function resolvePreviewBackgroundImagePath(assetPath) {
     var normalized = normalizeAssetPath(assetPath, "");
+    var relativePath;
 
     if (!normalized) {
       return "";
@@ -1461,7 +1488,13 @@
       return normalized;
     }
 
-    return "../" + normalized;
+    relativePath = "../" + normalized;
+
+    if (typeof window !== "undefined" && window.location && typeof window.location.href === "string" && typeof URL === "function") {
+      return new URL(relativePath, window.location.href).href;
+    }
+
+    return relativePath;
   }
 
   function getModeScriptPath(modeName) {

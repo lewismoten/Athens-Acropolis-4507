@@ -2,8 +2,8 @@
 <HTML>
 <HEAD>
   <TITLE>Shoomi's Color Marquee</TITLE>
-  <LINK REL="stylesheet" HREF="../font.css?v=20260607">
-  <LINK REL="stylesheet" HREF="index.css?v=20260606">
+  <LINK REL="stylesheet" HREF="../font.css?v=20260608">
+  <LINK REL="stylesheet" HREF="index.css?v=20260608">
 </HEAD>
 <BODY>
 <CENTER>
@@ -11,14 +11,16 @@
     <DIV CLASS="panel panel-preview">
       <DIV CLASS="panel-heading">Shoomi's Color Marquee</DIV>
       <DIV CLASS="preview-frame" ID="preview-frame">
-        <CANVAS
-          ID="marquee-preview-canvas"
-          CLASS="marquee-preview-canvas"
-          WIDTH="640"
-          HEIGHT="92"
-        >
-          Welcome to Shoomi's Color marquee maker.
-        </CANVAS>
+        <DIV ID="preview-surface" CLASS="preview-surface">
+          <CANVAS
+            ID="marquee-preview-canvas"
+            CLASS="marquee-preview-canvas"
+            WIDTH="640"
+            HEIGHT="92"
+          >
+            Welcome to Shoomi's Color marquee maker.
+          </CANVAS>
+        </DIV>
       </DIV>
     </DIV>
 
@@ -64,7 +66,7 @@
             </LABEL>
           </DIV>
 
-        <DIV CLASS="field-row field-row-3">
+        <DIV CLASS="field-row field-row-background">
           <LABEL CLASS="field">
             <SPAN CLASS="field-label">Background Color</SPAN>
             <INPUT ID="marquee-background" NAME="backgroundColor" CLASS="field-input field-color" TYPE="color" VALUE="#000066">
@@ -72,7 +74,12 @@
 
           <LABEL CLASS="field">
             <SPAN CLASS="field-label">Background Image</SPAN>
-            <INPUT ID="marquee-background-image" NAME="backgroundImage" CLASS="field-input" TYPE="text" VALUE="banner_geocities.gif">
+            <SELECT ID="marquee-background-image" NAME="backgroundImage" CLASS="field-input">
+              <OPTION VALUE="" SELECTED>None</OPTION>
+              <OPTION VALUE="banner_geocities.gif">banner_geocities.gif</OPTION>
+              <OPTION VALUE="banner_linkexchange.gif">banner_linkexchange.gif</OPTION>
+              <OPTION VALUE="banner_lpage.gif">banner_lpage.gif</OPTION>
+            </SELECT>
           </LABEL>
 
           <LABEL CLASS="field">
@@ -339,23 +346,23 @@
     </DIV>
   </DIV>
 </DIV>
-<SCRIPT SRC="shoomi-color-marquee.js?v=20260607"></SCRIPT>
-<SCRIPT SRC="modes/stars.js?v=20260607"></SCRIPT>
-<SCRIPT SRC="modes/rain.js?v=20260607"></SCRIPT>
-<SCRIPT SRC="modes/snow.js?v=20260607"></SCRIPT>
-<SCRIPT SRC="modes/fireflies.js?v=20260607"></SCRIPT>
-<SCRIPT SRC="modes/dust.js?v=20260607"></SCRIPT>
-<SCRIPT SRC="modes/bubbles.js?v=20260607"></SCRIPT>
-<SCRIPT SRC="modes/embers.js?v=20260607"></SCRIPT>
-<SCRIPT SRC="modes/sparkles.js?v=20260607"></SCRIPT>
-<SCRIPT SRC="modes/fog.js?v=20260607"></SCRIPT>
-<SCRIPT SRC="modes/comets.js?v=20260607"></SCRIPT>
-<SCRIPT SRC="modes/matrix.js?v=20260607"></SCRIPT>
-<SCRIPT SRC="modes/confetti.js?v=20260607"></SCRIPT>
-<SCRIPT SRC="modes/balls.js?v=20260607"></SCRIPT>
-<SCRIPT SRC="modes/static.js?v=20260607"></SCRIPT>
-<SCRIPT SRC="modes/leaves.js?v=20260607"></SCRIPT>
-<SCRIPT SRC="modes/fireworks.js?v=20260607"></SCRIPT>
-<SCRIPT SRC="index.js?v=20260607"></SCRIPT>
+<SCRIPT SRC="shoomi-color-marquee.js?v=20260608"></SCRIPT>
+<SCRIPT SRC="modes/stars.js?v=20260608"></SCRIPT>
+<SCRIPT SRC="modes/rain.js?v=20260608"></SCRIPT>
+<SCRIPT SRC="modes/snow.js?v=20260608"></SCRIPT>
+<SCRIPT SRC="modes/fireflies.js?v=20260608"></SCRIPT>
+<SCRIPT SRC="modes/dust.js?v=20260608"></SCRIPT>
+<SCRIPT SRC="modes/bubbles.js?v=20260608"></SCRIPT>
+<SCRIPT SRC="modes/embers.js?v=20260608"></SCRIPT>
+<SCRIPT SRC="modes/sparkles.js?v=20260608"></SCRIPT>
+<SCRIPT SRC="modes/fog.js?v=20260608"></SCRIPT>
+<SCRIPT SRC="modes/comets.js?v=20260608"></SCRIPT>
+<SCRIPT SRC="modes/matrix.js?v=20260608"></SCRIPT>
+<SCRIPT SRC="modes/confetti.js?v=20260608"></SCRIPT>
+<SCRIPT SRC="modes/balls.js?v=20260608"></SCRIPT>
+<SCRIPT SRC="modes/static.js?v=20260608"></SCRIPT>
+<SCRIPT SRC="modes/leaves.js?v=20260608"></SCRIPT>
+<SCRIPT SRC="modes/fireworks.js?v=20260608"></SCRIPT>
+<SCRIPT SRC="index.js?v=20260608"></SCRIPT>
 </BODY>
 </HTML>

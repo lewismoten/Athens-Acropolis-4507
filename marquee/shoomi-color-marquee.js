@@ -409,6 +409,7 @@
   function createCanvasMarquee(rawOptions) {
     var options = rawOptions || {};
     var canvas = options.canvas;
+    var backgroundElement;
     var TARGET_RENDER_MS = 25;
     var RECOVERY_RENDER_MS = 17;
 
@@ -417,6 +418,7 @@
     }
 
     var context = canvas.getContext("2d");
+    backgroundElement = options.backgroundElement && options.backgroundElement.style ? options.backgroundElement : canvas;
     var initialFontSize = typeof options.fontSize === "number" ? options.fontSize : (typeof options.fontHeight === "number" ? options.fontHeight : 29);
     var initialFontStyle = typeof options.fontStyle !== "undefined" ? String(options.fontStyle) : "2";
     var initialFontName = typeof options.fontName === "string" && options.fontName.trim()
@@ -746,11 +748,6 @@
       position = getPosition(entry, metrics, progress, holdProgress);
 
       context.clearRect(0, 0, canvas.width, canvas.height);
-
-      if (!settings.backgroundImage) {
-        context.fillStyle = settings.backgroundColor;
-        context.fillRect(0, 0, canvas.width, canvas.height);
-      }
 
       drawDots();
       drawText(entry, metrics, position.x, position.y, progress, exitProgress);
@@ -1297,67 +1294,67 @@
     function applyCanvasBackgroundStyle() {
       var source = state.backgroundImageSource;
 
-      canvas.style.backgroundColor = settings.backgroundColor;
+      backgroundElement.style.backgroundColor = settings.backgroundColor;
 
       if (settings.backgroundImagePlacement === "center") {
-        canvas.style.backgroundRepeat = "no-repeat";
-        canvas.style.backgroundPosition = "center center";
-        canvas.style.backgroundSize = "auto";
+        backgroundElement.style.backgroundRepeat = "no-repeat";
+        backgroundElement.style.backgroundPosition = "center center";
+        backgroundElement.style.backgroundSize = "auto";
       } else if (settings.backgroundImagePlacement === "top-left") {
-        canvas.style.backgroundRepeat = "no-repeat";
-        canvas.style.backgroundPosition = "left top";
-        canvas.style.backgroundSize = "auto";
+        backgroundElement.style.backgroundRepeat = "no-repeat";
+        backgroundElement.style.backgroundPosition = "left top";
+        backgroundElement.style.backgroundSize = "auto";
       } else if (settings.backgroundImagePlacement === "top-center") {
-        canvas.style.backgroundRepeat = "no-repeat";
-        canvas.style.backgroundPosition = "center top";
-        canvas.style.backgroundSize = "auto";
+        backgroundElement.style.backgroundRepeat = "no-repeat";
+        backgroundElement.style.backgroundPosition = "center top";
+        backgroundElement.style.backgroundSize = "auto";
       } else if (settings.backgroundImagePlacement === "top-right") {
-        canvas.style.backgroundRepeat = "no-repeat";
-        canvas.style.backgroundPosition = "right top";
-        canvas.style.backgroundSize = "auto";
+        backgroundElement.style.backgroundRepeat = "no-repeat";
+        backgroundElement.style.backgroundPosition = "right top";
+        backgroundElement.style.backgroundSize = "auto";
       } else if (settings.backgroundImagePlacement === "left-center") {
-        canvas.style.backgroundRepeat = "no-repeat";
-        canvas.style.backgroundPosition = "left center";
-        canvas.style.backgroundSize = "auto";
+        backgroundElement.style.backgroundRepeat = "no-repeat";
+        backgroundElement.style.backgroundPosition = "left center";
+        backgroundElement.style.backgroundSize = "auto";
       } else if (settings.backgroundImagePlacement === "right-center") {
-        canvas.style.backgroundRepeat = "no-repeat";
-        canvas.style.backgroundPosition = "right center";
-        canvas.style.backgroundSize = "auto";
+        backgroundElement.style.backgroundRepeat = "no-repeat";
+        backgroundElement.style.backgroundPosition = "right center";
+        backgroundElement.style.backgroundSize = "auto";
       } else if (settings.backgroundImagePlacement === "bottom-left") {
-        canvas.style.backgroundRepeat = "no-repeat";
-        canvas.style.backgroundPosition = "left bottom";
-        canvas.style.backgroundSize = "auto";
+        backgroundElement.style.backgroundRepeat = "no-repeat";
+        backgroundElement.style.backgroundPosition = "left bottom";
+        backgroundElement.style.backgroundSize = "auto";
       } else if (settings.backgroundImagePlacement === "bottom-center") {
-        canvas.style.backgroundRepeat = "no-repeat";
-        canvas.style.backgroundPosition = "center bottom";
-        canvas.style.backgroundSize = "auto";
+        backgroundElement.style.backgroundRepeat = "no-repeat";
+        backgroundElement.style.backgroundPosition = "center bottom";
+        backgroundElement.style.backgroundSize = "auto";
       } else if (settings.backgroundImagePlacement === "bottom-right") {
-        canvas.style.backgroundRepeat = "no-repeat";
-        canvas.style.backgroundPosition = "right bottom";
-        canvas.style.backgroundSize = "auto";
+        backgroundElement.style.backgroundRepeat = "no-repeat";
+        backgroundElement.style.backgroundPosition = "right bottom";
+        backgroundElement.style.backgroundSize = "auto";
       } else if (settings.backgroundImagePlacement === "fit") {
-        canvas.style.backgroundRepeat = "no-repeat";
-        canvas.style.backgroundPosition = "center center";
-        canvas.style.backgroundSize = "100% 100%";
+        backgroundElement.style.backgroundRepeat = "no-repeat";
+        backgroundElement.style.backgroundPosition = "center center";
+        backgroundElement.style.backgroundSize = "100% 100%";
       } else if (settings.backgroundImagePlacement === "xy") {
-        canvas.style.backgroundRepeat = "no-repeat";
-        canvas.style.backgroundPosition = settings.backgroundImageX + "px " + settings.backgroundImageY + "px";
-        canvas.style.backgroundSize = "auto";
+        backgroundElement.style.backgroundRepeat = "no-repeat";
+        backgroundElement.style.backgroundPosition = settings.backgroundImageX + "px " + settings.backgroundImageY + "px";
+        backgroundElement.style.backgroundSize = "auto";
       } else if (settings.backgroundImagePlacement === "xy-size") {
-        canvas.style.backgroundRepeat = "no-repeat";
-        canvas.style.backgroundPosition = settings.backgroundImageX + "px " + settings.backgroundImageY + "px";
+        backgroundElement.style.backgroundRepeat = "no-repeat";
+        backgroundElement.style.backgroundPosition = settings.backgroundImageX + "px " + settings.backgroundImageY + "px";
         if (settings.backgroundImageWidth > 0 && settings.backgroundImageHeight > 0) {
-          canvas.style.backgroundSize = settings.backgroundImageWidth + "px " + settings.backgroundImageHeight + "px";
+          backgroundElement.style.backgroundSize = settings.backgroundImageWidth + "px " + settings.backgroundImageHeight + "px";
         } else {
-          canvas.style.backgroundSize = "auto";
+          backgroundElement.style.backgroundSize = "auto";
         }
       } else {
-        canvas.style.backgroundRepeat = "repeat";
-        canvas.style.backgroundPosition = "left top";
-        canvas.style.backgroundSize = "auto";
+        backgroundElement.style.backgroundRepeat = "repeat";
+        backgroundElement.style.backgroundPosition = "left top";
+        backgroundElement.style.backgroundSize = "auto";
       }
 
-      canvas.style.backgroundImage = source ? ('url("' + source.replace(/"/g, "%22") + '")') : "none";
+      backgroundElement.style.backgroundImage = source ? ('url("' + source.replace(/"/g, "%22") + '")') : "none";
     }
   }
 
