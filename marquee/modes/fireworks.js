@@ -168,6 +168,7 @@
       var settings = runtime.settings;
       var context = runtime.context;
       var canvas = runtime.canvas;
+      var drawDotImage = runtime.drawDotImage;
       var index;
       var dot;
       var lifeProgress;
@@ -324,6 +325,17 @@
           context.moveTo(previousX, previousY);
           context.lineTo(currentX, currentY);
           context.stroke();
+
+          if (drawDotImage(dot, {
+            x: currentX,
+            y: currentY,
+            width: Math.max(2.5, particleRadius * 4.2),
+            height: Math.max(2.5, particleRadius * 4.2),
+            rotation: Math.atan2(currentY - previousY, currentX - previousX),
+            alpha: burstAlpha * (0.8 + (0.15 * Math.sin(dot.phase + particleIndex)))
+          })) {
+            continue;
+          }
 
           context.globalAlpha = burstAlpha * (0.8 + (0.15 * Math.sin(dot.phase + particleIndex)));
           context.beginPath();
