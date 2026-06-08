@@ -184,6 +184,14 @@
     return value || "stars";
   }
 
+  function normalizeBackgroundImagePlacement(value) {
+    if (value === "center" || value === "top-left" || value === "bottom-right") {
+      return value;
+    }
+
+    return "tile";
+  }
+
   function registerMode(name, definition) {
     if (!name || !definition) {
       return;
@@ -343,6 +351,7 @@
       height: options.height || canvas.height || 78,
       backgroundColor: normalizeColor(options.backgroundColor, "#000033"),
       backgroundImage: String(options.backgroundImage || ""),
+      backgroundImagePlacement: normalizeBackgroundImagePlacement(options.backgroundImagePlacement),
       messageFile: String(options.messageFile || ""),
       message: typeof options.message === "string" ? options.message : "",
       colors: typeof options.colors !== "undefined" ? options.colors : null,
@@ -472,6 +481,7 @@
       var previousDotCount = settings.dotCount;
       var previousDotColor = settings.dotColor;
       var previousBackgroundImage = settings.backgroundImage;
+      var previousBackgroundImagePlacement = settings.backgroundImagePlacement;
       var previousMessageFile = settings.messageFile;
       var previousBackgroundMode = settings.backgroundMode;
 
@@ -479,6 +489,7 @@
       settings.height = next.height || settings.height;
       settings.backgroundColor = typeof next.backgroundColor !== "undefined" ? normalizeColor(next.backgroundColor, settings.backgroundColor) : settings.backgroundColor;
       settings.backgroundImage = typeof next.backgroundImage === "string" ? next.backgroundImage : settings.backgroundImage;
+      settings.backgroundImagePlacement = typeof next.backgroundImagePlacement === "string" ? normalizeBackgroundImagePlacement(next.backgroundImagePlacement) : settings.backgroundImagePlacement;
       settings.messageFile = typeof next.messageFile === "string" ? next.messageFile : settings.messageFile;
       settings.message = typeof next.message === "string" ? next.message : settings.message;
       settings.colors = typeof next.colors !== "undefined" ? next.colors : settings.colors;
@@ -503,7 +514,7 @@
         setRenderDotCount(Math.min(state.renderDotCount, settings.dotCount));
       }
 
-      if (settings.backgroundImage !== previousBackgroundImage) {
+      if (settings.backgroundImage !== previousBackgroundImage || settings.backgroundImagePlacement !== previousBackgroundImagePlacement) {
         updateBackgroundImage(settings.backgroundImage);
       } else {
         applyCanvasBackgroundStyle();
@@ -1030,9 +1041,25 @@
       var source = state.backgroundImageSource;
 
       canvas.style.backgroundColor = settings.backgroundColor;
-      canvas.style.backgroundRepeat = "no-repeat";
-      canvas.style.backgroundPosition = "center center";
-      canvas.style.backgroundSize = "100% 100%";
+
+      if (settings.backgroundImagePlacement === "center") {
+        canvas.style.backgroundRepeat = "no-repeat";
+        canvas.style.backgroundPosition = "center center";
+        canvas.style.backgroundSize = "auto";
+      } else if (settings.backgroundImagePlacement === "top-left") {
+        canvas.style.backgroundRepeat = "no-repeat";
+        canvas.style.backgroundPosition = "left top";
+        canvas.style.backgroundSize = "auto";
+      } else if (settings.backgroundImagePlacement === "bottom-right") {
+        canvas.style.backgroundRepeat = "no-repeat";
+        canvas.style.backgroundPosition = "right bottom";
+        canvas.style.backgroundSize = "auto";
+      } else {
+        canvas.style.backgroundRepeat = "repeat";
+        canvas.style.backgroundPosition = "left top";
+        canvas.style.backgroundSize = "auto";
+      }
+
       canvas.style.backgroundImage = source ? ('url("' + source.replace(/"/g, "%22") + '")') : "none";
     }
   }

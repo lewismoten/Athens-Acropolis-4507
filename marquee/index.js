@@ -177,6 +177,7 @@
     animationSpeed: document.getElementById("marquee-animation-speed"),
     background: document.getElementById("marquee-background"),
     backgroundImage: document.getElementById("marquee-background-image"),
+    backgroundImagePlacement: document.getElementById("marquee-background-image-placement"),
     fileName: document.getElementById("sequence-file-name"),
     defaultColor: document.getElementById("marquee-default-color"),
     dotColor: document.getElementById("marquee-dot-color"),
@@ -196,6 +197,7 @@
     height: 92,
     backgroundColor: "#000066",
     backgroundImage: resolvePreviewBackgroundImagePath("banner_geocities.gif"),
+    backgroundImagePlacement: "tile",
     backgroundMode: "stars",
     dotColor: "#9999ff",
     dotCount: 50,
@@ -331,6 +333,7 @@
       animationSpeed: marqueeApi.clampNumber(fields.animationSpeed.value, 1, 120, 20),
       background: marqueeApi.normalizeColor(fields.background.value, "#000066"),
       backgroundImage: normalizeAssetPath(fields.backgroundImage.value, ""),
+      backgroundImagePlacement: normalizeBackgroundImagePlacement(fields.backgroundImagePlacement.value),
       defaultColor: defaultColor,
       dotColor: marqueeApi.normalizeColor(fields.dotColor.value, "#9999ff"),
       fontFamilyId: fontFamilyId,
@@ -345,6 +348,7 @@
       height: config.height,
       backgroundColor: config.background,
       backgroundImage: resolvePreviewBackgroundImagePath(config.backgroundImage),
+      backgroundImagePlacement: config.backgroundImagePlacement,
       backgroundMode: config.backgroundMode,
       dotColor: config.dotColor,
       dotCount: config.dotCount,
@@ -399,6 +403,7 @@
       height: config.height,
       backgroundColor: config.background,
       backgroundImage: config.backgroundImage,
+      backgroundImagePlacement: config.backgroundImagePlacement,
       backgroundMode: config.backgroundMode,
       dotColor: config.dotColor,
       dotCount: config.dotCount,
@@ -1064,6 +1069,14 @@
     }
 
     return "stars";
+  }
+
+  function normalizeBackgroundImagePlacement(value) {
+    if (value === "center" || value === "top-left" || value === "bottom-right") {
+      return value;
+    }
+
+    return "tile";
   }
 
   function normalizeAssetPath(value, fallback) {
