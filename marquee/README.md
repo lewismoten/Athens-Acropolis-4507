@@ -787,12 +787,13 @@ ShoomiColorMarquee.registerMode("my-drift", {
 Many background modes can run in reverse.
 
 Use a negative `dotSpeed` value.
+If you want to stay closest to the behavior that has actually been tested in this project, prefer negative integers.
 
 Examples:
 
 ```js
-dotSpeed: -0.18
-dotSpeed: -0.5
+dotSpeed: -3
+dotSpeed: -12
 ```
 
 What this does:
