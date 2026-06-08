@@ -326,7 +326,7 @@ A {
 }
 
 .sequence-text-char {
-  font: bold 13px "Courier New", Courier, monospace;
+  font: inherit;
 }
 
 .sequence-cell-actions {
@@ -397,17 +397,19 @@ A {
 }
 
 .image-token {
-  display: inline-flex;
+  display: inline-block;
   align-items: center;
   justify-content: center;
-  width: 1.1em;
-  height: 1.1em;
+  width: auto;
+  height: 1em;
+  line-height: 1;
   vertical-align: middle;
 }
 
 .image-token img {
-  max-width: 100%;
-  max-height: 100%;
+  display: block;
+  width: auto;
+  height: 1em;
 }
 
 .default-message-preview {

@@ -570,6 +570,7 @@
     var index;
     var row;
     var resolvedBackground = backgroundColor || "#000066";
+    var previewTextStyle = buildFormPreviewTextStyle();
 
     for (index = 0; index < sequenceRows.length; index += 1) {
       row = sequenceRows[index];
@@ -581,7 +582,7 @@
           "</div></div></td>",
         '<td>' + buildTransitionSelect("start", index, row.start) + "</td>",
         '<td>' + buildTransitionSelect("end", index, row.end) + "</td>",
-        "<td><div class=\"sequence-text\" title=\"" + escapeHtml(row.text) + "\" style=\"background:" + escapeHtml(resolvedBackground) + ";\">" + buildColorizedTextMarkup(row.text, row.colors) + "</div></td>",
+        "<td><div class=\"sequence-text\" title=\"" + escapeHtml(row.text) + "\" style=\"background:" + escapeHtml(resolvedBackground) + ";" + previewTextStyle + "\">" + buildColorizedTextMarkup(row.text, row.colors) + "</div></td>",
         '<td><div class="sequence-cell-actions">',
         '<button type="button" class="row-button row-edit" data-index="' + index + '">Edit</button>',
         '<button type="button" class="row-button row-delete" data-index="' + index + '">Delete</button>',
@@ -603,8 +604,10 @@
   }
 
   function renderDefaultMessageCard(backgroundColor) {
+    var previewTextStyle = buildFormPreviewTextStyle();
+
     defaultMessageCard.innerHTML = [
-      '<div class="sequence-text default-message-preview" title="' + escapeHtml(defaultMessageRow.text || "") + '" style="background:' + escapeHtml(backgroundColor || "#000066") + ';">' + buildColorizedTextMarkup(defaultMessageRow.text || "", defaultMessageRow.colors || "") + "</div>",
+      '<div class="sequence-text default-message-preview" title="' + escapeHtml(defaultMessageRow.text || "") + '" style="background:' + escapeHtml(backgroundColor || "#000066") + ";" + previewTextStyle + '">' + buildColorizedTextMarkup(defaultMessageRow.text || "", defaultMessageRow.colors || "") + "</div>",
       '<div class="sequence-cell-actions">',
       '<button type="button" class="row-button default-message-edit">Edit</button>',
       '<button type="button" class="row-button default-message-clear">Clear</button>',
@@ -676,6 +679,27 @@
 
   function buildImageFilesPipe(imageFiles) {
     return (imageFiles || []).join("|");
+  }
+
+  function buildFormPreviewTextStyle() {
+    var config = getPageConfig();
+    var style = "font-family:" + escapeHtml(config.fontFamily) + ";";
+
+    if (String(config.fontStyle || "0") === "1") {
+      style += "font-weight:bold;";
+      style += "font-style:normal;";
+    } else if (String(config.fontStyle || "0") === "2") {
+      style += "font-weight:normal;";
+      style += "font-style:italic;";
+    } else if (String(config.fontStyle || "0") === "3") {
+      style += "font-weight:bold;";
+      style += "font-style:italic;";
+    } else {
+      style += "font-weight:normal;";
+      style += "font-style:normal;";
+    }
+
+    return style;
   }
 
   function buildMoveButton(direction, index, disabled) {
@@ -840,7 +864,8 @@
     );
     fields.modalPreview.style.background = marqueeApi.normalizeColor(fields.background.value, "#000066");
     fields.modalPreview.style.font = buildFontDeclaration(config);
-    fields.modalText.style.font = fields.modalPreview.style.font;
+    fields.modalPreview.style.lineHeight = config.fontSize + "px";
+    fields.modalPreview.style.minHeight = Math.max(config.fontSize + 28, 54) + "px";
     fields.modalText.style.background = fields.modalPreview.style.background;
     fields.modalText.style.color = "#ffffff";
     fields.modalPreview.innerHTML = buildColorizedTextMarkup(fields.modalText.value || "", fields.modalColors.value);
