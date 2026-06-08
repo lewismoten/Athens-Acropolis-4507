@@ -4,6 +4,8 @@
 
 I got a GeoCities web page in the 90's. This was my first web page. My account was `moonhalo`, and I went by `Shoomi` as the online persona.
 
+The `moonhalo` name had a couple of roots. At the time, I was an avid Nine Inch Nails fan, and their releases used the sequential `Halo` naming that always stuck with me. I was also working nights back then, and one night I looked up and saw what looked like a glowing halo around the moon itself. I have never seen anything quite like it again, and the sight was breathtaking enough that the name stayed with me.
+
 ![Screenshot of GeoCities Athens/Acropolis/4507](screenshot-ani.gif)
 
 I had archived a few of my web sites and made a CD Resume in 1999. Some of the content had been changed to support an offline version for viewing without an internet connection.
