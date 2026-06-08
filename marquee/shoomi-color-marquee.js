@@ -452,7 +452,7 @@
       fontHeight: initialFontSize,
       fps: typeof options.fps === "number" ? options.fps : 30,
       displayFrames: typeof options.displayFrames === "number" ? options.displayFrames : 100,
-      edgePadding: typeof options.edgePadding === "number" ? options.edgePadding : 18,
+      _edgePadding: typeof options._edgePadding === "number" ? options._edgePadding : 18,
       dotSpeed: typeof options.dotSpeed === "number" ? options.dotSpeed : 0.18,
       defaultColor: normalizeColor(options.defaultColor, "#ffaa00"),
       imageFiles: typeof options.imageFiles !== "undefined" ? options.imageFiles : ""
@@ -610,7 +610,7 @@
       settings.fontHeight = settings.fontSize;
       settings.fps = typeof next.fps === "number" ? next.fps : settings.fps;
       settings.displayFrames = typeof next.displayFrames === "number" ? next.displayFrames : settings.displayFrames;
-      settings.edgePadding = typeof next.edgePadding === "number" ? next.edgePadding : settings.edgePadding;
+      settings._edgePadding = typeof next._edgePadding === "number" ? next._edgePadding : settings._edgePadding;
       settings.dotSpeed = typeof next.dotSpeed === "number" ? next.dotSpeed : settings.dotSpeed;
       settings.defaultColor = typeof next.defaultColor !== "undefined" ? normalizeColor(next.defaultColor, settings.defaultColor) : settings.defaultColor;
       settings.imageFiles = typeof next.imageFiles !== "undefined" ? next.imageFiles : settings.imageFiles;
@@ -991,10 +991,10 @@
     function getPosition(entry, metrics, progress, holdProgress) {
       var centerX = (canvas.width - metrics.width) / 2;
       var centerY = canvas.height / 2;
-      var startX = axisPoint(entry.start, "x", "start", metrics.width, settings.edgePadding, centerX);
-      var startY = axisPoint(entry.start, "y", "start", metrics.height, settings.edgePadding, centerY);
-      var endX = axisPoint(entry.end, "x", "end", metrics.width, settings.edgePadding, centerX);
-      var endY = axisPoint(entry.end, "y", "end", metrics.height, settings.edgePadding, centerY);
+      var startX = axisPoint(entry.start, "x", "start", metrics.width, settings._edgePadding, centerX);
+      var startY = axisPoint(entry.start, "y", "start", metrics.height, settings._edgePadding, centerY);
+      var endX = axisPoint(entry.end, "x", "end", metrics.width, settings._edgePadding, centerX);
+      var endY = axisPoint(entry.end, "y", "end", metrics.height, settings._edgePadding, centerY);
       var x = lerp(startX, centerX, easeOutCubic(progress));
       var y = lerp(startY, centerY, easeOutCubic(progress));
       var exitProgress;

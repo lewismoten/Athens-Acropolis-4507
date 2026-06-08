@@ -180,13 +180,6 @@ All options are passed to `ShoomiColorMarquee.createCanvasMarquee(options)`.
 - Default: `100`
 - Applet-style hold duration shared by sequenced messages.
 
-`edgePadding`
-
-- Type: `number`
-- Required: no
-- Default: `18`
-- Extra offscreen padding used by text transitions.
-
 ### Typography
 
 `fontName`
