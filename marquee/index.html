@@ -33,14 +33,14 @@
             <LABEL CLASS="field">
               <SPAN CLASS="field-label">Speed</SPAN>
               <SPAN CLASS="input-unit-wrap input-unit-wrap-compact">
-                <INPUT ID="marquee-animation-speed" CLASS="field-input field-input-compact" TYPE="number" MIN="1" MAX="120" STEP="1" VALUE="20">
+                <INPUT ID="marquee-animation-speed" NAME="animationSpeed" CLASS="field-input field-input-compact" TYPE="number" MIN="1" MAX="120" STEP="1" VALUE="20">
                 <SPAN CLASS="input-unit">fps</SPAN>
               </SPAN>
             </LABEL>
             <LABEL CLASS="field">
               <SPAN CLASS="field-label">Wave Height</SPAN>
               <SPAN CLASS="input-unit-wrap input-unit-wrap-compact">
-                <INPUT ID="marquee-wave-height" CLASS="field-input field-input-compact" TYPE="number" MIN="0" MAX="24" VALUE="8">
+                <INPUT ID="marquee-wave-height" NAME="waveHeight" CLASS="field-input field-input-compact" TYPE="number" MIN="0" MAX="24" VALUE="8">
                 <SPAN CLASS="input-unit">px</SPAN>
               </SPAN>
             </LABEL>
@@ -50,7 +50,7 @@
             <LABEL CLASS="field">
               <SPAN CLASS="field-label">Width</SPAN>
               <SPAN CLASS="input-unit-wrap input-unit-wrap-compact">
-                <INPUT ID="marquee-width" CLASS="field-input field-input-compact" TYPE="number" MIN="120" MAX="1200" VALUE="640">
+                <INPUT ID="marquee-width" NAME="width" CLASS="field-input field-input-compact" TYPE="number" MIN="120" MAX="1200" VALUE="640">
                 <SPAN CLASS="input-unit">px</SPAN>
               </SPAN>
             </LABEL>
@@ -58,7 +58,7 @@
             <LABEL CLASS="field">
               <SPAN CLASS="field-label">Height</SPAN>
               <SPAN CLASS="input-unit-wrap input-unit-wrap-compact">
-                <INPUT ID="marquee-height" CLASS="field-input field-input-compact" TYPE="number" MIN="32" MAX="240" VALUE="92">
+                <INPUT ID="marquee-height" NAME="height" CLASS="field-input field-input-compact" TYPE="number" MIN="32" MAX="240" VALUE="92">
                 <SPAN CLASS="input-unit">px</SPAN>
               </SPAN>
             </LABEL>
@@ -67,17 +67,17 @@
         <DIV CLASS="field-row field-row-5">
           <LABEL CLASS="field">
             <SPAN CLASS="field-label">Background Color</SPAN>
-            <INPUT ID="marquee-background" CLASS="field-input field-color" TYPE="color" VALUE="#000066">
+            <INPUT ID="marquee-background" NAME="backgroundColor" CLASS="field-input field-color" TYPE="color" VALUE="#000066">
           </LABEL>
 
           <LABEL CLASS="field">
             <SPAN CLASS="field-label">Background Image</SPAN>
-            <INPUT ID="marquee-background-image" CLASS="field-input" TYPE="text" VALUE="banner_geocities.gif">
+            <INPUT ID="marquee-background-image" NAME="backgroundImage" CLASS="field-input" TYPE="text" VALUE="banner_geocities.gif">
           </LABEL>
 
           <LABEL CLASS="field">
             <SPAN CLASS="field-label">Image Placement</SPAN>
-            <SELECT ID="marquee-background-image-placement" CLASS="field-input">
+            <SELECT ID="marquee-background-image-placement" NAME="backgroundImagePlacement" CLASS="field-input">
               <OPTION VALUE="tile" SELECTED>Tiled</OPTION>
               <OPTION VALUE="center">Center</OPTION>
               <OPTION VALUE="top-center">Top Center</OPTION>
@@ -96,7 +96,7 @@
           <LABEL CLASS="field">
             <SPAN CLASS="field-label">Image X</SPAN>
             <SPAN CLASS="input-unit-wrap input-unit-wrap-compact">
-              <INPUT ID="marquee-background-image-x" CLASS="field-input field-input-compact" TYPE="number" MIN="0" MAX="100" VALUE="50">
+              <INPUT ID="marquee-background-image-x" NAME="backgroundImageXPercent" CLASS="field-input field-input-compact" TYPE="number" MIN="0" MAX="100" VALUE="50">
               <SPAN CLASS="input-unit">%</SPAN>
             </SPAN>
           </LABEL>
@@ -104,7 +104,7 @@
           <LABEL CLASS="field">
             <SPAN CLASS="field-label">Image Y</SPAN>
             <SPAN CLASS="input-unit-wrap input-unit-wrap-compact">
-              <INPUT ID="marquee-background-image-y" CLASS="field-input field-input-compact" TYPE="number" MIN="0" MAX="100" VALUE="50">
+              <INPUT ID="marquee-background-image-y" NAME="backgroundImageYPercent" CLASS="field-input field-input-compact" TYPE="number" MIN="0" MAX="100" VALUE="50">
               <SPAN CLASS="input-unit">%</SPAN>
             </SPAN>
           </LABEL>
@@ -114,7 +114,7 @@
 
             <LABEL CLASS="field">
               <SPAN CLASS="field-label">Font Family</SPAN>
-              <SELECT ID="marquee-font-family" CLASS="field-input">
+              <SELECT ID="marquee-font-family" NAME="fontFamily" CLASS="field-input">
                 <OPTION VALUE="times-new-roman">Loading fonts...</OPTION>
               </SELECT>
             </LABEL>
@@ -122,14 +122,14 @@
             <LABEL CLASS="field">
               <SPAN CLASS="field-label">Font Size</SPAN>
               <SPAN CLASS="input-unit-wrap input-unit-wrap-compact">
-                <INPUT ID="marquee-font-size" CLASS="field-input field-input-compact" TYPE="number" MIN="10" MAX="72" VALUE="30">
+                <INPUT ID="marquee-font-size" NAME="fontSize" CLASS="field-input field-input-compact" TYPE="number" MIN="10" MAX="72" VALUE="30">
                 <SPAN CLASS="input-unit">pt</SPAN>
               </SPAN>
             </LABEL>
 
             <LABEL CLASS="field">
               <SPAN CLASS="field-label">Style</SPAN>
-              <SELECT ID="marquee-font-style" CLASS="field-input">
+              <SELECT ID="marquee-font-style" NAME="fontStyle" CLASS="field-input">
                 <OPTION VALUE="0">Regular</OPTION>
                 <OPTION VALUE="1">Bold</OPTION>
                 <OPTION VALUE="2" SELECTED>Italic</OPTION>
@@ -139,7 +139,7 @@
 
             <LABEL CLASS="field">
               <SPAN CLASS="field-label">Font Color</SPAN>
-              <INPUT ID="marquee-default-color" CLASS="field-input field-color" TYPE="color" VALUE="#ffff66">
+              <INPUT ID="marquee-default-color" NAME="defaultColor" CLASS="field-input field-color" TYPE="color" VALUE="#ffff66">
             </LABEL>
           </DIV>
 
@@ -154,13 +154,13 @@
         <DIV CLASS="field-row field-row-2-equal">
           <LABEL CLASS="field">
             <SPAN CLASS="field-label">Message File</SPAN>
-            <INPUT ID="sequence-file-name" CLASS="field-input" TYPE="text" VALUE="dreamers.txt">
+            <INPUT ID="sequence-file-name" NAME="messageFile" CLASS="field-input" TYPE="text" VALUE="dreamers.txt">
           </LABEL>
 
           <LABEL CLASS="field">
             <SPAN CLASS="field-label">Display Time</SPAN>
             <SPAN CLASS="input-unit-wrap input-unit-wrap-compact">
-              <INPUT ID="marquee-display-time" CLASS="field-input field-input-compact" TYPE="number" MIN="1" MAX="999" VALUE="100">
+              <INPUT ID="marquee-display-time" NAME="displayFrames" CLASS="field-input field-input-compact" TYPE="number" MIN="1" MAX="999" VALUE="100">
               <SPAN CLASS="input-unit">frames</SPAN>
             </SPAN>
           </LABEL>
@@ -169,7 +169,7 @@
           <DIV CLASS="field-row field-row-4">
             <LABEL CLASS="field">
               <SPAN CLASS="field-label">Background Mode</SPAN>
-              <SELECT ID="marquee-background-mode" CLASS="field-input">
+              <SELECT ID="marquee-background-mode" NAME="backgroundMode" CLASS="field-input">
                 <OPTION VALUE="stars" SELECTED>Stars</OPTION>
                 <OPTION VALUE="rain">Rain</OPTION>
                 <OPTION VALUE="snow">Snow</OPTION>
@@ -192,13 +192,13 @@
 
             <LABEL CLASS="field">
               <SPAN CLASS="field-label">Dot Color</SPAN>
-              <INPUT ID="marquee-dot-color" CLASS="field-input field-color" TYPE="color" VALUE="#9999ff">
+              <INPUT ID="marquee-dot-color" NAME="dotColor" CLASS="field-input field-color" TYPE="color" VALUE="#9999ff">
             </LABEL>
 
             <LABEL CLASS="field">
               <SPAN CLASS="field-label">Dots</SPAN>
               <SPAN CLASS="input-unit-wrap input-unit-wrap-compact">
-                <INPUT ID="marquee-dot-count" CLASS="field-input field-input-compact" TYPE="number" MIN="0" MAX="9999" VALUE="50">
+                <INPUT ID="marquee-dot-count" NAME="dotCount" CLASS="field-input field-input-compact" TYPE="number" MIN="0" MAX="9999" VALUE="50">
                 <SPAN CLASS="input-unit">#</SPAN>
               </SPAN>
             </LABEL>
@@ -206,7 +206,7 @@
             <LABEL CLASS="field">
               <SPAN CLASS="field-label">Background Speed</SPAN>
               <SPAN CLASS="input-unit-wrap input-unit-wrap-compact">
-                <INPUT ID="marquee-background-speed" CLASS="field-input field-input-compact" TYPE="number" MIN="0" MAX="30" STEP="1" VALUE="3">
+                <INPUT ID="marquee-background-speed" NAME="backgroundSpeed" CLASS="field-input field-input-compact" TYPE="number" MIN="0" MAX="30" STEP="1" VALUE="3">
                 <SPAN CLASS="input-unit">%</SPAN>
               </SPAN>
             </LABEL>
