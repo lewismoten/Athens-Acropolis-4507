@@ -6,7 +6,11 @@
   }
 
   function getLaunchScale(settings) {
-    return Math.max(1, 0.75 + (settings.dotSpeed * 2.5));
+    return Math.max(1, 0.75 + (Math.abs(settings.dotSpeed) * 2.5));
+  }
+
+  function isReverse(settings) {
+    return settings.dotSpeed < 0;
   }
 
   function initializeFirework(dot, runtime) {
@@ -16,9 +20,12 @@
     dot.x = canvas.width * (0.04 + (nextRandom() * 0.92));
     dot.y = canvas.height + (nextRandom() * (canvas.height * 0.42));
     dot.fireworkLaunchStartY = dot.y;
+    dot.fireworkBurstX = dot.x;
+    dot.fireworkBurstY = canvas.height * (0.12 + (nextRandom() * 0.38));
     dot.fireworkState = "idle";
     dot.fireworkDelay = 12 + Math.floor(nextRandom() * 90);
-    dot.fireworkTargetY = canvas.height * (0.12 + (nextRandom() * 0.38));
+    dot.fireworkTargetY = dot.fireworkBurstY;
+    dot.fireworkReturnFrame = 0;
     dot.sparkleFrame = 0;
   }
 
@@ -45,13 +52,33 @@
     dot.sparkleFrame = 0;
   }
 
+  function startReverseBurst(dot) {
+    dot.fireworkState = "burst";
+    dot.sparkleFrame = 0;
+    dot.x = dot.fireworkBurstX;
+    dot.y = dot.fireworkBurstY;
+  }
+
+  function startReverseLaunch(dot) {
+    dot.fireworkState = "launch-reverse";
+    dot.fireworkReturnFrame = 0;
+    dot.x = dot.fireworkBurstX;
+    dot.y = dot.fireworkBurstY;
+  }
+
   function stepFirework(dot, runtime) {
     var launchScale;
+    var reverse = isReverse(runtime.settings);
+    var progress;
 
     if (dot.fireworkState === "idle") {
       dot.fireworkDelay -= 1;
       if (dot.fireworkDelay <= 0) {
-        dot.fireworkState = "launch";
+        if (reverse) {
+          startReverseBurst(dot);
+        } else {
+          dot.fireworkState = "launch";
+        }
       }
       return;
     }
@@ -72,10 +99,26 @@
       return;
     }
 
+    if (dot.fireworkState === "launch-reverse") {
+      dot.fireworkReturnFrame += 1;
+      progress = Math.min(dot.fireworkReturnFrame / Math.max(dot.fireworkReturnDuration || 1, 1), 1);
+      dot.x = dot.fireworkBurstX + (dot.vx * getLaunchScale(runtime.settings) * (dot.fireworkReturnDuration || 1) * 0.55 * progress);
+      dot.y = dot.fireworkBurstY + ((dot.fireworkLaunchStartY - dot.fireworkBurstY) * runtime.easeInCubic(progress));
+
+      if (progress >= 1) {
+        restartFirework(dot, runtime);
+      }
+      return;
+    }
+
     dot.sparkleFrame += 1;
 
     if ((dot.sparkleFrame / Math.max(dot.sparkleLifeDuration || 1, 1)) >= 1) {
-      restartFirework(dot, runtime);
+      if (reverse) {
+        startReverseLaunch(dot);
+      } else {
+        restartFirework(dot, runtime);
+      }
     }
   }
 
@@ -105,6 +148,7 @@
       dot.vy = -((nextRandom() * 1.4) + 2.3);
       dot.fireworkBurstSize = 18 + (nextRandom() * 38);
       dot.fireworkBurstCount = 10 + Math.floor(nextRandom() * 18);
+      dot.fireworkReturnDuration = 20 + Math.floor(nextRandom() * 18);
     },
     reset: function (dot, spawnOffscreen, initialSpawn, runtime) {
       initializeFirework(dot, runtime);
@@ -149,6 +193,12 @@
       var previousGravityDrop;
       var particleRadius;
       var launchAlpha;
+      var reverse = isReverse(settings);
+      var burstProgress;
+      var previousBurstProgress;
+      var returnProgress;
+      var returnX;
+      var returnY;
 
       for (index = 0; index < state.dots.length; index += 1) {
         dot = state.dots[index];
@@ -156,7 +206,11 @@
         if (dot.fireworkState === "idle") {
           dot.fireworkDelay -= 1;
           if (dot.fireworkDelay <= 0) {
-            dot.fireworkState = "launch";
+            if (reverse) {
+              startReverseBurst(dot);
+            } else {
+              dot.fireworkState = "launch";
+            }
           }
           continue;
         }
@@ -196,28 +250,67 @@
           continue;
         }
 
+        if (dot.fireworkState === "launch-reverse") {
+          launchX = dot.x;
+          launchY = dot.y;
+          launchScale = getLaunchScale(settings);
+          dot.fireworkReturnFrame += 1;
+          returnProgress = Math.min(dot.fireworkReturnFrame / Math.max(dot.fireworkReturnDuration || 1, 1), 1);
+          returnX = dot.fireworkBurstX + (dot.vx * launchScale * (dot.fireworkReturnDuration || 1) * 0.55 * returnProgress);
+          returnY = dot.fireworkBurstY + ((dot.fireworkLaunchStartY - dot.fireworkBurstY) * runtime.easeInCubic(returnProgress));
+          dot.x = returnX;
+          dot.y = returnY;
+
+          trailLength = Math.max(8, dot.fireworkBurstSize * 0.22);
+          launchAlpha = Math.max(0.2, returnProgress);
+          context.strokeStyle = dot.color;
+          context.globalAlpha = 0.35 * launchAlpha;
+          context.lineWidth = Math.max(1, dot.radius * 0.35);
+          context.beginPath();
+          context.moveTo(launchX, launchY - trailLength);
+          context.lineTo(dot.x, dot.y);
+          context.stroke();
+
+          context.fillStyle = dot.color;
+          context.globalAlpha = 0.9 * launchAlpha;
+          context.beginPath();
+          context.arc(dot.x, dot.y, Math.max(0.75, dot.radius * 0.45), 0, Math.PI * 2, false);
+          context.fill();
+
+          if (returnProgress >= 1 || dot.y > canvas.height + 40) {
+            runtime.resetDot(dot, true);
+          }
+          continue;
+        }
+
         dot.sparkleFrame += 1;
         lifeProgress = dot.sparkleFrame / Math.max(dot.sparkleLifeDuration || 1, 1);
 
         if (lifeProgress >= 1) {
-          runtime.resetDot(dot, true);
+          if (reverse) {
+            startReverseLaunch(dot);
+          } else {
+            runtime.resetDot(dot, true);
+          }
           continue;
         }
 
-        alpha = 1 - lifeProgress;
+        alpha = reverse ? Math.max(0.2, lifeProgress) : (1 - lifeProgress);
         burstAlpha = alpha * 0.85;
         burstCount = dot.fireworkBurstCount;
         previousLifeProgress = Math.max(0, (dot.sparkleFrame - 1) / Math.max(dot.sparkleLifeDuration || 1, 1));
+        burstProgress = reverse ? Math.max(0, 1 - lifeProgress) : Math.min(lifeProgress, 1);
+        previousBurstProgress = reverse ? Math.max(0, 1 - previousLifeProgress) : Math.min(previousLifeProgress, 1);
 
         context.fillStyle = dot.color;
         for (particleIndex = 0; particleIndex < burstCount; particleIndex += 1) {
           angle = ((Math.PI * 2) * (particleIndex / burstCount)) + dot.phase;
           spread = 0.72 + (((particleIndex % 5) / 4) * 0.42);
           radius = dot.fireworkBurstSize * (0.22 + (spread * 0.1));
-          particleTravel = radius * runtime.easeOutCubic(Math.min(lifeProgress, 1));
-          previousTravel = radius * runtime.easeOutCubic(Math.min(previousLifeProgress, 1));
-          gravityDrop = (lifeProgress * lifeProgress) * dot.fireworkBurstSize * 0.42;
-          previousGravityDrop = (previousLifeProgress * previousLifeProgress) * dot.fireworkBurstSize * 0.42;
+          particleTravel = radius * runtime.easeOutCubic(burstProgress);
+          previousTravel = radius * runtime.easeOutCubic(previousBurstProgress);
+          gravityDrop = (burstProgress * burstProgress) * dot.fireworkBurstSize * 0.42;
+          previousGravityDrop = (previousBurstProgress * previousBurstProgress) * dot.fireworkBurstSize * 0.42;
           currentX = dot.x + (Math.cos(angle) * particleTravel);
           currentY = dot.y + (Math.sin(angle) * particleTravel) + gravityDrop;
           previousX = dot.x + (Math.cos(angle) * previousTravel);
