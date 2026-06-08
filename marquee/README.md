@@ -561,6 +561,258 @@ Launch, burst, and falling fragments.
 - Supports dot images: yes
 - Image behavior: burst particles only; one burst repeats one image, another burst can use another image
 
+## Creating Custom Modes
+
+Custom background modes are registered with:
+
+```js
+ShoomiColorMarquee.registerMode("my-mode", {
+  style: function (dot, runtime) {},
+  reset: function (dot, spawnOffscreen, initialSpawn, runtime) {},
+  draw: function (runtime) {},
+  cleanup: function (dot, runtime) {}
+});
+```
+
+Only `draw` is truly essential, but in practice you will almost always want `style` and `reset` too.
+
+### Mode Hooks
+
+`style(dot, runtime)`
+
+- Runs when a dot is created or restyled.
+- Use it to define the dot's shape and behavior inputs.
+- Typical fields to set:
+- `radius`
+- `speed`
+- `wobble`
+- `drift`
+- `glow`
+- `length`
+- any custom properties your mode needs
+
+`reset(dot, spawnOffscreen, initialSpawn, runtime)`
+
+- Runs when a dot is spawned or recycled.
+- Use it to place the dot and initialize per-life state.
+- `spawnOffscreen` tells you whether the dot should begin just outside the visible area.
+- `initialSpawn` tells you whether this is part of the initial field population.
+
+`draw(runtime)`
+
+- Called every frame for the active mode.
+- Usually loops over `runtime.state.dots`, updates positions, handles respawn, and draws visuals.
+
+`cleanup(dot, runtime)`
+
+- Optional.
+- Use it to clear mode-specific fields when dots are reset.
+
+### Runtime API
+
+The `runtime` object passed to mode hooks exposes:
+
+`runtime.canvas`
+
+- The active canvas element.
+
+`runtime.context`
+
+- The `2d` drawing context.
+
+`runtime.settings`
+
+- Current marquee settings, including `dotSpeed`, `dotCount`, `dotColor`, `dotImageMode`, `backgroundMode`, `fps`, and more.
+
+`runtime.state`
+
+- Current runtime state, including:
+- `dots`
+- `backgroundFrame`
+- `entryFrame`
+- render-adaptation state
+
+`runtime.nextRandom()`
+
+- Deterministic pseudo-random generator used throughout the marquee.
+
+`runtime.resetDot(dot, spawnOffscreen, initialSpawn?)`
+
+- Recycles a dot using the current mode's reset logic.
+
+`runtime.applyDotStyle(dot)`
+
+- Reapplies the current mode's `style(...)`.
+
+`runtime.syncDotRelativePosition(dot, width, height)`
+
+- Updates `relativeX` / `relativeY` after you move a dot.
+
+`runtime.syncDotAbsolutePosition(dot)`
+
+- Restores absolute position from relative coordinates after resize.
+
+`runtime.easeOutCubic(value)`
+
+- Shared easing helper.
+
+`runtime.easeInCubic(value)`
+
+- Shared easing helper.
+
+`runtime.getDotImage(dot)`
+
+- Returns the assigned dot image when `dotImageMode` is `images`.
+
+`runtime.drawDotImage(dot, options)`
+
+- Draws the assigned dot image for a dot.
+- Returns `true` if an image was drawn, `false` if the mode should fall back to vector drawing.
+
+### `drawDotImage(...)` Options
+
+```js
+runtime.drawDotImage(dot, {
+  x: dot.x,
+  y: dot.y,
+  width: 12,
+  height: 12,
+  rotation: 0,
+  alpha: 1
+});
+```
+
+Supported options:
+
+- `x`
+- `y`
+- `width`
+- `height`
+- `rotation`
+- `alpha`
+
+### Reverse Animation Requirement
+
+New modes should support negative `dotSpeed`.
+
+That means:
+
+- moving in the opposite direction when `dotSpeed < 0`
+- respawning from the correct opposite edge
+- avoiding modes that simply drain out and never repopulate in reverse
+- making lifecycle-based effects feel intentionally reversed when possible
+
+Examples from built-in modes:
+
+- rain respawns from the bottom in reverse
+- bubbles can reform downward in reverse
+- fireworks can rewind from burst back into launch
+
+If full lifecycle reversal is too complex, at minimum the mode should:
+
+- continue animating
+- continue respawning
+- not freeze
+- not vanish permanently
+
+### Dot Image Support Requirement
+
+New modes should also consider `dotImageMode`.
+
+If your mode is image-friendly:
+
+- call `runtime.drawDotImage(...)`
+- let the mode fall back to vector drawing when no image is available
+- decide how images should behave in that mode
+
+Examples:
+
+- `rain` stretches images into streaks
+- `comets` use the image as the head
+- `matrix` repeats one image down a whole line
+- `fireworks` use one image per burst
+
+If a mode is not a good fit for images, document that clearly and keep the vector rendering path.
+
+### Local Helpers
+
+If a drawing helper is only used by one mode, keep it inside that mode file instead of adding it to the shared runtime API.
+
+Examples:
+
+- `leaves.js` owns its own leaf-shape drawing helper
+- `fog.js` owns its own fog-ellipse helper
+
+That keeps the shared runtime smaller and makes mode files more self-contained.
+
+### Minimal Example
+
+```js
+ShoomiColorMarquee.registerMode("my-drift", {
+  style: function (dot, runtime) {
+    var rand = runtime.nextRandom;
+    dot.radius = (rand() * 2) + 1;
+    dot.speed = (rand() * 0.8) + 0.4;
+    dot.drift = (rand() * 0.8) + 0.2;
+    dot.wobble = (rand() * 0.6) + 0.2;
+    dot.glow = 1;
+    dot.length = 0;
+  },
+  reset: function (dot, spawnOffscreen, initialSpawn, runtime) {
+    var rand = runtime.nextRandom;
+    var canvas = runtime.canvas;
+    var reverse = runtime.settings.dotSpeed < 0;
+
+    dot.x = spawnOffscreen
+      ? (reverse ? -12 : canvas.width + 12)
+      : (rand() * canvas.width);
+    dot.y = rand() * canvas.height;
+  },
+  draw: function (runtime) {
+    var dots = runtime.state.dots;
+    var context = runtime.context;
+    var canvas = runtime.canvas;
+    var reverse = runtime.settings.dotSpeed < 0;
+    var i;
+    var dot;
+    var driftX;
+    var driftY;
+
+    for (i = 0; i < dots.length; i += 1) {
+      dot = dots[i];
+      driftX = dot.speed * runtime.settings.dotSpeed * 2;
+      driftY = Math.sin((runtime.state.backgroundFrame / 20) + dot.phase) * dot.wobble;
+
+      dot.x -= driftX;
+      dot.y += driftY;
+
+      if ((!reverse && dot.x < -16) || (reverse && dot.x > canvas.width + 16)) {
+        runtime.resetDot(dot, true);
+        continue;
+      }
+
+      runtime.syncDotRelativePosition(dot, canvas.width, canvas.height);
+
+      if (runtime.drawDotImage(dot, {
+        width: dot.radius * 3,
+        height: dot.radius * 3,
+        alpha: 0.8
+      })) {
+        continue;
+      }
+
+      context.fillStyle = dot.color;
+      context.globalAlpha = 0.8;
+      context.beginPath();
+      context.arc(dot.x, dot.y, dot.radius, 0, Math.PI * 2, false);
+      context.fill();
+    }
+
+    context.globalAlpha = 1;
+  }
+});
+```
+
 ## Easter Eggs
 
 ### Reverse Mode
