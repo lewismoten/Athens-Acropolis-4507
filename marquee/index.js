@@ -33,6 +33,120 @@
   var modalCancel = document.getElementById("modal-cancel");
   var marqueeApi = window.ShoomiColorMarquee;
   var previewMarquee;
+  var DEFAULT_FONT_ID = "times-new-roman";
+  var FALLBACK_FONT_CATALOG = [{
+    id: "burtons-nightmare",
+    label: "Burton's Nightmare",
+    family: "\"Burton's Nightmare\"",
+    fallback: "fantasy"
+  }, {
+    id: "times-new-roman",
+    label: "Times New Roman",
+    family: "\"Times New Roman\"",
+    fallback: "times"
+  }, {
+    id: "times",
+    label: "Times",
+    family: "Times",
+    fallback: "serif"
+  }, {
+    id: "georgia",
+    label: "Georgia",
+    family: "Georgia",
+    fallback: "serif"
+  }, {
+    id: "garamond",
+    label: "Garamond",
+    family: "Garamond",
+    fallback: "serif"
+  }, {
+    id: "palatino-linotype",
+    label: "Palatino Linotype",
+    family: "\"Palatino Linotype\"",
+    fallback: "palatino"
+  }, {
+    id: "palatino",
+    label: "Palatino",
+    family: "Palatino",
+    fallback: "serif"
+  }, {
+    id: "arial",
+    label: "Arial",
+    family: "Arial",
+    fallback: "helvetica"
+  }, {
+    id: "helvetica",
+    label: "Helvetica",
+    family: "Helvetica",
+    fallback: "sans-serif"
+  }, {
+    id: "verdana",
+    label: "Verdana",
+    family: "Verdana",
+    fallback: "sans-serif"
+  }, {
+    id: "tahoma",
+    label: "Tahoma",
+    family: "Tahoma",
+    fallback: "sans-serif"
+  }, {
+    id: "trebuchet-ms",
+    label: "Trebuchet MS",
+    family: "\"Trebuchet MS\"",
+    fallback: "sans-serif"
+  }, {
+    id: "system-ui",
+    label: "System UI",
+    family: "system-ui",
+    fallback: "sans-serif"
+  }, {
+    id: "courier-new",
+    label: "Courier New",
+    family: "\"Courier New\"",
+    fallback: "courier"
+  }, {
+    id: "courier",
+    label: "Courier",
+    family: "Courier",
+    fallback: "monospace"
+  }, {
+    id: "lucida-console",
+    label: "Lucida Console",
+    family: "\"Lucida Console\"",
+    fallback: "monospace"
+  }, {
+    id: "comic-sans-ms",
+    label: "Comic Sans MS",
+    family: "\"Comic Sans MS\"",
+    fallback: "cursive"
+  }, {
+    id: "impact",
+    label: "Impact",
+    family: "Impact",
+    fallback: "fantasy"
+  }, {
+    id: "serif",
+    label: "Serif",
+    family: "serif"
+  }, {
+    id: "sans-serif",
+    label: "Sans Serif",
+    family: "sans-serif"
+  }, {
+    id: "monospace",
+    label: "Monospace",
+    family: "monospace"
+  }, {
+    id: "fantasy",
+    label: "Fantasy",
+    family: "fantasy"
+  }, {
+    id: "cursive",
+    label: "Cursive",
+    family: "cursive"
+  }];
+  var fontCatalog = [];
+  var fontCatalogById = {};
   var defaultMessageRow = {
     start: ">>",
     end: "<<",
@@ -87,7 +201,7 @@
     dotCount: 50,
     waveHeight: 8,
     dotSpeed: toDotSpeed(3),
-    font: "italic 30px Times New Roman, Times, serif",
+    font: "italic 30px " + resolveFontFamilyStack(DEFAULT_FONT_ID),
     fontHeight: 30,
     fps: 20,
     displayFrames: 100,
@@ -141,8 +255,10 @@
     }
   });
 
+  applyFontCatalog(FALLBACK_FONT_CATALOG, DEFAULT_FONT_ID);
   seedDefaultRows();
   updateMarquee();
+  loadFontCatalog();
 
   function updateMarquee() {
     var config = getPageConfig();
@@ -196,6 +312,7 @@
     var fontSize = marqueeApi.clampNumber(fields.fontSize.value, 10, 72, 30);
     var defaultColor = marqueeApi.normalizeColor(fields.defaultColor.value, "#ffff66");
     var fontStyle = String(fields.fontStyle.value || "0");
+    var fontFamilyId = getSelectedFontFamilyId();
     var sequenceCount = sequenceRows.length;
     var messageFile = getSequenceFileName();
 
@@ -215,7 +332,8 @@
       backgroundImage: normalizeAssetPath(fields.backgroundImage.value, ""),
       defaultColor: defaultColor,
       dotColor: marqueeApi.normalizeColor(fields.dotColor.value, "#9999ff"),
-      fontFamily: (fields.fontFamily.value || "Times New Roman, Times, serif").trim(),
+      fontFamilyId: fontFamilyId,
+      fontFamily: resolveFontFamilyStack(fontFamilyId),
       fontStyle: fontStyle
     };
   }
@@ -1001,6 +1119,133 @@
     }
 
     return prefix + config.fontSize + "px " + config.fontFamily;
+  }
+
+  function loadFontCatalog() {
+    if (!window.fetch) {
+      return;
+    }
+
+    window.fetch("font-families.json?v=20260607").then(function (response) {
+      if (!response || !response.ok) {
+        throw new Error("Failed to load font catalog.");
+      }
+
+      return response.json();
+    }).then(function (catalog) {
+      applyFontCatalog(catalog, getSelectedFontFamilyId());
+      updateMarquee();
+      if (!rowModal.hidden) {
+        updateModalEditorPreview();
+      }
+    }).catch(function () {
+      applyFontCatalog(FALLBACK_FONT_CATALOG, getSelectedFontFamilyId());
+      updateMarquee();
+      if (!rowModal.hidden) {
+        updateModalEditorPreview();
+      }
+    });
+  }
+
+  function applyFontCatalog(catalog, selectedId) {
+    var list = Array.isArray(catalog) && catalog.length ? catalog : FALLBACK_FONT_CATALOG;
+    var nextSelectedId = selectedId || DEFAULT_FONT_ID;
+    var optionsHtml = [];
+    var index;
+    var entry;
+
+    fontCatalog = [];
+    fontCatalogById = {};
+
+    for (index = 0; index < list.length; index += 1) {
+      entry = normalizeFontCatalogEntry(list[index]);
+
+      if (!entry || fontCatalogById[entry.id]) {
+        continue;
+      }
+
+      fontCatalog.push(entry);
+      fontCatalogById[entry.id] = entry;
+    }
+
+    if (!fontCatalogById[nextSelectedId]) {
+      nextSelectedId = fontCatalogById[DEFAULT_FONT_ID] ? DEFAULT_FONT_ID : (fontCatalog[0] ? fontCatalog[0].id : "");
+    }
+
+    for (index = 0; index < fontCatalog.length; index += 1) {
+      entry = fontCatalog[index];
+      optionsHtml.push('<option value="' + escapeHtml(entry.id) + '"' + (entry.id === nextSelectedId ? " selected" : "") + ">" + escapeHtml(entry.label) + "</option>");
+    }
+
+    fields.fontFamily.innerHTML = optionsHtml.join("");
+    fields.fontFamily.value = nextSelectedId;
+  }
+
+  function normalizeFontCatalogEntry(entry) {
+    if (!entry || typeof entry !== "object") {
+      return null;
+    }
+
+    if (!entry.id || !entry.family) {
+      return null;
+    }
+
+    return {
+      id: String(entry.id).trim(),
+      label: String(entry.label || entry.family).trim(),
+      family: String(entry.family).trim(),
+      fallback: entry.fallback ? String(entry.fallback).trim() : ""
+    };
+  }
+
+  function getSelectedFontFamilyId() {
+    var value = fields.fontFamily && fields.fontFamily.value ? String(fields.fontFamily.value).trim() : "";
+
+    if (value && fontCatalogById[value]) {
+      return value;
+    }
+
+    if (fontCatalogById[DEFAULT_FONT_ID]) {
+      return DEFAULT_FONT_ID;
+    }
+
+    return fontCatalog[0] ? fontCatalog[0].id : DEFAULT_FONT_ID;
+  }
+
+  function resolveFontFamilyStack(fontFamilyId) {
+    var resolvedFamilies = [];
+    var seenIds = {};
+    var seenFamilies = {};
+    var currentId = fontFamilyId;
+    var entry;
+    var family;
+
+    if (!fontCatalogById[currentId] && fontCatalogById[DEFAULT_FONT_ID]) {
+      currentId = DEFAULT_FONT_ID;
+    }
+
+    while (currentId && fontCatalogById[currentId] && !seenIds[currentId]) {
+      entry = fontCatalogById[currentId];
+      family = entry.family;
+      seenIds[currentId] = true;
+
+      if (family && !seenFamilies[family]) {
+        resolvedFamilies.push(family);
+        seenFamilies[family] = true;
+      }
+
+      if (!entry.fallback || !fontCatalogById[entry.fallback]) {
+        break;
+      }
+
+      currentId = entry.fallback;
+    }
+
+    if (!resolvedFamilies.length) {
+      return '"Times New Roman", Times, serif';
+    }
+
+    return resolvedFamilies.join(", ");
   }
 
   function getPreviewCharIndexFromNode(node, offset, isStart) {
