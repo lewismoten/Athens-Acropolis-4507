@@ -40,6 +40,19 @@
       font-size: 20px;
     }
 
+    .panel-header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 12px;
+      margin-bottom: 12px;
+    }
+
+    .panel-header H1,
+    .panel-header H2 {
+      margin: 0;
+    }
+
     .sticky-panel {
       position: sticky;
       top: 18px;
@@ -90,13 +103,6 @@
       display: flex;
       align-items: center;
       min-height: 36px;
-    }
-
-    .actions {
-      display: flex;
-      flex-wrap: wrap;
-      gap: 10px;
-      margin-top: 14px;
     }
 
     .button {
@@ -164,7 +170,9 @@
 <BODY>
 <DIV CLASS="page">
   <DIV CLASS="panel sticky-panel">
-    <H1>Shoomi's Visitor Counter</H1>
+    <DIV CLASS="panel-header">
+      <H1>Shoomi's Visitor Counter</H1>
+    </DIV>
     <DIV CLASS="helper">
       Build an old-style counter URL like <CODE>df=lmoten(1).dat&amp;dd=lmoten(a)|frgb=000066|comma=T|ft=0</CODE>,
       then preview it through the PHP service or render it locally on a canvas from the strip.
@@ -236,19 +244,21 @@
       </LABEL>
     </DIV>
 
-    <DIV CLASS="actions">
-      <BUTTON ID="copy-url" TYPE="button" CLASS="button">Copy URL</BUTTON>
-      <BUTTON ID="copy-tag" TYPE="button" CLASS="button">Copy IMG Tag</BUTTON>
-    </DIV>
   </FORM>
 
   <DIV CLASS="panel">
-    <H2>Generated URL</H2>
+    <DIV CLASS="panel-header">
+      <H2>Generated URL</H2>
+      <BUTTON ID="copy-url" TYPE="button" CLASS="button">Copy</BUTTON>
+    </DIV>
     <TEXTAREA ID="counter-url" CLASS="code-output" READONLY></TEXTAREA>
   </DIV>
 
   <DIV CLASS="panel">
-    <H2>Generated IMG Tag</H2>
+    <DIV CLASS="panel-header">
+      <H2>Generated IMG Tag</H2>
+      <BUTTON ID="copy-tag" TYPE="button" CLASS="button">Copy</BUTTON>
+    </DIV>
     <TEXTAREA ID="counter-tag" CLASS="code-output" READONLY></TEXTAREA>
   </DIV>
 </DIV>
