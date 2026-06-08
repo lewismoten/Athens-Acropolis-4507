@@ -29,9 +29,9 @@
       dot.vy = 0;
       dot.fireworkState = "";
       dot.x = spawnOffscreen
-        ? (reverse ? (-((dot.radius * 8.5) + (nextRandom() * 42))) : (canvas.width + (dot.radius * 8.5) + (nextRandom() * 42)))
+        ? (reverse ? (-(dot.radius * 3.2) - (nextRandom() * 12)) : (canvas.width - (dot.radius * 3.2) + (nextRandom() * 12)))
         : (nextRandom() * canvas.width);
-      dot.y = nextRandom() * canvas.height;
+      dot.y = initialSpawn ? ((nextRandom() * (canvas.height * 1.15)) - (canvas.height * 0.075)) : (nextRandom() * canvas.height);
     },
     draw: function (runtime) {
       var state = runtime.state;

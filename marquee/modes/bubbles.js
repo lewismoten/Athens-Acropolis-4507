@@ -27,6 +27,11 @@
     var simX;
     var simY;
     var simFrame;
+    var reverseRisePerFrame;
+    var reverseStartY;
+    var reverseCycleFrames;
+    var reverseAge;
+    var reverseReformFrames;
 
     dot.popFrame = -1;
     dot.sparkleFrame = 0;
@@ -45,13 +50,34 @@
 
     dot.popTargetY = (canvas.height * (0.08 + (nextRandom() * 0.42))) + dot.radius;
 
-    if (!initialSpawn) {
-      if (reverse) {
-        if (nextRandom() < 0.45) {
-          dot.popFrame = Math.floor(nextRandom() * Math.max(dot.popDuration, 1));
-          dot.y = dot.popTargetY + ((nextRandom() * dot.radius * 2) - dot.radius);
-        }
+    if (reverse && withPop) {
+      reverseRisePerFrame = Math.max(dot.speed * Math.max(Math.abs(runtime.settings.dotSpeed), 0.01) * 6.5, 0.01);
+      reverseStartY = -dot.radius - (spawnOffscreen ? (nextRandom() * 10) : 0);
+      reverseReformFrames = Math.max(1, Math.round((canvas.height + dot.radius - dot.popTargetY) / reverseRisePerFrame));
+      reverseCycleFrames = Math.max(dot.popDuration, 1) + reverseReformFrames;
+
+      if (initialSpawn) {
+        reverseAge = Math.floor(nextRandom() * reverseCycleFrames);
+      } else if (spawnOffscreen) {
+        reverseAge = Math.floor(nextRandom() * Math.max(dot.popDuration + Math.round(reverseReformFrames * 0.35), 1));
+      } else {
+        reverseAge = Math.floor(nextRandom() * reverseCycleFrames);
       }
+
+      if (reverseAge < dot.popDuration) {
+        dot.popFrame = reverseAge;
+        dot.y = dot.popTargetY + ((nextRandom() * dot.radius * 2) - dot.radius);
+      } else {
+        dot.popFrame = -1;
+        dot.y = dot.popTargetY + ((reverseAge - dot.popDuration) * reverseRisePerFrame);
+      }
+
+      dot.x += Math.sin((reverseAge / 24) + dot.phase) * dot.drift * (Math.abs(runtime.settings.dotSpeed) * 2.8);
+      dot.y = Math.min(dot.y, canvas.height + dot.radius + 10);
+      return;
+    }
+
+    if (!initialSpawn) {
       return;
     }
 
