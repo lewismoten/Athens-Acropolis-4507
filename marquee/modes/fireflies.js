@@ -41,6 +41,7 @@
       var driftY;
       var pulse;
       var glowRadius;
+      var rotation;
 
       for (index = 0; index < state.dots.length; index += 1) {
         dot = state.dots[index];
@@ -62,9 +63,12 @@
         context.arc(dot.x, dot.y, glowRadius, 0, Math.PI * 2, false);
         context.fill();
 
+        rotation = Math.atan2(driftY, driftX) + (Math.PI / 2);
+
         if (drawDotImage(dot, {
           width: dot.radius * 4.6,
           height: dot.radius * 4.6,
+          rotation: rotation,
           alpha: 0.5 + (0.45 * pulse)
         })) {
           continue;
