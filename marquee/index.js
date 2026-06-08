@@ -40,16 +40,16 @@
   var marqueeApi = window.ShoomiColorMarquee;
   var previewMarquee;
   var AVAILABLE_IMAGE_FILES = [
-    "blue_ball.gif",
-    "black_ball.gif",
-    "green_ball.gif",
-    "grey_ball.gif",
-    "orange_ball.gif",
-    "pink_ball.gif",
-    "purple_ball.gif",
     "red_ball.gif",
+    "orange_ball.gif",
+    "yellow_ball.gif",
+    "green_ball.gif",
+    "blue_ball.gif",
+    "purple_ball.gif",
+    "pink_ball.gif",
+    "grey_ball.gif",
     "white_ball.gif",
-    "yellow_ball.gif"
+    "black_ball.gif"
   ];
   var DEFAULT_FONT_ID = "times-new-roman";
   var FALLBACK_FONT_CATALOG = [{
