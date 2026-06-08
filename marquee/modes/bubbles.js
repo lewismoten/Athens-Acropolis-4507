@@ -32,6 +32,7 @@
     var reverseCycleFrames;
     var reverseAge;
     var reverseReformFrames;
+    var reversePopBias;
 
     dot.popFrame = -1;
     dot.sparkleFrame = 0;
@@ -52,16 +53,14 @@
 
     if (reverse && withPop) {
       reverseRisePerFrame = Math.max(dot.speed * Math.max(Math.abs(runtime.settings.dotSpeed), 0.01) * 6.5, 0.01);
-      reverseStartY = -dot.radius - (spawnOffscreen ? (nextRandom() * 10) : 0);
       reverseReformFrames = Math.max(1, Math.round((canvas.height + dot.radius - dot.popTargetY) / reverseRisePerFrame));
       reverseCycleFrames = Math.max(dot.popDuration, 1) + reverseReformFrames;
+      reversePopBias = spawnOffscreen ? 0.88 : (initialSpawn ? 0.76 : 0.68);
 
-      if (initialSpawn) {
-        reverseAge = Math.floor(nextRandom() * reverseCycleFrames);
-      } else if (spawnOffscreen) {
-        reverseAge = Math.floor(nextRandom() * Math.max(dot.popDuration + Math.round(reverseReformFrames * 0.35), 1));
+      if (nextRandom() < reversePopBias) {
+        reverseAge = Math.floor(nextRandom() * Math.max(dot.popDuration, 1));
       } else {
-        reverseAge = Math.floor(nextRandom() * reverseCycleFrames);
+        reverseAge = dot.popDuration + Math.floor(nextRandom() * Math.max(Math.round(reverseReformFrames * 0.3), 1));
       }
 
       if (reverseAge < dot.popDuration) {
