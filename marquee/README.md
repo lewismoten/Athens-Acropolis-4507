@@ -42,10 +42,14 @@ It takes inspiration from old Java applet marquees and GeoCities-era banner art,
 
 ### `colors`
 
-`colors` is a pipe-delimited list of text colors.
+`colors` can be provided either as a pipe-delimited list or as an array of text colors.
 
 ```js
 colors: "ffff66|66ccff|ff99cc|"
+```
+
+```js
+colors: ["ffff66", "#66ccff", "ff99cc"]
 ```
 
 Notes:
@@ -57,10 +61,14 @@ Notes:
 
 ### `imageFiles`
 
-`imageFiles` is also pipe-delimited.
+`imageFiles` can also be provided either as a pipe-delimited list or as an array.
 
 ```js
 imageFiles: "blue_ball.gif|green_ball.gif|red_ball.gif|"
+```
+
+```js
+imageFiles: ["blue_ball.gif", "green_ball.gif", "red_ball.gif"]
 ```
 
 These images can be used inline inside text with `$` tokens.
@@ -147,6 +155,13 @@ All options are passed to `ShoomiColorMarquee.createCanvasMarquee(options)`.
 - Required: no
 - Default: `#ffaa00`
 - Fallback text color when `colors` is missing or too short.
+
+`imageFiles`
+
+- Type: `string | string[]`
+- Required: no
+- Default: `""`
+- Pipe-delimited image list or image array for inline `$0`, `$1`, `$2` message tokens.
 
 `start`
 
@@ -321,10 +336,10 @@ Supported values:
 
 `dotImageFiles`
 
-- Type: `string`
+- Type: `string | string[]`
 - Required: no
 - Default: `""`
-- Pipe-delimited image list used by image-aware background modes.
+- Pipe-delimited image list or image array used by image-aware background modes.
 
 ### Timing And Motion
 

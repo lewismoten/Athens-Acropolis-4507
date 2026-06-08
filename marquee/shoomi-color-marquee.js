@@ -16,7 +16,7 @@
   }
 
   function parseColorList(rawValue) {
-    var values = String(rawValue || "").split("|");
+    var values = Array.isArray(rawValue) ? rawValue : String(rawValue || "").split("|");
     var colors = [];
     var index;
     var normalized;
@@ -33,7 +33,7 @@
   }
 
   function parseImageFileList(rawValue) {
-    var values = String(rawValue || "").split("|");
+    var values = Array.isArray(rawValue) ? rawValue : String(rawValue || "").split("|");
     var files = [];
     var index;
     var value;
@@ -445,7 +445,7 @@
       dotImageMode: normalizeDotImageMode(options.dotImageMode),
       dotColor: normalizeColor(options.dotColor, "#9999ff"),
       dotCount: typeof options.dotCount === "number" ? options.dotCount : 50,
-      dotImageFiles: typeof options.dotImageFiles === "string" ? options.dotImageFiles : "",
+      dotImageFiles: typeof options.dotImageFiles !== "undefined" ? options.dotImageFiles : "",
       waveHeight: typeof options.waveHeight === "number" ? options.waveHeight : 8,
       fontName: initialFontName || '"Times New Roman", Times, serif',
       fontSize: initialFontSize,
@@ -456,7 +456,7 @@
       edgePadding: typeof options.edgePadding === "number" ? options.edgePadding : 18,
       dotSpeed: typeof options.dotSpeed === "number" ? options.dotSpeed : 0.18,
       defaultColor: normalizeColor(options.defaultColor, "#ffaa00"),
-      imageFiles: typeof options.imageFiles === "string" ? options.imageFiles : ""
+      imageFiles: typeof options.imageFiles !== "undefined" ? options.imageFiles : ""
     };
 
     var randomSeed = typeof options.randomSeed === "number" ? (options.randomSeed >>> 0) : 0x1a2b3c4d;
@@ -602,7 +602,7 @@
       settings.dotImageMode = typeof next.dotImageMode === "string" ? normalizeDotImageMode(next.dotImageMode) : settings.dotImageMode;
       settings.dotColor = typeof next.dotColor !== "undefined" ? normalizeColor(next.dotColor, settings.dotColor) : settings.dotColor;
       settings.dotCount = typeof next.dotCount === "number" ? next.dotCount : settings.dotCount;
-      settings.dotImageFiles = typeof next.dotImageFiles === "string" ? next.dotImageFiles : settings.dotImageFiles;
+      settings.dotImageFiles = typeof next.dotImageFiles !== "undefined" ? next.dotImageFiles : settings.dotImageFiles;
       settings.waveHeight = typeof next.waveHeight === "number" ? next.waveHeight : settings.waveHeight;
       settings.fontName = typeof next.fontName === "string" && next.fontName.trim() ? next.fontName.trim() : (next.font ? extractFontNameFromDeclaration(next.font) : settings.fontName);
       settings.fontSize = typeof next.fontSize === "number" ? next.fontSize : (typeof next.fontHeight === "number" ? next.fontHeight : settings.fontSize);
@@ -613,7 +613,7 @@
       settings.edgePadding = typeof next.edgePadding === "number" ? next.edgePadding : settings.edgePadding;
       settings.dotSpeed = typeof next.dotSpeed === "number" ? next.dotSpeed : settings.dotSpeed;
       settings.defaultColor = typeof next.defaultColor !== "undefined" ? normalizeColor(next.defaultColor, settings.defaultColor) : settings.defaultColor;
-      settings.imageFiles = typeof next.imageFiles === "string" ? next.imageFiles : settings.imageFiles;
+      settings.imageFiles = typeof next.imageFiles !== "undefined" ? next.imageFiles : settings.imageFiles;
 
       if (settings.dotCount !== previousDotCount) {
         setRenderDotCount(Math.min(state.renderDotCount, settings.dotCount));
