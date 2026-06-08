@@ -500,8 +500,7 @@
       settings.defaultColor = typeof next.defaultColor !== "undefined" ? normalizeColor(next.defaultColor, settings.defaultColor) : settings.defaultColor;
 
       if (settings.dotCount !== previousDotCount) {
-        state.renderDotCount = Math.min(state.renderDotCount, settings.dotCount);
-        setRenderDotCount(settings.dotCount);
+        setRenderDotCount(Math.min(state.renderDotCount, settings.dotCount));
       }
 
       if (settings.backgroundImage !== previousBackgroundImage) {
