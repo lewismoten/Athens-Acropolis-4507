@@ -34,6 +34,7 @@
       var settings = runtime.settings;
       var context = runtime.context;
       var canvas = runtime.canvas;
+      var drawDotImage = runtime.drawDotImage;
       var index;
       var dot;
       var driftX;
@@ -60,6 +61,14 @@
         context.beginPath();
         context.arc(dot.x, dot.y, glowRadius, 0, Math.PI * 2, false);
         context.fill();
+
+        if (drawDotImage(dot, {
+          width: dot.radius * 4.6,
+          height: dot.radius * 4.6,
+          alpha: 0.5 + (0.45 * pulse)
+        })) {
+          continue;
+        }
 
         context.globalAlpha = 0.5 + (0.45 * pulse);
         context.beginPath();

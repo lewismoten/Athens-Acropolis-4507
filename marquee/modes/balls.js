@@ -41,6 +41,7 @@
       var settings = runtime.settings;
       var context = runtime.context;
       var canvas = runtime.canvas;
+      var drawDotImage = runtime.drawDotImage;
       var index;
       var dot;
       var nextX;
@@ -64,6 +65,14 @@
         dot.x = nextX;
         dot.y = nextY;
         runtime.syncDotRelativePosition(dot, canvas.width, canvas.height);
+
+        if (drawDotImage(dot, {
+          width: dot.radius * 2.5,
+          height: dot.radius * 2.5,
+          alpha: 0.95
+        })) {
+          continue;
+        }
 
         context.fillStyle = dot.color;
         context.globalAlpha = 0.75;

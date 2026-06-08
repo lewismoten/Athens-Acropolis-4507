@@ -241,6 +241,14 @@
     return value || "stars";
   }
 
+  function normalizeDotImageMode(value) {
+    if (value === "images") {
+      return "images";
+    }
+
+    return "none";
+  }
+
   function normalizeBackgroundImagePlacement(value) {
     if (value === "center" ||
       value === "top-left" ||
@@ -431,8 +439,10 @@
       end: options.end || "<<",
       staticMessage: !!options.staticMessage,
       backgroundMode: normalizeBackgroundMode(options.backgroundMode),
+      dotImageMode: normalizeDotImageMode(options.dotImageMode),
       dotColor: normalizeColor(options.dotColor, "#9999ff"),
       dotCount: typeof options.dotCount === "number" ? options.dotCount : 50,
+      dotImageFiles: typeof options.dotImageFiles === "string" ? options.dotImageFiles : "",
       waveHeight: typeof options.waveHeight === "number" ? options.waveHeight : 8,
       fontName: initialFontName || '"Times New Roman", Times, serif',
       fontSize: initialFontSize,
@@ -459,6 +469,7 @@
       slowFrameStreak: 0,
       backgroundImageSource: "",
       inlineImages: [],
+      dotImages: [],
       lastTimestamp: 0,
       entries: []
     };
@@ -466,6 +477,7 @@
     resizeCanvas();
     updateBackgroundImage(settings.backgroundImage);
     loadInlineImages(settings.imageFiles);
+    loadDotImages(settings.dotImageFiles);
     setEntries(options.entries || buildFallbackEntries(), false);
     loadOptionalMessageFile();
     requestAnimationFrame(tick);
@@ -563,6 +575,8 @@
       var previousBackgroundImageWidth = settings.backgroundImageWidth;
       var previousBackgroundImageHeight = settings.backgroundImageHeight;
       var previousImageFiles = settings.imageFiles;
+      var previousDotImageFiles = settings.dotImageFiles;
+      var previousDotImageMode = settings.dotImageMode;
       var previousMessageFile = settings.messageFile;
       var previousBackgroundMode = settings.backgroundMode;
 
@@ -582,8 +596,10 @@
       settings.end = typeof next.end === "string" ? next.end : settings.end;
       settings.staticMessage = typeof next.staticMessage === "boolean" ? next.staticMessage : settings.staticMessage;
       settings.backgroundMode = next.backgroundMode ? normalizeBackgroundMode(next.backgroundMode) : settings.backgroundMode;
+      settings.dotImageMode = typeof next.dotImageMode === "string" ? normalizeDotImageMode(next.dotImageMode) : settings.dotImageMode;
       settings.dotColor = typeof next.dotColor !== "undefined" ? normalizeColor(next.dotColor, settings.dotColor) : settings.dotColor;
       settings.dotCount = typeof next.dotCount === "number" ? next.dotCount : settings.dotCount;
+      settings.dotImageFiles = typeof next.dotImageFiles === "string" ? next.dotImageFiles : settings.dotImageFiles;
       settings.waveHeight = typeof next.waveHeight === "number" ? next.waveHeight : settings.waveHeight;
       settings.fontName = typeof next.fontName === "string" && next.fontName.trim() ? next.fontName.trim() : (next.font ? extractFontNameFromDeclaration(next.font) : settings.fontName);
       settings.fontSize = typeof next.fontSize === "number" ? next.fontSize : (typeof next.fontHeight === "number" ? next.fontHeight : settings.fontSize);
@@ -613,6 +629,10 @@
 
       if (settings.imageFiles !== previousImageFiles) {
         loadInlineImages(settings.imageFiles);
+      }
+
+      if (settings.dotImageFiles !== previousDotImageFiles || settings.dotImageMode !== previousDotImageMode) {
+        loadDotImages(settings.dotImageFiles);
       }
 
       if (settings.messageFile !== previousMessageFile) {
@@ -765,6 +785,27 @@
       state.inlineImages = nextImages;
     }
 
+    function loadDotImages(imageFiles) {
+      var nextFiles = parseImageFileList(imageFiles);
+      var nextImages = [];
+      var index;
+      var fileName;
+      var image;
+
+      for (index = 0; index < nextFiles.length; index += 1) {
+        fileName = String(nextFiles[index] || "").trim();
+        if (!fileName) {
+          continue;
+        }
+        image = new Image();
+        image.onload = drawFrame;
+        image.src = fileName;
+        nextImages.push(image);
+      }
+
+      state.dotImages = nextImages;
+    }
+
     function getModeRuntime() {
       return {
         canvas: canvas,
@@ -778,9 +819,55 @@
         syncDotAbsolutePosition: syncDotAbsolutePosition,
         easeOutCubic: easeOutCubic,
         easeInCubic: easeInCubic,
+        getDotImage: getDotImage,
+        drawDotImage: drawDotImage,
         drawLeafShape: drawLeafShape,
         drawFogEllipse: drawFogEllipse
       };
+    }
+
+    function getDotImage(dot) {
+      var index;
+
+      if (settings.dotImageMode !== "images" || !state.dotImages.length) {
+        return null;
+      }
+
+      if (typeof dot.imageIndex !== "number" || dot.imageIndex < 0) {
+        dot.imageIndex = Math.floor(nextRandom() * state.dotImages.length);
+      }
+
+      index = dot.imageIndex % state.dotImages.length;
+      return state.dotImages[index] || null;
+    }
+
+    function drawDotImage(dot, options) {
+      var image = getDotImage(dot);
+      var settingsMap = options || {};
+      var width;
+      var height;
+      var x;
+      var y;
+
+      if (!image || !image.complete || image.naturalWidth <= 0 || image.naturalHeight <= 0) {
+        return false;
+      }
+
+      width = Math.max(1, settingsMap.width || (dot.radius * 2));
+      height = Math.max(1, settingsMap.height || (dot.radius * 2));
+      x = typeof settingsMap.x === "number" ? settingsMap.x : dot.x;
+      y = typeof settingsMap.y === "number" ? settingsMap.y : dot.y;
+
+      context.save();
+      context.globalAlpha = typeof settingsMap.alpha === "number" ? settingsMap.alpha : 1;
+      context.translate(x, y);
+      if (typeof settingsMap.rotation === "number" && settingsMap.rotation !== 0) {
+        context.rotate(settingsMap.rotation);
+      }
+      context.drawImage(image, -width / 2, -height / 2, width, height);
+      context.restore();
+      context.globalAlpha = 1;
+      return true;
     }
 
     function drawLeafShape(width, height) {
@@ -1121,6 +1208,7 @@
         fireworkTargetY: 0,
         fireworkBurstSize: 0,
         fireworkBurstCount: 0,
+        imageIndex: -1,
         phase: nextRandom() * Math.PI * 2,
         color: settings.dotColor
       };

@@ -141,6 +141,7 @@
       var settings = runtime.settings;
       var context = runtime.context;
       var canvas = runtime.canvas;
+      var drawDotImage = runtime.drawDotImage;
       var index;
       var dot;
       var rise;
@@ -163,6 +164,14 @@
           (reverse && dot.y > canvas.height + dot.radius + 10) ||
           dot.x < -24 || dot.x > canvas.width + 24) {
           runtime.resetDot(dot, true);
+        }
+
+        if (drawDotImage(dot, {
+          width: dot.radius * 2.35,
+          height: dot.radius * 2.35,
+          alpha: 0.8 + (pulse * 0.35)
+        })) {
+          continue;
         }
 
         drawBubbleBody(dot, context, pulse);
@@ -190,6 +199,7 @@
       var settings = runtime.settings;
       var context = runtime.context;
       var canvas = runtime.canvas;
+      var drawDotImage = runtime.drawDotImage;
       var index;
       var dot;
       var rise;
@@ -250,6 +260,14 @@
           (reverse && dot.y > canvas.height + dot.radius + 10) ||
           dot.x < -24 || dot.x > canvas.width + 24) {
           runtime.resetDot(dot, true);
+          continue;
+        }
+
+        if (drawDotImage(dot, {
+          width: dot.radius * 2.35,
+          height: dot.radius * 2.35,
+          alpha: 0.8 + (pulse * 0.35)
+        })) {
           continue;
         }
 

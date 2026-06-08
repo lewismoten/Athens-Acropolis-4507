@@ -51,6 +51,7 @@
       var settings = runtime.settings;
       var context = runtime.context;
       var canvas = runtime.canvas;
+      var drawDotImage = runtime.drawDotImage;
       var index;
       var dot;
       var drift;
@@ -68,6 +69,15 @@
 
         if ((!reverse && dot.x < -dot.radius) || (reverse && dot.x > canvas.width + dot.radius)) {
           runtime.resetDot(dot, true);
+        }
+
+        if (drawDotImage(dot, {
+          y: dot.y + shimmerY,
+          width: dot.radius * 3.4,
+          height: dot.radius * 3.4,
+          alpha: twinkle
+        })) {
+          continue;
         }
 
         context.fillStyle = dot.color;

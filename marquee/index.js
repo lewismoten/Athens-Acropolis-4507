@@ -194,6 +194,7 @@
     dotCount: document.getElementById("marquee-dot-count"),
     backgroundSpeed: document.getElementById("marquee-background-speed"),
     backgroundMode: document.getElementById("marquee-background-mode"),
+    dotImageMode: document.getElementById("marquee-dot-image-mode"),
     animationSpeed: document.getElementById("marquee-animation-speed"),
     background: document.getElementById("marquee-background"),
     backgroundImage: document.getElementById("marquee-background-image"),
@@ -238,6 +239,8 @@
     fps: 20,
     displayFrames: 100,
     defaultColor: "#ffff66",
+    dotImageMode: "none",
+    dotImageFiles: buildImageFilesPipe(selectedImageFiles.map(resolvePreviewBackgroundImagePath)),
     imageFiles: buildImageFilesPipe(selectedImageFiles.map(resolvePreviewBackgroundImagePath)),
     entries: [[">>,<<", defaultMessageRow.text, "#ffff66|#ffee88|#ffdd55|#ffee88"]]
   });
@@ -385,6 +388,7 @@
       dotCount: marqueeApi.clampNumber(fields.dotCount.value, 0, 9999, 50),
       backgroundSpeed: marqueeApi.clampNumber(fields.backgroundSpeed.value, -30, 30, 3),
       backgroundMode: normalizeBackgroundMode(fields.backgroundMode.value),
+      dotImageMode: normalizeDotImageMode(fields.dotImageMode.value),
       animationSpeed: marqueeApi.clampNumber(fields.animationSpeed.value, 1, 120, 20),
       background: marqueeApi.normalizeColor(fields.background.value, "#000066"),
       backgroundImage: normalizeAssetPath(fields.backgroundImage.value, ""),
@@ -414,8 +418,10 @@
       backgroundImageWidth: config.backgroundImageWidth,
       backgroundImageHeight: config.backgroundImageHeight,
       backgroundMode: config.backgroundMode,
+      dotImageMode: config.dotImageMode,
       dotColor: config.dotColor,
       dotCount: config.dotCount,
+      dotImageFiles: buildImageFilesPipe(selectedImageFiles.map(resolvePreviewBackgroundImagePath)),
       dotSpeed: toDotSpeed(config.backgroundSpeed),
       waveHeight: config.waveHeight,
       fontName: config.fontFamily,
@@ -474,8 +480,10 @@
       backgroundImageWidth: config.backgroundImageWidth,
       backgroundImageHeight: config.backgroundImageHeight,
       backgroundMode: config.backgroundMode,
+      dotImageMode: config.dotImageMode,
       dotColor: config.dotColor,
       dotCount: config.dotCount,
+      dotImageFiles: config.imageFiles,
       dotSpeed: toDotSpeed(config.backgroundSpeed),
       waveHeight: config.waveHeight,
       fontName: config.fontFamily,
@@ -1403,6 +1411,14 @@
     }
 
     return "stars";
+  }
+
+  function normalizeDotImageMode(value) {
+    if (value === "images") {
+      return "images";
+    }
+
+    return "none";
   }
 
   function normalizeBackgroundImagePlacement(value) {
