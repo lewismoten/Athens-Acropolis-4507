@@ -207,6 +207,8 @@
       var imageCenterX;
       var imageCenterY;
       var streakProgress;
+      var launchBurstProgress;
+      var centerFlashAlpha;
 
       for (index = 0; index < state.dots.length; index += 1) {
         dot = state.dots[index];
@@ -309,6 +311,16 @@
         previousLifeProgress = Math.max(0, (dot.sparkleFrame - 1) / Math.max(dot.sparkleLifeDuration || 1, 1));
         burstProgress = reverse ? Math.max(0, 1 - lifeProgress) : Math.min(lifeProgress, 1);
         previousBurstProgress = reverse ? Math.max(0, 1 - previousLifeProgress) : Math.min(previousLifeProgress, 1);
+        launchBurstProgress = Math.min(burstProgress / 0.16, 1);
+
+        if (!reverse && burstProgress < 0.18) {
+          centerFlashAlpha = burstAlpha * (1 - (burstProgress / 0.18));
+          context.fillStyle = dot.color;
+          context.globalAlpha = centerFlashAlpha * 0.6;
+          context.beginPath();
+          context.arc(dot.x, dot.y, Math.max(1.5, dot.radius * (2.1 - (launchBurstProgress * 0.9))), 0, Math.PI * 2, false);
+          context.fill();
+        }
 
         context.fillStyle = dot.color;
         for (particleIndex = 0; particleIndex < burstCount; particleIndex += 1) {
@@ -326,8 +338,8 @@
           particleRadius = dot.radius * (0.7 - (lifeProgress * 0.2));
 
           context.strokeStyle = dot.color;
-          context.globalAlpha = burstAlpha * (0.75 - (0.2 * burstProgress));
-          context.lineWidth = Math.max(1, dot.radius * (0.16 + ((1 - burstProgress) * 0.18)));
+          context.globalAlpha = burstAlpha * (0.92 - (0.34 * burstProgress));
+          context.lineWidth = Math.max(1, dot.radius * (0.12 + ((1 - burstProgress) * 0.24)));
           context.beginPath();
           context.moveTo(dot.x, dot.y);
           context.lineTo(currentX, currentY);
@@ -335,11 +347,11 @@
 
           imageRotation = Math.atan2(currentY - dot.y, currentX - dot.x) + (Math.PI / 2);
           imageSize = Math.max(2.5, particleRadius * 4.2);
-          streakProgress = runtime.easeOutCubic(burstProgress);
-          imageWidth = imageSize * (0.18 + (0.82 * streakProgress));
-          imageHeight = imageSize * (2.8 - (1.8 * streakProgress));
-          imageCenterX = dot.x + ((currentX - dot.x) * (0.45 + (0.55 * streakProgress)));
-          imageCenterY = dot.y + ((currentY - dot.y) * (0.45 + (0.55 * streakProgress)));
+          streakProgress = runtime.easeOutCubic(launchBurstProgress);
+          imageWidth = imageSize * (0.1 + (0.9 * streakProgress));
+          imageHeight = imageSize * (3.3 - (2.3 * streakProgress));
+          imageCenterX = dot.x + ((currentX - dot.x) * (0.18 + (0.82 * streakProgress)));
+          imageCenterY = dot.y + ((currentY - dot.y) * (0.18 + (0.82 * streakProgress)));
 
           if (drawDotImage(dot, {
             x: imageCenterX,
