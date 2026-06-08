@@ -296,7 +296,7 @@
     lines.push('<canvas id="dream-marquee" width="' + config.width + '" height="' + config.height + '" style="display:block;">');
     lines.push(escapeForInlineText((rows[0] && rows[0].text) || "Dream marquee"));
     lines.push("</canvas>");
-    lines.push('<script src="dream-marquee.js"><\/script>');
+    lines.push('<script src="marquee/shoomi-color-marquee.js"><\/script>');
     for (index = 0; index < modeScripts.length; index += 1) {
       lines.push('<script src="' + modeScripts[index] + '"><\/script>');
     }
