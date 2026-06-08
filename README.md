@@ -16,6 +16,8 @@ This archive has been partially modernized so the original experience can still 
 - The `Burton's Nightmare` / `nitemare.ttf` font now loads as a webfont through `font.css`, which restores the intended look of the navigation and page titles.
 - The old Visual Basic `Color Writer / <FONT> Editor` has been recreated as a browser app in `colorwriter.html` and `colorwriter.js`, including palette picking, per-letter anchor colors, gradient HTML output, and a live rendered preview.
 
+The reconstructed marquee engine, editor, parameters, message-file format, and mode system are documented in [marquee/README.md](marquee/README.md).
+
 # MIDI Restoration
 The original site used an embedded MIDI file, [midi_song_newage.mid](midi_song_newage.mid), which is only about `12 KB`, but modern browsers now tend to download instead of play it. A straight browser-friendly replacement with rendered `mp3` or `ogg` files worked technically, but those full audio renders ended up being a few megabytes each, which felt out of proportion to the tiny original asset.
 
