@@ -5,6 +5,17 @@
     return;
   }
 
+  function drawLeafShape(context, width, height) {
+    context.beginPath();
+    context.moveTo(0, -height / 2);
+    context.bezierCurveTo(width / 2, -height / 3, width / 2, height / 3, 0, height / 2);
+    context.bezierCurveTo(-width / 2, height / 3, -width / 2, -height / 3, 0, -height / 2);
+    context.fill();
+
+    context.globalAlpha *= 0.55;
+    context.fillRect(-0.5, -height / 2, 1, height);
+  }
+
   api.registerMode("leaves", {
     style: function (dot, runtime) {
       var nextRandom = runtime.nextRandom;
@@ -38,7 +49,6 @@
       var settings = runtime.settings;
       var context = runtime.context;
       var canvas = runtime.canvas;
-      var drawLeafShape = runtime.drawLeafShape;
       var drawDotImage = runtime.drawDotImage;
       var index;
       var dot;
@@ -81,7 +91,7 @@
         context.rotate(rotation);
         context.fillStyle = dot.color;
         context.globalAlpha = 0.78;
-        drawLeafShape(width, height);
+        drawLeafShape(context, width, height);
         context.restore();
       }
 

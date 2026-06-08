@@ -818,9 +818,7 @@
         easeOutCubic: easeOutCubic,
         easeInCubic: easeInCubic,
         getDotImage: getDotImage,
-        drawDotImage: drawDotImage,
-        drawLeafShape: drawLeafShape,
-        drawFogEllipse: drawFogEllipse
+        drawDotImage: drawDotImage
       };
     }
 
@@ -866,31 +864,6 @@
       context.restore();
       context.globalAlpha = 1;
       return true;
-    }
-
-    function drawLeafShape(width, height) {
-      context.beginPath();
-      context.moveTo(0, -height / 2);
-      context.bezierCurveTo(width / 2, -height / 3, width / 2, height / 3, 0, height / 2);
-      context.bezierCurveTo(-width / 2, height / 3, -width / 2, -height / 3, 0, -height / 2);
-      context.fill();
-
-      context.globalAlpha *= 0.55;
-      context.fillRect(-0.5, -height / 2, 1, height);
-    }
-
-    function drawFogEllipse(centerX, centerY, width, height) {
-      context.beginPath();
-      if (typeof context.ellipse === "function") {
-        context.ellipse(centerX, centerY, width / 2, height / 2, 0, 0, Math.PI * 2);
-      } else {
-        context.save();
-        context.translate(centerX, centerY);
-        context.scale(width / 2, height / 2);
-        context.arc(0, 0, 1, 0, Math.PI * 2, false);
-        context.restore();
-      }
-      context.fill();
     }
 
     function drawText(entry, metrics, baseX, baseY, progress, exitProgress) {

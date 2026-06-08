@@ -5,6 +5,20 @@
     return;
   }
 
+  function drawFogEllipse(context, centerX, centerY, width, height) {
+    context.beginPath();
+    if (typeof context.ellipse === "function") {
+      context.ellipse(centerX, centerY, width / 2, height / 2, 0, 0, Math.PI * 2);
+    } else {
+      context.save();
+      context.translate(centerX, centerY);
+      context.scale(width / 2, height / 2);
+      context.arc(0, 0, 1, 0, Math.PI * 2, false);
+      context.restore();
+    }
+    context.fill();
+  }
+
   api.registerMode("fog", {
     style: function (dot, runtime) {
       var nextRandom = runtime.nextRandom;
@@ -38,7 +52,6 @@
       var settings = runtime.settings;
       var context = runtime.context;
       var canvas = runtime.canvas;
-      var drawFogEllipse = runtime.drawFogEllipse;
       var drawDotImage = runtime.drawDotImage;
       var index;
       var dot;
@@ -80,11 +93,11 @@
 
         context.fillStyle = dot.color;
         context.globalAlpha = alpha;
-        drawFogEllipse(dot.x, dot.y, width, height);
+        drawFogEllipse(context, dot.x, dot.y, width, height);
         context.globalAlpha = alpha * 0.75;
-        drawFogEllipse(dot.x + (width * 0.22), dot.y - (height * 0.1), width * 0.68, height * 0.72);
+        drawFogEllipse(context, dot.x + (width * 0.22), dot.y - (height * 0.1), width * 0.68, height * 0.72);
         context.globalAlpha = alpha * 0.55;
-        drawFogEllipse(dot.x - (width * 0.18), dot.y + (height * 0.08), width * 0.56, height * 0.62);
+        drawFogEllipse(context, dot.x - (width * 0.18), dot.y + (height * 0.08), width * 0.56, height * 0.62);
       }
 
       context.globalAlpha = 1;
