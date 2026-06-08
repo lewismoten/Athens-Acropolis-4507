@@ -1,10 +1,10 @@
 <?php
 declare(strict_types=1);
 
-$storagePath = __DIR__ . '/data/counts.json';
+$storageDirectory = __DIR__ . '/data';
 $legacyOptions = parseLegacyCounterOptions($_GET);
 $stripPath = resolveStripPath($legacyOptions['dd'] ?? ($_GET['dd'] ?? ''));
-$counterKey = normalizeCounterKey($_GET['key'] ?? ($legacyOptions['df'] ?? ($_GET['df'] ?? 'default')));
+$counterFile = resolveCounterFilePath($storageDirectory, $_GET['key'] ?? ($legacyOptions['df'] ?? ($_GET['df'] ?? 'default')));
 $minimumDigits = clampInteger($_GET['digits'] ?? '4', 1, 12, 4);
 $shouldIncrement = ($_GET['increment'] ?? '1') !== '0';
 $step = clampInteger($_GET['step'] ?? '1', 0, 1000, 1);
@@ -12,8 +12,9 @@ $useComma = parseLegacyBoolean($legacyOptions['comma'] ?? ($_GET['comma'] ?? '1'
 $frameColor = normalizeOptionalColor($legacyOptions['frgb'] ?? ($_GET['frgb'] ?? ''));
 $frameThickness = clampInteger($legacyOptions['ft'] ?? ($_GET['ft'] ?? '0'), 0, 6, 0);
 
-ensureStorageFile($storagePath);
-$count = readAndUpdateCount($storagePath, $counterKey, $shouldIncrement ? $step : 0);
+ensureStorageDirectory($storageDirectory);
+ensureCounterFile($counterFile);
+$count = readAndUpdateCount($counterFile, $shouldIncrement ? $step : 0);
 
 renderCounterImage($count, $minimumDigits, $stripPath, $useComma, $frameColor, $frameThickness);
 
@@ -50,23 +51,34 @@ function clampInteger($value, int $min, int $max, int $fallback): int
     return $number;
 }
 
-function ensureStorageFile(string $storagePath): void
+function ensureStorageDirectory(string $storageDirectory): void
 {
-    $directory = dirname($storagePath);
-
-    if (!is_dir($directory)) {
-        mkdir($directory, 0777, true);
-    }
-
-    if (!is_file($storagePath)) {
-        file_put_contents($storagePath, "{}\n", LOCK_EX);
+    if (!is_dir($storageDirectory)) {
+        mkdir($storageDirectory, 0777, true);
     }
 }
 
-function readAndUpdateCount(string $storagePath, string $counterKey, int $incrementBy): int
+function resolveCounterFilePath(string $storageDirectory, string $value): string
 {
-    $handle = fopen($storagePath, 'c+');
-    $counts = [];
+    $key = normalizeCounterKey($value);
+
+    if ($key === '' || $key === 'default') {
+        $key = 'default';
+    }
+
+    return $storageDirectory . '/' . $key . '.dat';
+}
+
+function ensureCounterFile(string $counterFile): void
+{
+    if (!is_file($counterFile)) {
+        file_put_contents($counterFile, "0\n", LOCK_EX);
+    }
+}
+
+function readAndUpdateCount(string $counterFile, int $incrementBy): int
+{
+    $handle = fopen($counterFile, 'c+');
     $count = 0;
 
     if ($handle === false) {
@@ -79,21 +91,13 @@ function readAndUpdateCount(string $storagePath, string $counterKey, int $increm
         }
 
         $contents = stream_get_contents($handle);
-        if (is_string($contents) && trim($contents) !== '') {
-            $decoded = json_decode($contents, true);
-            if (is_array($decoded)) {
-                $counts = $decoded;
-            }
-        }
-
-        $count = isset($counts[$counterKey]) ? max(0, (int) $counts[$counterKey]) : 0;
+        $count = max(0, (int) trim((string) $contents));
 
         if ($incrementBy > 0) {
             $count += $incrementBy;
-            $counts[$counterKey] = $count;
             rewind($handle);
             ftruncate($handle, 0);
-            fwrite($handle, json_encode($counts, JSON_PRETTY_PRINT | JSON_UNESCAPED_SLASHES) . "\n");
+            fwrite($handle, (string) $count . "\n");
         }
 
         flock($handle, LOCK_UN);
