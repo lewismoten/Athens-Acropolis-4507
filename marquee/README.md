@@ -141,6 +141,7 @@ All options are passed to `ShoomiColorMarquee.createCanvasMarquee(options)`.
 - Required: no
 - Default: `""`
 - Fallback inline message used when no message file is active or when file loading fails.
+- This fallback message is shown as a centered waving message, not as a transitioning sequence row.
 
 `colors`
 
@@ -163,26 +164,13 @@ All options are passed to `ShoomiColorMarquee.createCanvasMarquee(options)`.
 - Default: `""`
 - Pipe-delimited image list or image array for inline `$0`, `$1`, `$2` message tokens.
 
-`start`
-
-- Type: `string`
-- Required: no
-- Default: `">>"`
-- Enter transition for the fallback inline message.
-
-`end`
-
-- Type: `string`
-- Required: no
-- Default: `"<<"`
-- Exit transition for the fallback inline message.
-
 `staticMessage`
 
 - Type: `boolean`
 - Required: no
 - Default: `false`
 - When `true`, the inline message stays centered and visible instead of sequencing.
+- This is the intended behavior for the plain fallback `message` path.
 
 `messageFile`
 
@@ -385,6 +373,8 @@ The marquee instance returns:
 ## Sequences
 
 You can supply sequences either inline or by using a message file.
+
+`start` and `end` belong to sequence entries only. They are not used by the plain top-level fallback `message`.
 
 ### Inline `entries`
 
