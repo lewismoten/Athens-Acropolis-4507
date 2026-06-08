@@ -201,7 +201,7 @@
     height: 92,
     backgroundColor: "#000066",
     backgroundImage: resolvePreviewBackgroundImagePath("banner_geocities.gif"),
-    backgroundImagePlacement: "tile",
+    backgroundImagePlacement: "center",
     backgroundImageX: 0,
     backgroundImageY: 0,
     backgroundImageWidth: 0,
@@ -1107,7 +1107,7 @@
       return value;
     }
 
-    return "tile";
+    return "center";
   }
 
   function normalizeAssetPath(value, fallback) {

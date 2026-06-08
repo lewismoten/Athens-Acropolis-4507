@@ -200,7 +200,7 @@
       return value;
     }
 
-    return "tile";
+    return "center";
   }
 
   function registerMode(name, definition) {
@@ -1117,9 +1117,8 @@
       } else if (settings.backgroundImagePlacement === "xy-size") {
         canvas.style.backgroundRepeat = "no-repeat";
         canvas.style.backgroundPosition = settings.backgroundImageX + "px " + settings.backgroundImageY + "px";
-        if (settings.backgroundImageWidth > 0 || settings.backgroundImageHeight > 0) {
-          canvas.style.backgroundSize = (settings.backgroundImageWidth > 0 ? (settings.backgroundImageWidth + "px") : "auto") + " " +
-            (settings.backgroundImageHeight > 0 ? (settings.backgroundImageHeight + "px") : "auto");
+        if (settings.backgroundImageWidth > 0 && settings.backgroundImageHeight > 0) {
+          canvas.style.backgroundSize = settings.backgroundImageWidth + "px " + settings.backgroundImageHeight + "px";
         } else {
           canvas.style.backgroundSize = "auto";
         }
