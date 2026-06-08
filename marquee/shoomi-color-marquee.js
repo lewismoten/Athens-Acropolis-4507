@@ -310,8 +310,6 @@
       lastRenderDuration: 0,
       fastFrameStreak: 0,
       slowFrameStreak: 0,
-      backgroundImageEl: null,
-      backgroundImageLoaded: false,
       backgroundImageSource: "",
       lastTimestamp: 0,
       entries: []
@@ -414,6 +412,8 @@
 
       if (settings.backgroundImage !== previousBackgroundImage) {
         updateBackgroundImage(settings.backgroundImage);
+      } else {
+        applyCanvasBackgroundStyle();
       }
 
       if (settings.backgroundMode !== previousBackgroundMode) {
@@ -512,23 +512,15 @@
       }
       position = getPosition(entry, metrics, progress, holdProgress);
 
-      context.fillStyle = settings.backgroundColor;
-      context.fillRect(0, 0, canvas.width, canvas.height);
-      drawBackgroundImage();
+      context.clearRect(0, 0, canvas.width, canvas.height);
+
+      if (!settings.backgroundImage) {
+        context.fillStyle = settings.backgroundColor;
+        context.fillRect(0, 0, canvas.width, canvas.height);
+      }
 
       drawDots();
       drawText(entry, metrics, position.x, position.y, progress, exitProgress);
-    }
-
-    function drawBackgroundImage() {
-      var image = state.backgroundImageEl;
-
-      if (!image || !state.backgroundImageLoaded) {
-        return;
-      }
-
-      context.globalAlpha = 1;
-      context.drawImage(image, 0, 0, canvas.width, canvas.height);
     }
 
     function drawDots() {
@@ -922,37 +914,20 @@
 
     function updateBackgroundImage(nextSource) {
       var source = String(nextSource || "").trim();
-      var image;
 
       state.backgroundImageSource = source;
-      state.backgroundImageLoaded = false;
-      state.backgroundImageEl = null;
+      applyCanvasBackgroundStyle();
+      drawFrame();
+    }
 
-      if (!source || typeof Image === "undefined") {
-        drawFrame();
-        return;
-      }
+    function applyCanvasBackgroundStyle() {
+      var source = state.backgroundImageSource;
 
-      image = new Image();
-      image.onload = function () {
-        if (state.backgroundImageSource !== source) {
-          return;
-        }
-
-        state.backgroundImageEl = image;
-        state.backgroundImageLoaded = true;
-        drawFrame();
-      };
-      image.onerror = function () {
-        if (state.backgroundImageSource !== source) {
-          return;
-        }
-
-        state.backgroundImageEl = null;
-        state.backgroundImageLoaded = false;
-        drawFrame();
-      };
-      image.src = source;
+      canvas.style.backgroundColor = settings.backgroundColor;
+      canvas.style.backgroundRepeat = "no-repeat";
+      canvas.style.backgroundPosition = "center center";
+      canvas.style.backgroundSize = "100% 100%";
+      canvas.style.backgroundImage = source ? ('url("' + source.replace(/"/g, "%22") + '")') : "none";
     }
   }
 
