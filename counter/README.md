@@ -8,16 +8,32 @@ This folder contains a tiny PHP-based hit counter that stores counts in a local 
 <img src="counter/index.php?key=home" alt="Visitor counter">
 ```
 
+Legacy-style usage is also supported:
+
+```html
+<img src="counter/index.php?df=lmoten(1).dat&dd=lmoten(a)|frgb=000066|comma=T|ft=0" alt="counter">
+```
+
 ## Query Parameters
 
 - `key`
   Unique counter name. Default: `default`
+- `df`
+  Legacy data-file style counter key. `.dat` is ignored if present.
+- `dd`
+  Legacy style selector. Pipe-packed options like `lmoten(a)|frgb=000066|comma=T|ft=0` are supported.
 - `digits`
   Minimum number of digits to display. Default: `4`
 - `increment`
   Set to `0` to read without incrementing.
 - `step`
   How much to increment by when `increment` is enabled. Default: `1`
+- `comma`
+  `T` / `F` or `1` / `0` to toggle thousands separators.
+- `frgb`
+  Legacy frame-color tint in `RRGGBB`.
+- `ft`
+  Legacy frame-thickness value. `0` keeps the original strip chrome thickness.
 
 ## Notes
 
