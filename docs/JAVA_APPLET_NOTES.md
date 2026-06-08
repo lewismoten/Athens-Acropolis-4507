@@ -539,6 +539,12 @@ From my perspective as the maintainer of a restored GeoCities page:
 
 If stronger attribution or licensing evidence turns up later, this note should be updated.
 
+## Usages Found
+* [Eduardo Funabashi](https://hk.oocities.org/siliconvalley/sector/2715/): Java Applets
+  * [Banner 10](https://hk.oocities.org/siliconvalley/sector/2715/java/banner10.html)
+  * [Banner 15](https://hk.oocities.org/siliconvalley/sector/2715/java/banner15.html)
+* Gigi Livorno [JS Text](https://digilander.libero.it/gigilivorno/html/javajstext.htm)
+
 ## Continue Exploring
 
 - [Back to the main project overview](../README.md)
