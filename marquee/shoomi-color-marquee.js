@@ -195,7 +195,8 @@
       value === "bottom-center" ||
       value === "bottom-right" ||
       value === "fit" ||
-      value === "xy") {
+      value === "xy" ||
+      value === "xy-size") {
       return value;
     }
 
@@ -362,8 +363,10 @@
       backgroundColor: normalizeColor(options.backgroundColor, "#000033"),
       backgroundImage: String(options.backgroundImage || ""),
       backgroundImagePlacement: normalizeBackgroundImagePlacement(options.backgroundImagePlacement),
-      backgroundImageXPercent: clampNumber(options.backgroundImageXPercent, 0, 100, 50),
-      backgroundImageYPercent: clampNumber(options.backgroundImageYPercent, 0, 100, 50),
+      backgroundImageX: clampNumber(options.backgroundImageX, -4000, 4000, 0),
+      backgroundImageY: clampNumber(options.backgroundImageY, -4000, 4000, 0),
+      backgroundImageWidth: clampNumber(options.backgroundImageWidth, 0, 4000, 0),
+      backgroundImageHeight: clampNumber(options.backgroundImageHeight, 0, 4000, 0),
       messageFile: String(options.messageFile || ""),
       message: typeof options.message === "string" ? options.message : "",
       colors: typeof options.colors !== "undefined" ? options.colors : null,
@@ -494,8 +497,10 @@
       var previousDotColor = settings.dotColor;
       var previousBackgroundImage = settings.backgroundImage;
       var previousBackgroundImagePlacement = settings.backgroundImagePlacement;
-      var previousBackgroundImageXPercent = settings.backgroundImageXPercent;
-      var previousBackgroundImageYPercent = settings.backgroundImageYPercent;
+      var previousBackgroundImageX = settings.backgroundImageX;
+      var previousBackgroundImageY = settings.backgroundImageY;
+      var previousBackgroundImageWidth = settings.backgroundImageWidth;
+      var previousBackgroundImageHeight = settings.backgroundImageHeight;
       var previousMessageFile = settings.messageFile;
       var previousBackgroundMode = settings.backgroundMode;
 
@@ -504,8 +509,10 @@
       settings.backgroundColor = typeof next.backgroundColor !== "undefined" ? normalizeColor(next.backgroundColor, settings.backgroundColor) : settings.backgroundColor;
       settings.backgroundImage = typeof next.backgroundImage === "string" ? next.backgroundImage : settings.backgroundImage;
       settings.backgroundImagePlacement = typeof next.backgroundImagePlacement === "string" ? normalizeBackgroundImagePlacement(next.backgroundImagePlacement) : settings.backgroundImagePlacement;
-      settings.backgroundImageXPercent = typeof next.backgroundImageXPercent === "number" ? clampNumber(next.backgroundImageXPercent, 0, 100, settings.backgroundImageXPercent) : settings.backgroundImageXPercent;
-      settings.backgroundImageYPercent = typeof next.backgroundImageYPercent === "number" ? clampNumber(next.backgroundImageYPercent, 0, 100, settings.backgroundImageYPercent) : settings.backgroundImageYPercent;
+      settings.backgroundImageX = typeof next.backgroundImageX === "number" ? clampNumber(next.backgroundImageX, -4000, 4000, settings.backgroundImageX) : settings.backgroundImageX;
+      settings.backgroundImageY = typeof next.backgroundImageY === "number" ? clampNumber(next.backgroundImageY, -4000, 4000, settings.backgroundImageY) : settings.backgroundImageY;
+      settings.backgroundImageWidth = typeof next.backgroundImageWidth === "number" ? clampNumber(next.backgroundImageWidth, 0, 4000, settings.backgroundImageWidth) : settings.backgroundImageWidth;
+      settings.backgroundImageHeight = typeof next.backgroundImageHeight === "number" ? clampNumber(next.backgroundImageHeight, 0, 4000, settings.backgroundImageHeight) : settings.backgroundImageHeight;
       settings.messageFile = typeof next.messageFile === "string" ? next.messageFile : settings.messageFile;
       settings.message = typeof next.message === "string" ? next.message : settings.message;
       settings.colors = typeof next.colors !== "undefined" ? next.colors : settings.colors;
@@ -532,8 +539,10 @@
 
       if (settings.backgroundImage !== previousBackgroundImage ||
         settings.backgroundImagePlacement !== previousBackgroundImagePlacement ||
-        settings.backgroundImageXPercent !== previousBackgroundImageXPercent ||
-        settings.backgroundImageYPercent !== previousBackgroundImageYPercent) {
+        settings.backgroundImageX !== previousBackgroundImageX ||
+        settings.backgroundImageY !== previousBackgroundImageY ||
+        settings.backgroundImageWidth !== previousBackgroundImageWidth ||
+        settings.backgroundImageHeight !== previousBackgroundImageHeight) {
         updateBackgroundImage(settings.backgroundImage);
       } else {
         applyCanvasBackgroundStyle();
@@ -1103,8 +1112,17 @@
         canvas.style.backgroundSize = "100% 100%";
       } else if (settings.backgroundImagePlacement === "xy") {
         canvas.style.backgroundRepeat = "no-repeat";
-        canvas.style.backgroundPosition = settings.backgroundImageXPercent + "% " + settings.backgroundImageYPercent + "%";
+        canvas.style.backgroundPosition = settings.backgroundImageX + "px " + settings.backgroundImageY + "px";
         canvas.style.backgroundSize = "auto";
+      } else if (settings.backgroundImagePlacement === "xy-size") {
+        canvas.style.backgroundRepeat = "no-repeat";
+        canvas.style.backgroundPosition = settings.backgroundImageX + "px " + settings.backgroundImageY + "px";
+        if (settings.backgroundImageWidth > 0 || settings.backgroundImageHeight > 0) {
+          canvas.style.backgroundSize = (settings.backgroundImageWidth > 0 ? (settings.backgroundImageWidth + "px") : "auto") + " " +
+            (settings.backgroundImageHeight > 0 ? (settings.backgroundImageHeight + "px") : "auto");
+        } else {
+          canvas.style.backgroundSize = "auto";
+        }
       } else {
         canvas.style.backgroundRepeat = "repeat";
         canvas.style.backgroundPosition = "left top";

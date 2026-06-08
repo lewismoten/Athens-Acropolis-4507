@@ -64,7 +64,7 @@
             </LABEL>
           </DIV>
 
-        <DIV CLASS="field-row field-row-5">
+        <DIV CLASS="field-row field-row-3">
           <LABEL CLASS="field">
             <SPAN CLASS="field-label">Background Color</SPAN>
             <INPUT ID="marquee-background" NAME="backgroundColor" CLASS="field-input field-color" TYPE="color" VALUE="#000066">
@@ -90,22 +90,41 @@
               <OPTION VALUE="bottom-right">Bottom Right</OPTION>
               <OPTION VALUE="fit">Fit</OPTION>
               <OPTION VALUE="xy">Coordinates</OPTION>
+              <OPTION VALUE="xy-size">Coordinates + Size</OPTION>
             </SELECT>
           </LABEL>
+        </DIV>
 
+        <DIV CLASS="field-row field-row-4">
           <LABEL CLASS="field">
             <SPAN CLASS="field-label">Image X</SPAN>
             <SPAN CLASS="input-unit-wrap input-unit-wrap-compact">
-              <INPUT ID="marquee-background-image-x" NAME="backgroundImageXPercent" CLASS="field-input field-input-compact" TYPE="number" MIN="0" MAX="100" VALUE="50">
-              <SPAN CLASS="input-unit">%</SPAN>
+              <INPUT ID="marquee-background-image-x" NAME="backgroundImageX" CLASS="field-input field-input-compact" TYPE="number" MIN="-4000" MAX="4000" VALUE="0">
+              <SPAN CLASS="input-unit">px</SPAN>
             </SPAN>
           </LABEL>
 
           <LABEL CLASS="field">
             <SPAN CLASS="field-label">Image Y</SPAN>
             <SPAN CLASS="input-unit-wrap input-unit-wrap-compact">
-              <INPUT ID="marquee-background-image-y" NAME="backgroundImageYPercent" CLASS="field-input field-input-compact" TYPE="number" MIN="0" MAX="100" VALUE="50">
-              <SPAN CLASS="input-unit">%</SPAN>
+              <INPUT ID="marquee-background-image-y" NAME="backgroundImageY" CLASS="field-input field-input-compact" TYPE="number" MIN="-4000" MAX="4000" VALUE="0">
+              <SPAN CLASS="input-unit">px</SPAN>
+            </SPAN>
+          </LABEL>
+
+          <LABEL CLASS="field">
+            <SPAN CLASS="field-label">Image Width</SPAN>
+            <SPAN CLASS="input-unit-wrap input-unit-wrap-compact">
+              <INPUT ID="marquee-background-image-width" NAME="backgroundImageWidth" CLASS="field-input field-input-compact" TYPE="number" MIN="0" MAX="4000" VALUE="0">
+              <SPAN CLASS="input-unit">px</SPAN>
+            </SPAN>
+          </LABEL>
+
+          <LABEL CLASS="field">
+            <SPAN CLASS="field-label">Image Height</SPAN>
+            <SPAN CLASS="input-unit-wrap input-unit-wrap-compact">
+              <INPUT ID="marquee-background-image-height" NAME="backgroundImageHeight" CLASS="field-input field-input-compact" TYPE="number" MIN="0" MAX="4000" VALUE="0">
+              <SPAN CLASS="input-unit">px</SPAN>
             </SPAN>
           </LABEL>
         </DIV>

@@ -180,6 +180,8 @@
     backgroundImagePlacement: document.getElementById("marquee-background-image-placement"),
     backgroundImageX: document.getElementById("marquee-background-image-x"),
     backgroundImageY: document.getElementById("marquee-background-image-y"),
+    backgroundImageWidth: document.getElementById("marquee-background-image-width"),
+    backgroundImageHeight: document.getElementById("marquee-background-image-height"),
     fileName: document.getElementById("sequence-file-name"),
     defaultColor: document.getElementById("marquee-default-color"),
     dotColor: document.getElementById("marquee-dot-color"),
@@ -200,8 +202,10 @@
     backgroundColor: "#000066",
     backgroundImage: resolvePreviewBackgroundImagePath("banner_geocities.gif"),
     backgroundImagePlacement: "tile",
-    backgroundImageXPercent: 50,
-    backgroundImageYPercent: 50,
+    backgroundImageX: 0,
+    backgroundImageY: 0,
+    backgroundImageWidth: 0,
+    backgroundImageHeight: 0,
     backgroundMode: "stars",
     dotColor: "#9999ff",
     dotCount: 50,
@@ -338,8 +342,10 @@
       background: marqueeApi.normalizeColor(fields.background.value, "#000066"),
       backgroundImage: normalizeAssetPath(fields.backgroundImage.value, ""),
       backgroundImagePlacement: normalizeBackgroundImagePlacement(fields.backgroundImagePlacement.value),
-      backgroundImageXPercent: marqueeApi.clampNumber(fields.backgroundImageX.value, 0, 100, 50),
-      backgroundImageYPercent: marqueeApi.clampNumber(fields.backgroundImageY.value, 0, 100, 50),
+      backgroundImageX: marqueeApi.clampNumber(fields.backgroundImageX.value, -4000, 4000, 0),
+      backgroundImageY: marqueeApi.clampNumber(fields.backgroundImageY.value, -4000, 4000, 0),
+      backgroundImageWidth: marqueeApi.clampNumber(fields.backgroundImageWidth.value, 0, 4000, 0),
+      backgroundImageHeight: marqueeApi.clampNumber(fields.backgroundImageHeight.value, 0, 4000, 0),
       defaultColor: defaultColor,
       dotColor: marqueeApi.normalizeColor(fields.dotColor.value, "#9999ff"),
       fontFamilyId: fontFamilyId,
@@ -355,8 +361,10 @@
       backgroundColor: config.background,
       backgroundImage: resolvePreviewBackgroundImagePath(config.backgroundImage),
       backgroundImagePlacement: config.backgroundImagePlacement,
-      backgroundImageXPercent: config.backgroundImageXPercent,
-      backgroundImageYPercent: config.backgroundImageYPercent,
+      backgroundImageX: config.backgroundImageX,
+      backgroundImageY: config.backgroundImageY,
+      backgroundImageWidth: config.backgroundImageWidth,
+      backgroundImageHeight: config.backgroundImageHeight,
       backgroundMode: config.backgroundMode,
       dotColor: config.dotColor,
       dotCount: config.dotCount,
@@ -412,8 +420,10 @@
       backgroundColor: config.background,
       backgroundImage: config.backgroundImage,
       backgroundImagePlacement: config.backgroundImagePlacement,
-      backgroundImageXPercent: config.backgroundImageXPercent,
-      backgroundImageYPercent: config.backgroundImageYPercent,
+      backgroundImageX: config.backgroundImageX,
+      backgroundImageY: config.backgroundImageY,
+      backgroundImageWidth: config.backgroundImageWidth,
+      backgroundImageHeight: config.backgroundImageHeight,
       backgroundMode: config.backgroundMode,
       dotColor: config.dotColor,
       dotCount: config.dotCount,
@@ -1092,7 +1102,8 @@
       value === "bottom-center" ||
       value === "bottom-right" ||
       value === "fit" ||
-      value === "xy") {
+      value === "xy" ||
+      value === "xy-size") {
       return value;
     }
 

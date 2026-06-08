@@ -90,7 +90,7 @@ These do not all appear in my local page, but they show up in class strings or i
 | `ImageFiles` | pipe-delimited string list | Additional images the message system can reference. |
 | `BackGroundImage` | string / path | Background image asset loaded by the applet. |
 | `BackGroundActionSpeed` | integer | A more explicit speed value for certain background effects. |
-| `DrawImageType` or similar image-placement parameter | string / enum-like text | Verified in embedded class strings: `IMAGE_TILE`, `IMAGE_CENTER_CENTER`, `IMAGE_LEFT_TOP`, `IMAGE_CENTER_TOP`, `IMAGE_RIGHT_TOP`, `IMAGE_LEFT_CENTER`, `IMAGE_RIGHT_CENTER`, `IMAGE_LEFT_BOTTOM`, `IMAGE_CENTER_BOTTOM`, `IMAGE_RIGHT_BOTTOM`, `IMAGE_FIT`, `IMAGE_XY`, and `IMAGE_XYXLYL`. The exact parameter name still is not confirmed from my old HTML, but the applet clearly supports a richer image-placement enum set internally. |
+| `DrawImageType` or similar image-placement parameter | string / enum-like text | Verified in embedded class strings: `IMAGE_TILE`, `IMAGE_CENTER_CENTER`, `IMAGE_LEFT_TOP`, `IMAGE_CENTER_TOP`, `IMAGE_RIGHT_TOP`, `IMAGE_LEFT_CENTER`, `IMAGE_RIGHT_CENTER`, `IMAGE_LEFT_BOTTOM`, `IMAGE_CENTER_BOTTOM`, `IMAGE_RIGHT_BOTTOM`, `IMAGE_FIT`, `IMAGE_XY`, and `IMAGE_XYXLYL`. My current best reading is that `IMAGE_XY` is coordinate-based placement, and `IMAGE_XYXLYL` is coordinate-based placement with explicit X/Y length sizing. The exact parameter name still is not confirmed from my old HTML, but the applet clearly supports a richer image-placement enum set internally. |
 
 ### Notes From How I Used It
 
