@@ -33,6 +33,10 @@
               <SPAN CLASS="field-label">Speed</SPAN>
               <INPUT ID="marquee-animation-speed" CLASS="field-input" TYPE="number" MIN="1" MAX="120" STEP="1" VALUE="20">
             </LABEL>
+            <LABEL CLASS="field">
+              <SPAN CLASS="field-label">Wave Height</SPAN>
+              <INPUT ID="marquee-wave-height" CLASS="field-input" TYPE="number" MIN="0" MAX="24" VALUE="8">
+            </LABEL>
           </DIV>
 
           <DIV CLASS="field-row field-row-2-equal">
@@ -59,34 +63,16 @@
           </LABEL>
         </DIV>
 
-        <DIV CLASS="field-row field-row-2-equal">
-          <LABEL CLASS="field">
-            <SPAN CLASS="field-label">Message File</SPAN>
-            <INPUT ID="sequence-file-name" CLASS="field-input" TYPE="text" VALUE="dreamers.txt">
-          </LABEL>
-
-          <LABEL CLASS="field">
-            <SPAN CLASS="field-label">Display Time</SPAN>
-            <INPUT ID="marquee-display-time" CLASS="field-input" TYPE="number" MIN="1" MAX="999" VALUE="100">
-          </LABEL>
-        </DIV>
-
-        <DIV CLASS="field-row">
-          <DIV CLASS="field">
-            <SPAN CLASS="field-label">Message</SPAN>
-            <DIV ID="default-message-card" CLASS="default-message-card"></DIV>
-          </DIV>
-        </DIV>
-
           <DIV CLASS="field-row field-row-4">
-            <LABEL CLASS="field">
-              <SPAN CLASS="field-label">Font Size</SPAN>
-              <INPUT ID="marquee-font-size" CLASS="field-input" TYPE="number" MIN="10" MAX="72" VALUE="30">
-            </LABEL>
 
             <LABEL CLASS="field">
               <SPAN CLASS="field-label">Font Family</SPAN>
               <INPUT ID="marquee-font-family" CLASS="field-input" TYPE="text" VALUE="Times New Roman, Times, serif">
+            </LABEL>
+
+            <LABEL CLASS="field">
+              <SPAN CLASS="field-label">Font Size</SPAN>
+              <INPUT ID="marquee-font-size" CLASS="field-input" TYPE="number" MIN="10" MAX="72" VALUE="30">
             </LABEL>
 
             <LABEL CLASS="field">
@@ -100,12 +86,32 @@
             </LABEL>
 
             <LABEL CLASS="field">
-              <SPAN CLASS="field-label">Default Font Color</SPAN>
+              <SPAN CLASS="field-label">Font Color</SPAN>
               <INPUT ID="marquee-default-color" CLASS="field-input field-color" TYPE="color" VALUE="#ffff66">
             </LABEL>
           </DIV>
 
-          <DIV CLASS="field-row field-row-5">
+
+        <DIV CLASS="field-row">
+          <DIV CLASS="field">
+            <SPAN CLASS="field-label">Message</SPAN>
+            <DIV ID="default-message-card" CLASS="default-message-card"></DIV>
+          </DIV>
+        </DIV>
+
+        <DIV CLASS="field-row field-row-2-equal">
+          <LABEL CLASS="field">
+            <SPAN CLASS="field-label">Message File</SPAN>
+            <INPUT ID="sequence-file-name" CLASS="field-input" TYPE="text" VALUE="dreamers.txt">
+          </LABEL>
+
+          <LABEL CLASS="field">
+            <SPAN CLASS="field-label">Display Time</SPAN>
+            <INPUT ID="marquee-display-time" CLASS="field-input" TYPE="number" MIN="1" MAX="999" VALUE="100">
+          </LABEL>
+        </DIV>
+
+          <DIV CLASS="field-row field-row-4">
             <LABEL CLASS="field">
               <SPAN CLASS="field-label">Background Mode</SPAN>
               <SELECT ID="marquee-background-mode" CLASS="field-input">
@@ -137,11 +143,6 @@
             <LABEL CLASS="field">
               <SPAN CLASS="field-label">Dots</SPAN>
               <INPUT ID="marquee-dot-count" CLASS="field-input" TYPE="number" MIN="0" MAX="9999" VALUE="50">
-            </LABEL>
-
-            <LABEL CLASS="field">
-              <SPAN CLASS="field-label">Wave Height</SPAN>
-              <INPUT ID="marquee-wave-height" CLASS="field-input" TYPE="number" MIN="0" MAX="24" VALUE="8">
             </LABEL>
 
             <LABEL CLASS="field">
