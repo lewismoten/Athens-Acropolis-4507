@@ -38,6 +38,42 @@ It takes inspiration from old Java applet marquees and GeoCities-era banner art,
 </script>
 ```
 
+## Applet Replacer
+
+If you still have old markup like:
+
+```html
+<applet code="jsTextAnimation_Nami.class" width="500" height="78">
+  ...
+</applet>
+
+<script src="marquee/jsTextAnimation_Nami-replacer.js"></script>
+```
+
+the replacer script will scan the page for `jsTextAnimation_Nami.class` applets, replace each one with a canvas marquee, and map the old applet attributes and `<param>` values into the modern marquee options.
+
+It currently maps:
+
+- applet `width` / `height`
+- `FontName`, `FontSize`, `FontStyle`
+- `Message`, `MessageFile`
+- `DefalutColor`, `Colors`
+- `BackColor`
+- `BackGroundDotColor`, `BackGroundDotNum`, `BackGroundSpeed`
+- `DisplayTime`, `Speed`, `NamiHeight`
+- `ImageFiles`
+- `BackGroundImage`
+- image placement enums like `IMAGE_TILE`, `IMAGE_CENTER_CENTER`, `IMAGE_XY`, and `IMAGE_XYXLYL`
+
+For `BackGroundAction`, the replacer currently uses the best reconstruction from the recovered applet notes:
+
+- `0` = none
+- `1` = rain
+- `2` = snow
+- `3` = stars
+
+That mapping is a restoration guess, not fully proven original vendor documentation.
+
 ## Color And Image Piping
 
 ### `colors`
