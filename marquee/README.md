@@ -298,23 +298,13 @@ Supported values:
 - Default: `0.18`
 - Controls the speed and direction of the background mode.
 
-`dotImageMode`
-
-- Type: `string`
-- Required: no
-- Default: `"none"`
-
-Supported values:
-
-- `none`
-- `images`
-
 `dotImageFiles`
 
 - Type: `string | string[]`
 - Required: no
 - Default: `""`
 - Pipe-delimited image list or image array used by image-aware background modes.
+- When empty, image-aware modes fall back to their normal vector rendering.
 
 ### Timing And Motion
 
@@ -599,7 +589,7 @@ The `runtime` object passed to mode hooks exposes:
 
 `runtime.settings`
 
-- Current marquee settings, including `dotSpeed`, `dotCount`, `dotColor`, `dotImageMode`, `backgroundMode`, `fps`, and more.
+- Current marquee settings, including `dotSpeed`, `dotCount`, `dotColor`, `dotImageFiles`, `backgroundMode`, `fps`, and more.
 
 `runtime.state`
 
@@ -639,7 +629,7 @@ The `runtime` object passed to mode hooks exposes:
 
 `runtime.getDotImage(dot)`
 
-- Returns the assigned dot image when `dotImageMode` is `images`.
+- Returns the assigned dot image when `dotImageFiles` is populated.
 
 `runtime.drawDotImage(dot, options)`
 
@@ -694,7 +684,7 @@ If full lifecycle reversal is too complex, at minimum the mode should:
 
 ### Dot Image Support Requirement
 
-New modes should also consider `dotImageMode`.
+New modes should also consider whether `dotImageFiles` is populated.
 
 If your mode is image-friendly:
 

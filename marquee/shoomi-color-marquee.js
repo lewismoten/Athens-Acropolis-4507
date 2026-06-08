@@ -241,14 +241,6 @@
     return value || "stars";
   }
 
-  function normalizeDotImageMode(value) {
-    if (value === "images") {
-      return "images";
-    }
-
-    return "none";
-  }
-
   function normalizeBackgroundImagePlacement(value) {
     if (value === "tile" ||
       value === "center" ||
@@ -441,7 +433,6 @@
       start: options.start || ">>",
       end: options.end || "<<",
       backgroundMode: normalizeBackgroundMode(options.backgroundMode),
-      dotImageMode: normalizeDotImageMode(options.dotImageMode),
       dotColor: normalizeColor(options.dotColor, "#9999ff"),
       dotCount: typeof options.dotCount === "number" ? options.dotCount : 50,
       dotImageFiles: typeof options.dotImageFiles !== "undefined" ? options.dotImageFiles : "",
@@ -580,7 +571,6 @@
       var previousBackgroundImageHeight = settings.backgroundImageHeight;
       var previousImageFiles = settings.imageFiles;
       var previousDotImageFiles = settings.dotImageFiles;
-      var previousDotImageMode = settings.dotImageMode;
       var previousMessageFile = settings.messageFile;
       var previousBackgroundMode = settings.backgroundMode;
 
@@ -599,7 +589,6 @@
       settings.start = typeof next.start === "string" ? next.start : settings.start;
       settings.end = typeof next.end === "string" ? next.end : settings.end;
       settings.backgroundMode = next.backgroundMode ? normalizeBackgroundMode(next.backgroundMode) : settings.backgroundMode;
-      settings.dotImageMode = typeof next.dotImageMode === "string" ? normalizeDotImageMode(next.dotImageMode) : settings.dotImageMode;
       settings.dotColor = typeof next.dotColor !== "undefined" ? normalizeColor(next.dotColor, settings.dotColor) : settings.dotColor;
       settings.dotCount = typeof next.dotCount === "number" ? next.dotCount : settings.dotCount;
       settings.dotImageFiles = typeof next.dotImageFiles !== "undefined" ? next.dotImageFiles : settings.dotImageFiles;
@@ -634,7 +623,7 @@
         loadInlineImages(settings.imageFiles);
       }
 
-      if (settings.dotImageFiles !== previousDotImageFiles || settings.dotImageMode !== previousDotImageMode) {
+      if (settings.dotImageFiles !== previousDotImageFiles) {
         loadDotImages(settings.dotImageFiles);
       }
 
@@ -825,7 +814,7 @@
     function getDotImage(dot) {
       var index;
 
-      if (settings.dotImageMode !== "images" || !state.dotImages.length) {
+      if (!state.dotImages.length) {
         return null;
       }
 

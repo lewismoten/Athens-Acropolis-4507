@@ -246,8 +246,7 @@
     fps: 20,
     displayFrames: 100,
     defaultColor: "#ffff66",
-    dotImageMode: "none",
-    dotImageFiles: buildImageFilesPipe(selectedImageFiles.map(resolvePreviewBackgroundImagePath)),
+    dotImageFiles: "",
     imageFiles: buildImageFilesPipe(selectedImageFiles.map(resolvePreviewBackgroundImagePath)),
     entries: [[">>,<<", defaultMessageRow.text, "#ffff66|#ffee88|#ffdd55|#ffee88"]]
   });
@@ -392,6 +391,7 @@
     var fontFamilyId = getSelectedFontFamilyId();
     var sequenceCount = sequenceRows.length;
     var messageFile = getSequenceFileName();
+    var useDotImages = fields.dotImageMode && fields.dotImageMode.value === "images";
 
     return {
       sequenceCount: sequenceCount,
@@ -404,7 +404,7 @@
       dotCount: marqueeApi.clampNumber(fields.dotCount.value, 0, 9999, 50),
       backgroundSpeed: marqueeApi.clampNumber(fields.backgroundSpeed.value, -30, 30, 3),
       backgroundMode: normalizeBackgroundMode(fields.backgroundMode.value),
-      dotImageMode: normalizeDotImageMode(fields.dotImageMode.value),
+      dotImageFiles: useDotImages ? buildImageFilesPipe(selectedImageFiles) : "",
       animationSpeed: marqueeApi.clampNumber(fields.animationSpeed.value, 1, 120, 20),
       background: marqueeApi.normalizeColor(fields.background.value, "#000066"),
       backgroundImage: normalizeBackgroundBanner(fields.backgroundImage.value),
@@ -434,10 +434,9 @@
       backgroundImageWidth: config.backgroundImageWidth,
       backgroundImageHeight: config.backgroundImageHeight,
       backgroundMode: config.backgroundMode,
-      dotImageMode: config.dotImageMode,
       dotColor: config.dotColor,
       dotCount: config.dotCount,
-      dotImageFiles: buildImageFilesPipe(selectedImageFiles.map(resolvePreviewBackgroundImagePath)),
+      dotImageFiles: config.dotImageFiles ? buildImageFilesPipe(selectedImageFiles.map(resolvePreviewBackgroundImagePath)) : "",
       dotSpeed: toDotSpeed(config.backgroundSpeed),
       waveHeight: config.waveHeight,
       fontName: config.fontFamily,
@@ -495,7 +494,6 @@
       backgroundImageWidth: config.backgroundImageWidth,
       backgroundImageHeight: config.backgroundImageHeight,
       backgroundMode: config.backgroundMode,
-      dotImageMode: config.dotImageMode,
       dotColor: config.dotColor,
       dotCount: config.dotCount,
       dotImageFiles: config.imageFiles,
