@@ -238,7 +238,7 @@
     fps: 20,
     displayFrames: 100,
     defaultColor: "#ffff66",
-    imageFiles: selectedImageFiles.slice(0),
+    imageFiles: buildImageFilesPipe(selectedImageFiles.map(resolvePreviewBackgroundImagePath)),
     entries: [[">>,<<", defaultMessageRow.text, "#ffff66|#ffee88|#ffdd55|#ffee88"]]
   });
 
@@ -393,7 +393,7 @@
       backgroundImageY: marqueeApi.clampNumber(fields.backgroundImageY.value, -4000, 4000, 0),
       backgroundImageWidth: marqueeApi.clampNumber(fields.backgroundImageWidth.value, 0, 4000, 0),
       backgroundImageHeight: marqueeApi.clampNumber(fields.backgroundImageHeight.value, 0, 4000, 0),
-      imageFiles: selectedImageFiles.slice(0),
+      imageFiles: buildImageFilesPipe(selectedImageFiles),
       defaultColor: defaultColor,
       dotColor: marqueeApi.normalizeColor(fields.dotColor.value, "#9999ff"),
       fontFamilyId: fontFamilyId,
@@ -425,7 +425,7 @@
       displayFrames: config.displayTime,
       staticMessage: !config.messageFile,
       defaultColor: config.defaultColor,
-      imageFiles: config.imageFiles.map(resolvePreviewBackgroundImagePath)
+      imageFiles: buildImageFilesPipe(selectedImageFiles.map(resolvePreviewBackgroundImagePath))
     };
   }
 
@@ -484,7 +484,7 @@
       fps: config.animationSpeed,
       displayFrames: config.displayTime,
       staticMessage: !useMessageFile,
-      imageFiles: config.imageFiles.slice(0),
+      imageFiles: config.imageFiles,
       message: defaultMessageRow.text,
       colors: defaultMessageRow.colors,
       defaultColor: config.defaultColor
@@ -672,6 +672,10 @@
       token,
       "</span>"
     ].join("");
+  }
+
+  function buildImageFilesPipe(imageFiles) {
+    return (imageFiles || []).join("|");
   }
 
   function buildMoveButton(direction, index, disabled) {

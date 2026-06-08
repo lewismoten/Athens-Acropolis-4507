@@ -32,6 +32,22 @@
     return colors;
   }
 
+  function parseImageFileList(rawValue) {
+    var values = String(rawValue || "").split("|");
+    var files = [];
+    var index;
+    var value;
+
+    for (index = 0; index < values.length; index += 1) {
+      value = String(values[index] || "").trim();
+      if (value) {
+        files.push(value);
+      }
+    }
+
+    return files;
+  }
+
   function createEntry(actionText, text, colorText, options) {
     var actions = String(actionText || "<>,<>").split(",");
     var settings = options || {};
@@ -427,7 +443,7 @@
       edgePadding: typeof options.edgePadding === "number" ? options.edgePadding : 18,
       dotSpeed: typeof options.dotSpeed === "number" ? options.dotSpeed : 0.18,
       defaultColor: normalizeColor(options.defaultColor, "#ffaa00"),
-      imageFiles: Array.isArray(options.imageFiles) ? options.imageFiles.slice(0) : []
+      imageFiles: typeof options.imageFiles === "string" ? options.imageFiles : ""
     };
 
     var randomSeed = typeof options.randomSeed === "number" ? (options.randomSeed >>> 0) : 0x1a2b3c4d;
@@ -545,7 +561,7 @@
       var previousBackgroundImageY = settings.backgroundImageY;
       var previousBackgroundImageWidth = settings.backgroundImageWidth;
       var previousBackgroundImageHeight = settings.backgroundImageHeight;
-      var previousImageFiles = settings.imageFiles.join("|");
+      var previousImageFiles = settings.imageFiles;
       var previousMessageFile = settings.messageFile;
       var previousBackgroundMode = settings.backgroundMode;
 
@@ -577,7 +593,7 @@
       settings.edgePadding = typeof next.edgePadding === "number" ? next.edgePadding : settings.edgePadding;
       settings.dotSpeed = typeof next.dotSpeed === "number" ? next.dotSpeed : settings.dotSpeed;
       settings.defaultColor = typeof next.defaultColor !== "undefined" ? normalizeColor(next.defaultColor, settings.defaultColor) : settings.defaultColor;
-      settings.imageFiles = Array.isArray(next.imageFiles) ? next.imageFiles.slice(0) : settings.imageFiles;
+      settings.imageFiles = typeof next.imageFiles === "string" ? next.imageFiles : settings.imageFiles;
 
       if (settings.dotCount !== previousDotCount) {
         setRenderDotCount(Math.min(state.renderDotCount, settings.dotCount));
@@ -594,7 +610,7 @@
         applyCanvasBackgroundStyle();
       }
 
-      if (settings.imageFiles.join("|") !== previousImageFiles) {
+      if (settings.imageFiles !== previousImageFiles) {
         loadInlineImages(settings.imageFiles);
       }
 
@@ -726,7 +742,7 @@
     }
 
     function loadInlineImages(imageFiles) {
-      var nextFiles = Array.isArray(imageFiles) ? imageFiles : [];
+      var nextFiles = parseImageFileList(imageFiles);
       var nextImages = [];
       var index;
       var fileName;
