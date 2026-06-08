@@ -440,7 +440,6 @@
       colors: typeof options.colors !== "undefined" ? options.colors : null,
       start: options.start || ">>",
       end: options.end || "<<",
-      staticMessage: !!options.staticMessage,
       backgroundMode: normalizeBackgroundMode(options.backgroundMode),
       dotImageMode: normalizeDotImageMode(options.dotImageMode),
       dotColor: normalizeColor(options.dotColor, "#9999ff"),
@@ -474,14 +473,15 @@
       inlineImages: [],
       dotImages: [],
       lastTimestamp: 0,
-      entries: []
+      entries: [],
+      entrySource: "fallback"
     };
 
     resizeCanvas();
     updateBackgroundImage(settings.backgroundImage);
     loadInlineImages(settings.imageFiles);
     loadDotImages(settings.dotImageFiles);
-    setEntries(options.entries || buildFallbackEntries(), false);
+    setEntries(options.entries || buildFallbackEntries(), false, options.entries ? "sequence" : "fallback");
     loadOptionalMessageFile();
     requestAnimationFrame(tick);
 
@@ -494,7 +494,7 @@
       }
     };
 
-    function setEntries(entries, preserveProgress) {
+    function setEntries(entries, preserveProgress, source) {
       var shouldPreserve = preserveProgress !== false;
       var previousEntries = state.entries;
       var previousIndex = state.currentIndex;
@@ -512,6 +512,7 @@
       }
 
       state.entries = normalizeEntries(entries);
+      state.entrySource = source === "fallback" ? "fallback" : "sequence";
 
       if (!shouldPreserve) {
         state.currentIndex = 0;
@@ -552,7 +553,7 @@
         defaultEntryAction: options.defaultEntryAction
       }).then(function (loadedEntries) {
         if (loadedEntries && loadedEntries.length && settings.messageFile) {
-          setEntries(loadedEntries, false);
+          setEntries(loadedEntries, false, "sequence");
         }
       }).catch(function () {
         // Keep the current fallback entries if the optional message file fails to load.
@@ -597,7 +598,6 @@
       settings.colors = typeof next.colors !== "undefined" ? next.colors : settings.colors;
       settings.start = typeof next.start === "string" ? next.start : settings.start;
       settings.end = typeof next.end === "string" ? next.end : settings.end;
-      settings.staticMessage = typeof next.staticMessage === "boolean" ? next.staticMessage : settings.staticMessage;
       settings.backgroundMode = next.backgroundMode ? normalizeBackgroundMode(next.backgroundMode) : settings.backgroundMode;
       settings.dotImageMode = typeof next.dotImageMode === "string" ? normalizeDotImageMode(next.dotImageMode) : settings.dotImageMode;
       settings.dotColor = typeof next.dotColor !== "undefined" ? normalizeColor(next.dotColor, settings.dotColor) : settings.dotColor;
@@ -639,7 +639,7 @@
       }
 
       if (settings.messageFile !== previousMessageFile) {
-        setEntries(buildFallbackEntries(), false);
+        setEntries(buildFallbackEntries(), false, "fallback");
         loadOptionalMessageFile();
       }
 
@@ -710,7 +710,7 @@
         state.lastRenderDuration = renderDuration;
         adaptDotCount(renderDuration);
         state.backgroundFrame += 1;
-        if (!settings.staticMessage) {
+        if (!isStaticFallbackMessage()) {
           state.entryFrame += 1;
 
           if (state.entryFrame > state.entries[state.currentIndex].durationFrames) {
@@ -736,7 +736,7 @@
       }
 
       metrics = measureEntry(entry);
-      if (settings.staticMessage) {
+      if (isStaticFallbackMessage()) {
         progress = 1;
         holdProgress = 0;
       } else {
@@ -871,7 +871,7 @@
       var character;
       var color;
       var wave;
-      var waveFrame = settings.staticMessage ? state.backgroundFrame : state.entryFrame;
+      var waveFrame = isStaticFallbackMessage() ? state.backgroundFrame : state.entryFrame;
       var canvasMidX = canvas.width / 2;
       var textMidOffset;
       var enterFromCenter = entry.start === "<>" && progress < 1 && exitProgress === 0;
@@ -982,6 +982,10 @@
         width: offsetX,
         height: settings.fontHeight
       };
+    }
+
+    function isStaticFallbackMessage() {
+      return !settings.messageFile && state.entrySource === "fallback";
     }
 
     function getPosition(entry, metrics, progress, holdProgress) {

@@ -445,7 +445,6 @@
       fontStyle: config.fontStyle,
       fps: config.animationSpeed,
       displayFrames: config.displayTime,
-      staticMessage: !config.messageFile,
       defaultColor: config.defaultColor,
       imageFiles: buildImageFilesPipe(selectedImageFiles.map(resolvePreviewBackgroundImagePath))
     };
@@ -507,7 +506,6 @@
       fontStyle: config.fontStyle,
       fps: config.animationSpeed,
       displayFrames: config.displayTime,
-      staticMessage: !useMessageFile,
       imageFiles: config.imageFiles,
       message: defaultMessageRow.text,
       colors: defaultMessageRow.colors,

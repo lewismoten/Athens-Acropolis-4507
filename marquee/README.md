@@ -164,20 +164,14 @@ All options are passed to `ShoomiColorMarquee.createCanvasMarquee(options)`.
 - Default: `""`
 - Pipe-delimited image list or image array for inline `$0`, `$1`, `$2` message tokens.
 
-`staticMessage`
-
-- Type: `boolean`
-- Required: no
-- Default: `false`
-- When `true`, the inline message stays centered and visible instead of sequencing.
-- This is the intended behavior for the plain fallback `message` path.
-
 `messageFile`
 
 - Type: `string`
 - Required: no
 - Default: `""`
 - Optional external message file in `dreamers.txt` style format.
+- When blank, the top-level `message` is shown as the centered waving fallback message.
+- When present, the fallback `message` stays visible until the file loads successfully.
 
 `displayFrames`
 
