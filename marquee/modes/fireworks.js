@@ -200,6 +200,13 @@
       var returnProgress;
       var returnX;
       var returnY;
+      var imageSize;
+      var imageWidth;
+      var imageHeight;
+      var imageRotation;
+      var imageCenterX;
+      var imageCenterY;
+      var streakProgress;
 
       for (index = 0; index < state.dots.length; index += 1) {
         dot = state.dots[index];
@@ -319,19 +326,27 @@
           particleRadius = dot.radius * (0.7 - (lifeProgress * 0.2));
 
           context.strokeStyle = dot.color;
-          context.globalAlpha = burstAlpha * 0.58;
-          context.lineWidth = Math.max(1, dot.radius * 0.22);
+          context.globalAlpha = burstAlpha * (0.75 - (0.2 * burstProgress));
+          context.lineWidth = Math.max(1, dot.radius * (0.16 + ((1 - burstProgress) * 0.18)));
           context.beginPath();
-          context.moveTo(previousX, previousY);
+          context.moveTo(dot.x, dot.y);
           context.lineTo(currentX, currentY);
           context.stroke();
 
+          imageRotation = Math.atan2(currentY - dot.y, currentX - dot.x) + (Math.PI / 2);
+          imageSize = Math.max(2.5, particleRadius * 4.2);
+          streakProgress = runtime.easeOutCubic(burstProgress);
+          imageWidth = imageSize * (0.18 + (0.82 * streakProgress));
+          imageHeight = imageSize * (2.8 - (1.8 * streakProgress));
+          imageCenterX = dot.x + ((currentX - dot.x) * (0.45 + (0.55 * streakProgress)));
+          imageCenterY = dot.y + ((currentY - dot.y) * (0.45 + (0.55 * streakProgress)));
+
           if (drawDotImage(dot, {
-            x: currentX,
-            y: currentY,
-            width: Math.max(2.5, particleRadius * 4.2),
-            height: Math.max(2.5, particleRadius * 4.2),
-            rotation: Math.atan2(currentY - previousY, currentX - previousX),
+            x: imageCenterX,
+            y: imageCenterY,
+            width: imageWidth,
+            height: imageHeight,
+            rotation: imageRotation,
             alpha: burstAlpha * (0.8 + (0.15 * Math.sin(dot.phase + particleIndex)))
           })) {
             continue;
