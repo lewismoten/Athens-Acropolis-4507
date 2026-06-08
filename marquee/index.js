@@ -54,6 +54,7 @@
     backgroundMode: document.getElementById("marquee-background-mode"),
     animationSpeed: document.getElementById("marquee-animation-speed"),
     background: document.getElementById("marquee-background"),
+    backgroundImage: document.getElementById("marquee-background-image"),
     fileName: document.getElementById("sequence-file-name"),
     defaultColor: document.getElementById("marquee-default-color"),
     dotColor: document.getElementById("marquee-dot-color"),
@@ -72,6 +73,7 @@
     width: 640,
     height: 92,
     backgroundColor: "#000066",
+    backgroundImage: resolvePreviewBackgroundImagePath("banner_geocities.gif"),
     backgroundMode: "stars",
     dotColor: "#9999ff",
     dotCount: 50,
@@ -198,6 +200,7 @@
       backgroundMode: normalizeBackgroundMode(fields.backgroundMode.value),
       animationSpeed: marqueeApi.clampNumber(fields.animationSpeed.value, 1, 120, 20),
       background: marqueeApi.normalizeColor(fields.background.value, "#000066"),
+      backgroundImage: normalizeAssetPath(fields.backgroundImage.value, ""),
       defaultColor: defaultColor,
       dotColor: marqueeApi.normalizeColor(fields.dotColor.value, "#9999ff"),
       fontFamily: (fields.fontFamily.value || "Times New Roman, Times, serif").trim(),
@@ -212,6 +215,7 @@
       width: config.width,
       height: config.height,
       backgroundColor: config.background,
+      backgroundImage: resolvePreviewBackgroundImagePath(config.backgroundImage),
       backgroundMode: config.backgroundMode,
       dotColor: config.dotColor,
       dotCount: config.dotCount,
@@ -263,6 +267,7 @@
       width: config.width,
       height: config.height,
       backgroundColor: config.background,
+      backgroundImage: config.backgroundImage,
       backgroundMode: config.backgroundMode,
       dotColor: config.dotColor,
       dotCount: config.dotCount,
@@ -917,6 +922,30 @@
     }
 
     return "stars";
+  }
+
+  function normalizeAssetPath(value, fallback) {
+    var normalized = String(value || "").trim();
+
+    if (!normalized) {
+      return typeof fallback === "string" ? fallback : "";
+    }
+
+    return normalized;
+  }
+
+  function resolvePreviewBackgroundImagePath(assetPath) {
+    var normalized = normalizeAssetPath(assetPath, "");
+
+    if (!normalized) {
+      return "";
+    }
+
+    if (/^(?:[a-z]+:)?\/\//i.test(normalized) || normalized.charAt(0) === "/" || normalized.indexOf("../") === 0 || normalized.indexOf("./") === 0) {
+      return normalized;
+    }
+
+    return "../" + normalized;
   }
 
   function getModeScriptPath(modeName) {

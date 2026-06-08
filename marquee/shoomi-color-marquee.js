@@ -285,6 +285,7 @@
       width: options.width || canvas.width || 500,
       height: options.height || canvas.height || 78,
       backgroundColor: options.backgroundColor || "#000033",
+      backgroundImage: String(options.backgroundImage || ""),
       backgroundMode: normalizeBackgroundMode(options.backgroundMode),
       dotColor: options.dotColor || "#9999ff",
       dotCount: typeof options.dotCount === "number" ? options.dotCount : 50,
@@ -309,11 +310,15 @@
       lastRenderDuration: 0,
       fastFrameStreak: 0,
       slowFrameStreak: 0,
+      backgroundImageEl: null,
+      backgroundImageLoaded: false,
+      backgroundImageSource: "",
       lastTimestamp: 0,
       entries: []
     };
 
     resizeCanvas();
+    updateBackgroundImage(settings.backgroundImage);
     setEntries(options.entries || [], false);
     if (options.messageFile) {
       loadMessageFile(options.messageFile, {
@@ -383,11 +388,13 @@
       var next = nextOptions || {};
       var previousDotCount = settings.dotCount;
       var previousDotColor = settings.dotColor;
+      var previousBackgroundImage = settings.backgroundImage;
       var previousBackgroundMode = settings.backgroundMode;
 
       settings.width = next.width || settings.width;
       settings.height = next.height || settings.height;
       settings.backgroundColor = next.backgroundColor || settings.backgroundColor;
+      settings.backgroundImage = typeof next.backgroundImage === "string" ? next.backgroundImage : settings.backgroundImage;
       settings.backgroundMode = next.backgroundMode ? normalizeBackgroundMode(next.backgroundMode) : settings.backgroundMode;
       settings.dotColor = next.dotColor || settings.dotColor;
       settings.dotCount = typeof next.dotCount === "number" ? next.dotCount : settings.dotCount;
@@ -403,6 +410,10 @@
       if (settings.dotCount !== previousDotCount) {
         state.renderDotCount = Math.min(state.renderDotCount, settings.dotCount);
         setRenderDotCount(settings.dotCount);
+      }
+
+      if (settings.backgroundImage !== previousBackgroundImage) {
+        updateBackgroundImage(settings.backgroundImage);
       }
 
       if (settings.backgroundMode !== previousBackgroundMode) {
@@ -503,9 +514,21 @@
 
       context.fillStyle = settings.backgroundColor;
       context.fillRect(0, 0, canvas.width, canvas.height);
+      drawBackgroundImage();
 
       drawDots();
       drawText(entry, metrics, position.x, position.y, progress, exitProgress);
+    }
+
+    function drawBackgroundImage() {
+      var image = state.backgroundImageEl;
+
+      if (!image || !state.backgroundImageLoaded) {
+        return;
+      }
+
+      context.globalAlpha = 1;
+      context.drawImage(image, 0, 0, canvas.width, canvas.height);
     }
 
     function drawDots() {
@@ -895,6 +918,41 @@
       }
 
       return Date.now();
+    }
+
+    function updateBackgroundImage(nextSource) {
+      var source = String(nextSource || "").trim();
+      var image;
+
+      state.backgroundImageSource = source;
+      state.backgroundImageLoaded = false;
+      state.backgroundImageEl = null;
+
+      if (!source || typeof Image === "undefined") {
+        drawFrame();
+        return;
+      }
+
+      image = new Image();
+      image.onload = function () {
+        if (state.backgroundImageSource !== source) {
+          return;
+        }
+
+        state.backgroundImageEl = image;
+        state.backgroundImageLoaded = true;
+        drawFrame();
+      };
+      image.onerror = function () {
+        if (state.backgroundImageSource !== source) {
+          return;
+        }
+
+        state.backgroundImageEl = null;
+        state.backgroundImageLoaded = false;
+        drawFrame();
+      };
+      image.src = source;
     }
   }
 
