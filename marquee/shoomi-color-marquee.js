@@ -317,7 +317,7 @@
 
     resizeCanvas();
     updateBackgroundImage(settings.backgroundImage);
-    setEntries(options.entries || [], false);
+    setEntries(options.entries || buildFallbackEntries(), false);
     if (options.messageFile) {
       loadMessageFile(options.messageFile, {
         defaultColors: settings.defaultColors,
@@ -373,6 +373,19 @@
       nextEntry = state.entries[state.currentIndex];
       state.entryFrame = Math.round((nextEntry.durationFrames || 0) * progressRatio);
       drawFrame();
+    }
+
+    function buildFallbackEntries() {
+      if (typeof options.message === "string" && options.message.length) {
+        return [{
+          start: options.start || ">>",
+          end: options.end || "<<",
+          text: options.message,
+          colors: typeof options.colors === "string" ? parseColorList(options.colors) : (options.colors || settings.defaultColors)
+        }];
+      }
+
+      return [];
     }
 
     function setSize(width, height) {

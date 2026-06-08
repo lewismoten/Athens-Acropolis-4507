@@ -272,7 +272,7 @@
   function buildCanvasEmbedCode(config, rows) {
     var defaultColorValues = splitColorPipe(config.defaultColor);
     var fileName = getSequenceFileName();
-    var useMessageFile = !!(fileName && rows.length);
+    var useMessageFile = !!fileName;
     var modeScripts = getEmbedModeScripts(config.backgroundMode);
     var optionsConfig = {
       width: config.width,
@@ -288,18 +288,12 @@
       fontHeight: config.fontSize,
       fps: config.animationSpeed,
       displayFrames: config.displayTime,
+      message: defaultMessageRow.text,
+      colors: defaultMessageRow.colors,
       defaultColors: defaultColorValues
     };
-    var entriesConfig = [];
     var lines = [];
     var index;
-
-    entriesConfig.push({
-      start: defaultMessageRow.start,
-      end: defaultMessageRow.end,
-      text: defaultMessageRow.text,
-      colors: splitColorPipe(defaultMessageRow.colors)
-    });
 
     if (useMessageFile) {
       optionsConfig.messageFile = fileName;
@@ -317,7 +311,6 @@
     lines.push('  var canvas = document.getElementById("dream-marquee");');
     lines.push("  var marqueeApi = window.ShoomiColorMarquee;");
     lines.push("  var marqueeOptions = " + stringifyForCode(optionsConfig, 2) + ";");
-    lines.push("  var marqueeEntries = " + stringifyForCode(entriesConfig, 2) + ";");
     lines.push("");
     lines.push("  if (!canvas || !canvas.getContext || !marqueeApi) {");
     lines.push("    return;");
@@ -325,11 +318,6 @@
     lines.push("");
     lines.push("  marqueeOptions.canvas = canvas;");
     lines.push("  marqueeOptions.defaultColors = marqueeApi.parseColorList(marqueeOptions.defaultColors.join(\"|\"));");
-    lines.push("  marqueeOptions.entries = marqueeEntries.map(function (entry) {");
-    lines.push("    return marqueeApi.createEntry(entry.start + \",\" + entry.end, entry.text, entry.colors.join(\"|\"), {");
-    lines.push("      defaultColors: marqueeOptions.defaultColors");
-    lines.push("    });");
-    lines.push("  });");
     lines.push("");
     lines.push("  marqueeApi.createCanvasMarquee(marqueeOptions);");
     lines.push("}());");
