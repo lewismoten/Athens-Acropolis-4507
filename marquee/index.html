@@ -300,10 +300,10 @@
     <FORM ID="row-modal-form" CLASS="modal-form">
       <LABEL CLASS="field">
         <SPAN CLASS="field-label">Text</SPAN>
-        <TEXTAREA ID="modal-row-text" CLASS="field-input field-textarea" ROWS="4"></TEXTAREA>
+        <TEXTAREA ID="modal-row-text" NAME="rowText" CLASS="field-input field-textarea" ROWS="4"></TEXTAREA>
       </LABEL>
 
-      <INPUT ID="modal-row-colors" TYPE="hidden">
+      <INPUT ID="modal-row-colors" NAME="rowColors" TYPE="hidden">
 
       <DIV CLASS="field">
         <SPAN CLASS="field-label">Preview</SPAN>
@@ -313,14 +313,14 @@
       <DIV CLASS="modal-footer">
         <DIV CLASS="modal-toolbar">
           <BUTTON TYPE="button" ID="modal-color-trigger" CLASS="action-button modal-color-trigger" TITLE="Change selected text color" ARIA-LABEL="Change selected text color"></BUTTON>
-          <INPUT ID="modal-row-color-picker" CLASS="modal-color-native-input" TYPE="color" VALUE="#ffff66" TABINDEX="-1" ARIA-HIDDEN="true">
+          <INPUT ID="modal-row-color-picker" NAME="rowColorPicker" CLASS="modal-color-native-input" TYPE="color" VALUE="#ffff66" TABINDEX="-1" ARIA-HIDDEN="true">
           <BUTTON TYPE="button" ID="modal-undo" CLASS="action-button">Undo</BUTTON>
           <BUTTON TYPE="button" ID="modal-insert-image" CLASS="action-button">Insert Image</BUTTON>
         </DIV>
 
         <DIV CLASS="modal-actions">
           <BUTTON TYPE="button" ID="modal-cancel" CLASS="row-button">Cancel</BUTTON>
-          <BUTTON TYPE="submit" CLASS="action-button">Save</BUTTON>
+          <BUTTON TYPE="submit" ID="modal-save" NAME="rowSave" CLASS="action-button">Save</BUTTON>
         </DIV>
       </DIV>
     </FORM>

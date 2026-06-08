@@ -608,8 +608,8 @@
         '<td>' + buildTransitionSelect("end", index, row.end) + "</td>",
         "<td><div class=\"sequence-text\" title=\"" + escapeHtml(row.text) + "\" style=\"background:" + escapeHtml(resolvedBackground) + ";" + previewTextStyle + "\">" + buildColorizedTextMarkup(row.text, row.colors) + "</div></td>",
         '<td><div class="sequence-cell-actions">',
-        '<button type="button" class="row-button row-edit" data-index="' + index + '">Edit</button>',
-        '<button type="button" class="row-button row-delete" data-index="' + index + '">Delete</button>',
+        '<button type="button" id="sequence-row-edit-' + index + '" name="sequenceRowEdit' + index + '" class="row-button row-edit" data-index="' + index + '">Edit</button>',
+        '<button type="button" id="sequence-row-delete-' + index + '" name="sequenceRowDelete' + index + '" class="row-button row-delete" data-index="' + index + '">Delete</button>',
         "</div></td>",
         "</tr>"
       ].join("");
@@ -619,7 +619,7 @@
       "<tr>",
       '<td colspan="4" class="sequence-text">Optional message file rows.</td>',
       '<td><div class="sequence-cell-actions">',
-      '<button type="button" class="row-button row-add">Add</button>',
+      '<button type="button" id="sequence-row-add" name="sequenceRowAdd" class="row-button row-add">Add</button>',
       "</div></td>",
       "</tr>"
     ].join("");
@@ -633,8 +633,8 @@
     defaultMessageCard.innerHTML = [
       '<div class="sequence-text default-message-preview" title="' + escapeHtml(defaultMessageRow.text || "") + '" style="background:' + escapeHtml(backgroundColor || "#000066") + ";" + previewTextStyle + '">' + buildColorizedTextMarkup(defaultMessageRow.text || "", defaultMessageRow.colors || "") + "</div>",
       '<div class="sequence-cell-actions">',
-      '<button type="button" class="row-button default-message-edit">Edit</button>',
-      '<button type="button" class="row-button default-message-clear">Clear</button>',
+      '<button type="button" id="default-message-edit" name="defaultMessageEdit" class="row-button default-message-edit">Edit</button>',
+      '<button type="button" id="default-message-clear" name="defaultMessageClear" class="row-button default-message-clear">Clear</button>',
       "</div>"
     ].join("");
   }
@@ -731,7 +731,7 @@
     var symbol = isUp ? "&#9650;" : "&#9660;";
     var label = isUp ? "Move row up" : "Move row down";
 
-    return '<button type="button" class="sequence-move-button row-button row-' + direction + '" data-index="' + index + '" aria-label="' + label + '"' + (disabled ? " disabled" : "") + ">" + symbol + "</button>";
+    return '<button type="button" id="sequence-row-' + direction + '-' + index + '" name="sequenceRow' + (isUp ? "Up" : "Down") + index + '" class="sequence-move-button row-button row-' + direction + '" data-index="' + index + '" aria-label="' + label + '"' + (disabled ? " disabled" : "") + ">" + symbol + "</button>";
   }
 
   function buildTransitionSelect(kind, index, token) {
@@ -755,7 +755,7 @@
       ].join("");
     }
 
-    return '<select class="sequence-transition-select" data-kind="' + kind + '" data-index="' + index + '">' + options + "</select>";
+    return '<select id="sequence-row-' + kind + '-' + index + '" name="sequenceRow' + (kind === "start" ? "Enter" : "Exit") + index + '" class="sequence-transition-select" data-kind="' + kind + '" data-index="' + index + '">' + options + "</select>";
   }
 
   function buildTransitionOption(value, currentValue) {
