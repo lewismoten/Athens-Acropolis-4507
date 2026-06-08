@@ -1,0 +1,257 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 3.2//EN">
+<HTML>
+<HEAD>
+  <TITLE>Counter Builder</TITLE>
+  <LINK REL="icon" HREF="../favicon.ico">
+  <LINK REL="shortcut icon" HREF="../favicon.ico">
+  <STYLE>
+    BODY {
+      margin: 0;
+      padding: 24px;
+      background: #000033;
+      color: #ffff99;
+      font: 16px "Times New Roman", Times, serif;
+    }
+
+    A {
+      color: #99ccff;
+    }
+
+    .page {
+      max-width: 980px;
+      margin: 0 auto;
+    }
+
+    .panel {
+      border: 2px solid #666699;
+      background: #000044;
+      padding: 16px;
+      margin-bottom: 18px;
+    }
+
+    .panel H1,
+    .panel H2 {
+      margin: 0 0 12px;
+      color: #ffffff;
+      font: bold 24px "Times New Roman", Times, serif;
+    }
+
+    .panel H2 {
+      font-size: 20px;
+    }
+
+    .sticky-panel {
+      position: sticky;
+      top: 18px;
+    }
+
+    .grid {
+      display: grid;
+      grid-template-columns: repeat(3, minmax(0, 1fr));
+      gap: 12px;
+    }
+
+    .field {
+      display: block;
+    }
+
+    .field-label {
+      display: block;
+      margin-bottom: 4px;
+      color: #ccccff;
+      font-size: 14px;
+    }
+
+    .field-input,
+    .field-select,
+    .field-color,
+    .field-checkbox {
+      box-sizing: border-box;
+      width: 100%;
+      padding: 6px 8px;
+      border: 1px solid #7777aa;
+      background: #111133;
+      color: #ffffff;
+      font: 15px "Courier New", Courier, monospace;
+    }
+
+    .field-color {
+      padding: 2px;
+      height: 36px;
+    }
+
+    .field-checkbox {
+      width: auto;
+      margin-right: 8px;
+      vertical-align: middle;
+    }
+
+    .field-inline {
+      display: flex;
+      align-items: center;
+      min-height: 36px;
+    }
+
+    .actions {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 10px;
+      margin-top: 14px;
+    }
+
+    .button {
+      border: 1px solid #9999cc;
+      background: #222255;
+      color: #ffffff;
+      padding: 7px 12px;
+      cursor: pointer;
+      font: bold 14px "Times New Roman", Times, serif;
+    }
+
+    .preview-controls {
+      display: flex;
+      align-items: end;
+      gap: 12px;
+      margin-bottom: 12px;
+    }
+
+    .preview-controls .field {
+      max-width: 220px;
+      margin: 0;
+    }
+
+    .preview-box {
+      min-height: 44px;
+      padding: 10px;
+      border: 1px dashed #666699;
+      background: #000022;
+    }
+
+    .preview-box IMG,
+    .preview-box CANVAS {
+      display: block;
+    }
+
+    .code-output {
+      width: 100%;
+      min-height: 92px;
+      box-sizing: border-box;
+      padding: 10px;
+      border: 1px solid #7777aa;
+      background: #111133;
+      color: #ffffff;
+      font: 13px "Courier New", Courier, monospace;
+      white-space: pre;
+    }
+
+    .helper {
+      color: #cccccc;
+      font-size: 14px;
+      line-height: 1.4;
+    }
+
+    @MEDIA (max-width: 780px) {
+      .sticky-panel {
+        position: static;
+      }
+
+      .grid {
+        grid-template-columns: 1fr;
+      }
+    }
+  </STYLE>
+</HEAD>
+<BODY>
+<DIV CLASS="page">
+  <DIV CLASS="panel sticky-panel">
+    <H1>Shoomi's Visitor Counter</H1>
+    <DIV CLASS="helper">
+      Build an old-style counter URL like <CODE>df=lmoten(1).dat&amp;dd=lmoten(a)|frgb=000066|comma=T|ft=0</CODE>,
+      then preview it through the PHP service or render it locally on a canvas from the strip.
+    </DIV>
+    <DIV CLASS="preview-controls">
+      <LABEL CLASS="field">
+        <SPAN CLASS="field-label">Preview Mode</SPAN>
+        <SELECT ID="preview-mode" NAME="previewMode" CLASS="field-select">
+          <OPTION VALUE="canvas" SELECTED>JavaScript Canvas</OPTION>
+          <OPTION VALUE="php">PHP Image</OPTION>
+        </SELECT>
+      </LABEL>
+    </DIV>
+    <DIV ID="preview-box" CLASS="preview-box"></DIV>
+  </DIV>
+
+  <FORM ID="counter-form" CLASS="panel">
+    <H2>Parameters</H2>
+    <DIV CLASS="grid">
+      <LABEL CLASS="field">
+        <SPAN CLASS="field-label">Data File / `df`</SPAN>
+        <INPUT ID="counter-df" NAME="df" CLASS="field-input" TYPE="text" VALUE="lmoten(1).dat">
+      </LABEL>
+
+      <LABEL CLASS="field">
+        <SPAN CLASS="field-label">Style / `dd` Base</SPAN>
+        <INPUT ID="counter-dd" NAME="dd_base" CLASS="field-input" TYPE="text" VALUE="lmoten(a)">
+      </LABEL>
+
+      <LABEL CLASS="field">
+        <SPAN CLASS="field-label">Digits</SPAN>
+        <INPUT ID="counter-digits" NAME="digits" CLASS="field-input" TYPE="number" MIN="1" MAX="12" VALUE="4">
+      </LABEL>
+
+      <LABEL CLASS="field">
+        <SPAN CLASS="field-label">Frame Color / `frgb`</SPAN>
+        <INPUT ID="counter-frgb" NAME="frgb" CLASS="field-color" TYPE="color" VALUE="#000066">
+      </LABEL>
+
+      <LABEL CLASS="field">
+        <SPAN CLASS="field-label">Frame Thickness / `ft`</SPAN>
+        <INPUT ID="counter-ft" NAME="ft" CLASS="field-input" TYPE="number" MIN="0" MAX="6" VALUE="0">
+      </LABEL>
+
+      <LABEL CLASS="field">
+        <SPAN CLASS="field-label">Increment Step</SPAN>
+        <INPUT ID="counter-step" NAME="step" CLASS="field-input" TYPE="number" MIN="0" MAX="1000" VALUE="1">
+      </LABEL>
+
+      <LABEL CLASS="field">
+        <SPAN CLASS="field-label">Show Commas / `comma`</SPAN>
+        <SPAN CLASS="field-inline">
+          <INPUT ID="counter-comma" NAME="comma" CLASS="field-checkbox" TYPE="checkbox" CHECKED>
+          <SPAN>Insert thousands separators</SPAN>
+        </SPAN>
+      </LABEL>
+
+      <LABEL CLASS="field">
+        <SPAN CLASS="field-label">Increment on PHP Preview</SPAN>
+        <SPAN CLASS="field-inline">
+          <INPUT ID="counter-increment" NAME="increment" CLASS="field-checkbox" TYPE="checkbox" CHECKED>
+          <SPAN>Increment stored count</SPAN>
+        </SPAN>
+      </LABEL>
+
+      <LABEL CLASS="field">
+        <SPAN CLASS="field-label">Canvas Preview Count</SPAN>
+        <INPUT ID="counter-preview-count" NAME="preview_count" CLASS="field-input" TYPE="number" MIN="0" MAX="999999999" VALUE="12345">
+      </LABEL>
+    </DIV>
+
+    <DIV CLASS="actions">
+      <BUTTON ID="copy-url" TYPE="button" CLASS="button">Copy URL</BUTTON>
+      <BUTTON ID="copy-tag" TYPE="button" CLASS="button">Copy IMG Tag</BUTTON>
+    </DIV>
+  </FORM>
+
+  <DIV CLASS="panel">
+    <H2>Generated URL</H2>
+    <TEXTAREA ID="counter-url" CLASS="code-output" READONLY></TEXTAREA>
+  </DIV>
+
+  <DIV CLASS="panel">
+    <H2>Generated IMG Tag</H2>
+    <TEXTAREA ID="counter-tag" CLASS="code-output" READONLY></TEXTAREA>
+  </DIV>
+</DIV>
+<SCRIPT SRC="index.js"></SCRIPT>
+</BODY>
+</HTML>
