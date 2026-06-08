@@ -1148,11 +1148,11 @@
     }
 
     fileName = getSequenceFileName();
-    generatedFileHeading.innerHTML = "Generated `" + escapeHtml(fileName) + "`";
+    generatedFileHeading.innerHTML = fileName ? ("Generated `" + escapeHtml(fileName) + "`") : "Generated Message File";
   }
 
   function getSequenceFileName() {
     var value = fields.fileName && fields.fileName.value ? String(fields.fileName.value).trim() : "";
-    return value || "dreamers.txt";
+    return value;
   }
 }());

@@ -286,6 +286,11 @@
       height: options.height || canvas.height || 78,
       backgroundColor: options.backgroundColor || "#000033",
       backgroundImage: String(options.backgroundImage || ""),
+      messageFile: String(options.messageFile || ""),
+      message: typeof options.message === "string" ? options.message : "",
+      colors: typeof options.colors !== "undefined" ? options.colors : null,
+      start: options.start || ">>",
+      end: options.end || "<<",
       backgroundMode: normalizeBackgroundMode(options.backgroundMode),
       dotColor: options.dotColor || "#9999ff",
       dotCount: typeof options.dotCount === "number" ? options.dotCount : 50,
@@ -318,20 +323,7 @@
     resizeCanvas();
     updateBackgroundImage(settings.backgroundImage);
     setEntries(options.entries || buildFallbackEntries(), false);
-    if (options.messageFile) {
-      loadMessageFile(options.messageFile, {
-        defaultColors: settings.defaultColors,
-        holdFrames: settings.displayFrames,
-        firstEntryAction: options.firstEntryAction,
-        defaultEntryAction: options.defaultEntryAction
-      }).then(function (loadedEntries) {
-        if (loadedEntries && loadedEntries.length) {
-          setEntries(loadedEntries, false);
-        }
-      }).catch(function () {
-        // Keep the current entries if the optional message file fails to load.
-      });
-    }
+    loadOptionalMessageFile();
     requestAnimationFrame(tick);
 
     return {
@@ -376,16 +368,35 @@
     }
 
     function buildFallbackEntries() {
-      if (typeof options.message === "string" && options.message.length) {
+      if (typeof settings.message === "string" && settings.message.length) {
         return [{
-          start: options.start || ">>",
-          end: options.end || "<<",
-          text: options.message,
-          colors: typeof options.colors === "string" ? parseColorList(options.colors) : (options.colors || settings.defaultColors)
+          start: settings.start || ">>",
+          end: settings.end || "<<",
+          text: settings.message,
+          colors: typeof settings.colors === "string" ? parseColorList(settings.colors) : (settings.colors || settings.defaultColors)
         }];
       }
 
       return [];
+    }
+
+    function loadOptionalMessageFile() {
+      if (!settings.messageFile) {
+        return;
+      }
+
+      loadMessageFile(settings.messageFile, {
+        defaultColors: settings.defaultColors,
+        holdFrames: settings.displayFrames,
+        firstEntryAction: options.firstEntryAction,
+        defaultEntryAction: options.defaultEntryAction
+      }).then(function (loadedEntries) {
+        if (loadedEntries && loadedEntries.length && settings.messageFile) {
+          setEntries(loadedEntries, false);
+        }
+      }).catch(function () {
+        // Keep the current fallback entries if the optional message file fails to load.
+      });
     }
 
     function setSize(width, height) {
@@ -400,12 +411,18 @@
       var previousDotCount = settings.dotCount;
       var previousDotColor = settings.dotColor;
       var previousBackgroundImage = settings.backgroundImage;
+      var previousMessageFile = settings.messageFile;
       var previousBackgroundMode = settings.backgroundMode;
 
       settings.width = next.width || settings.width;
       settings.height = next.height || settings.height;
       settings.backgroundColor = next.backgroundColor || settings.backgroundColor;
       settings.backgroundImage = typeof next.backgroundImage === "string" ? next.backgroundImage : settings.backgroundImage;
+      settings.messageFile = typeof next.messageFile === "string" ? next.messageFile : settings.messageFile;
+      settings.message = typeof next.message === "string" ? next.message : settings.message;
+      settings.colors = typeof next.colors !== "undefined" ? next.colors : settings.colors;
+      settings.start = typeof next.start === "string" ? next.start : settings.start;
+      settings.end = typeof next.end === "string" ? next.end : settings.end;
       settings.backgroundMode = next.backgroundMode ? normalizeBackgroundMode(next.backgroundMode) : settings.backgroundMode;
       settings.dotColor = next.dotColor || settings.dotColor;
       settings.dotCount = typeof next.dotCount === "number" ? next.dotCount : settings.dotCount;
@@ -427,6 +444,11 @@
         updateBackgroundImage(settings.backgroundImage);
       } else {
         applyCanvasBackgroundStyle();
+      }
+
+      if (settings.messageFile !== previousMessageFile) {
+        setEntries(buildFallbackEntries(), false);
+        loadOptionalMessageFile();
       }
 
       if (settings.backgroundMode !== previousBackgroundMode) {
