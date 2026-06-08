@@ -197,9 +197,11 @@
     var defaultColor = marqueeApi.normalizeColor(fields.defaultColor.value, "#ffff66");
     var fontStyle = String(fields.fontStyle.value || "0");
     var sequenceCount = sequenceRows.length;
+    var messageFile = getSequenceFileName();
 
     return {
       sequenceCount: sequenceCount,
+      messageFile: messageFile,
       displayTime: marqueeApi.clampNumber(fields.displayTime.value, 1, 999, 100),
       width: width,
       height: height,
@@ -241,7 +243,7 @@
 
   function buildCanvasEntries(config, rows) {
     var entries = [];
-    var sourceRows = rows.length ? rows : [defaultMessageRow];
+    var sourceRows = (config.messageFile && rows.length) ? rows : [defaultMessageRow];
     var index;
 
     for (index = 0; index < sourceRows.length; index += 1) {
