@@ -15,15 +15,34 @@
 
     dot.x = canvas.width * (0.04 + (nextRandom() * 0.92));
     dot.y = canvas.height + (nextRandom() * (canvas.height * 0.42));
+    dot.fireworkLaunchStartY = dot.y;
     dot.fireworkState = "idle";
     dot.fireworkDelay = 12 + Math.floor(nextRandom() * 90);
     dot.fireworkTargetY = canvas.height * (0.12 + (nextRandom() * 0.38));
     dot.sparkleFrame = 0;
   }
 
+  function getLaunchFadeAlpha(dot) {
+    var totalRise = Math.max(1, (dot.fireworkLaunchStartY || dot.y) - dot.fireworkTargetY);
+    var riseProgress = Math.max(0, Math.min(1, ((dot.fireworkLaunchStartY || dot.y) - dot.y) / totalRise));
+    var fadeProgress;
+
+    if (riseProgress <= 0.6) {
+      return 1;
+    }
+
+    fadeProgress = (riseProgress - 0.6) / 0.4;
+    return Math.max(0.15, 1 - (fadeProgress * 0.85));
+  }
+
   function restartFirework(dot, runtime) {
     runtime.applyDotStyle(dot);
     initializeFirework(dot, runtime);
+  }
+
+  function burstFirework(dot) {
+    dot.fireworkState = "burst";
+    dot.sparkleFrame = 0;
   }
 
   function stepFirework(dot, runtime) {
@@ -44,15 +63,9 @@
       dot.vy += 0.085 * launchScale;
 
       if (dot.y <= dot.fireworkTargetY) {
-        dot.fireworkState = "burst";
-        dot.sparkleFrame = 0;
+        burstFirework(dot);
       } else if (dot.vy >= 0) {
-        if (dot.y <= runtime.canvas.height * 0.5) {
-          dot.fireworkState = "burst";
-          dot.sparkleFrame = 0;
-        } else {
-          restartFirework(dot, runtime);
-        }
+        burstFirework(dot);
       } else if (dot.y < -40 || dot.y > runtime.canvas.height + 40) {
         restartFirework(dot, runtime);
       }
@@ -135,6 +148,7 @@
       var gravityDrop;
       var previousGravityDrop;
       var particleRadius;
+      var launchAlpha;
 
       for (index = 0; index < state.dots.length; index += 1) {
         dot = state.dots[index];
@@ -157,8 +171,9 @@
           dot.vy += 0.085 * launchScale;
 
           trailLength = Math.max(8, dot.fireworkBurstSize * 0.22);
+          launchAlpha = getLaunchFadeAlpha(dot);
           context.strokeStyle = dot.color;
-          context.globalAlpha = 0.35;
+          context.globalAlpha = 0.35 * launchAlpha;
           context.lineWidth = Math.max(1, dot.radius * 0.35);
           context.beginPath();
           context.moveTo(launchX, launchY + trailLength);
@@ -166,21 +181,15 @@
           context.stroke();
 
           context.fillStyle = dot.color;
-          context.globalAlpha = 0.9;
+          context.globalAlpha = 0.9 * launchAlpha;
           context.beginPath();
           context.arc(dot.x, dot.y, Math.max(0.75, dot.radius * 0.45), 0, Math.PI * 2, false);
           context.fill();
 
           if (dot.y <= dot.fireworkTargetY) {
-            dot.fireworkState = "burst";
-            dot.sparkleFrame = 0;
+            burstFirework(dot);
           } else if (dot.vy >= 0) {
-            if (dot.y <= canvas.height * 0.5) {
-              dot.fireworkState = "burst";
-              dot.sparkleFrame = 0;
-            } else {
-              runtime.resetDot(dot, true);
-            }
+            burstFirework(dot);
           } else if (dot.y < -40 || dot.y > canvas.height + 40) {
             runtime.resetDot(dot, true);
           }
