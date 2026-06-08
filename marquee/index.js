@@ -237,6 +237,7 @@
       fontHeight: config.fontSize,
       fps: config.animationSpeed,
       displayFrames: config.displayTime,
+      staticMessage: !config.messageFile,
       defaultColors: defaultColors
     };
   }
@@ -290,6 +291,7 @@
       fontHeight: config.fontSize,
       fps: config.animationSpeed,
       displayFrames: config.displayTime,
+      staticMessage: !useMessageFile,
       message: defaultMessageRow.text,
       colors: defaultMessageRow.colors,
       defaultColors: defaultColorValues

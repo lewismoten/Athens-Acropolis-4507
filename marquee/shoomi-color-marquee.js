@@ -291,6 +291,7 @@
       colors: typeof options.colors !== "undefined" ? options.colors : null,
       start: options.start || ">>",
       end: options.end || "<<",
+      staticMessage: !!options.staticMessage,
       backgroundMode: normalizeBackgroundMode(options.backgroundMode),
       dotColor: options.dotColor || "#9999ff",
       dotCount: typeof options.dotCount === "number" ? options.dotCount : 50,
@@ -423,6 +424,7 @@
       settings.colors = typeof next.colors !== "undefined" ? next.colors : settings.colors;
       settings.start = typeof next.start === "string" ? next.start : settings.start;
       settings.end = typeof next.end === "string" ? next.end : settings.end;
+      settings.staticMessage = typeof next.staticMessage === "boolean" ? next.staticMessage : settings.staticMessage;
       settings.backgroundMode = next.backgroundMode ? normalizeBackgroundMode(next.backgroundMode) : settings.backgroundMode;
       settings.dotColor = next.dotColor || settings.dotColor;
       settings.dotCount = typeof next.dotCount === "number" ? next.dotCount : settings.dotCount;
@@ -516,11 +518,13 @@
         state.lastRenderDuration = renderDuration;
         adaptDotCount(renderDuration);
         state.backgroundFrame += 1;
-        state.entryFrame += 1;
+        if (!settings.staticMessage) {
+          state.entryFrame += 1;
 
-        if (state.entryFrame > state.entries[state.currentIndex].durationFrames) {
-          state.currentIndex = (state.currentIndex + 1) % state.entries.length;
-          state.entryFrame = 0;
+          if (state.entryFrame > state.entries[state.currentIndex].durationFrames) {
+            state.currentIndex = (state.currentIndex + 1) % state.entries.length;
+            state.entryFrame = 0;
+          }
         }
       }
 
@@ -540,10 +544,15 @@
       }
 
       metrics = measureEntry(entry);
-      progress = Math.min(state.entryFrame / entry.transitionFrames, 1);
-      holdProgress = Math.max(state.entryFrame - entry.holdStartFrame, 0);
-      if (state.entryFrame > entry.holdStartFrame) {
-        exitProgress = Math.min(holdProgress / entry.transitionFrames, 1);
+      if (settings.staticMessage) {
+        progress = 1;
+        holdProgress = 0;
+      } else {
+        progress = Math.min(state.entryFrame / entry.transitionFrames, 1);
+        holdProgress = Math.max(state.entryFrame - entry.holdStartFrame, 0);
+        if (state.entryFrame > entry.holdStartFrame) {
+          exitProgress = Math.min(holdProgress / entry.transitionFrames, 1);
+        }
       }
       position = getPosition(entry, metrics, progress, holdProgress);
 
@@ -614,6 +623,7 @@
       var character;
       var color;
       var wave;
+      var waveFrame = settings.staticMessage ? state.backgroundFrame : state.entryFrame;
       var canvasMidX = canvas.width / 2;
       var textMidOffset;
       var enterFromCenter = entry.start === "<>" && progress < 1 && exitProgress === 0;
@@ -637,7 +647,7 @@
       for (index = 0; index < entry.characters.length; index += 1) {
         character = entry.characters[index];
         color = entry.colors[index] || settings.defaultColors[0];
-        wave = Math.sin((state.entryFrame / 4) + (index / 1.7)) * settings.waveHeight;
+        wave = Math.sin((waveFrame / 4) + (index / 1.7)) * settings.waveHeight;
         textMidOffset = (character.offsetX + (character.width / 2)) - (metrics.width / 2);
         x = baseX + character.offsetX;
 
