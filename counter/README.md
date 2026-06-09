@@ -1,18 +1,20 @@
-# Counter Service
+# Shoomi's Visitor Counter
 
-This folder contains a tiny strip-based hit counter that stores counts in individual `.dat` files and returns a generated GIF image assembled from a classic counter strip.
+This folder contains Shoomi's Visitor Counter: a strip-based hit counter that stores counts in individual `.dat` files and can either return a generated GIF image or a JSONP payload for browser-side rendering.
 
 ## Basic Usage
 
 ```html
-<img src="counter/counter.php?key=home" alt="Visitor counter">
+<img src="/counter/counter.php?key=home" alt="Visitor counter">
 ```
 
 Legacy-style usage is also supported:
 
 ```html
-<img src="counter/counter.php?df=lmoten(1).dat&dd=counter-strip|frgb=000066|comma=T|ft=0" alt="counter">
+<img src="/counter/counter.php?df=lmoten(1).dat&dd=counter-strip|frgb=000066|comma=T|ft=0" alt="counter">
 ```
+
+There is also a builder page at [index.html](/Users/lewismoten/dev/Athens-Acropolis-4507/counter/index.html) for previewing strips and generating URLs or embed code.
 
 ## Query Parameters
 
@@ -33,24 +35,24 @@ Legacy-style usage is also supported:
 - `comma`
   `T` / `F` or `1` / `0` to toggle thousands separators.
 - `frgb`
-  Legacy frame-color tint in `RRGGBB`.
+  Legacy frame color in `RRGGBB`. It colors the outer frame only.
 - `ft`
-  Legacy frame-thickness value. `0` keeps the original strip chrome thickness.
+  Legacy frame-thickness value. `0` keeps the original strip size unchanged.
 
 ## Notes
 
 - Counter values are stored as individual files like [data/default.dat](/Users/lewismoten/dev/Athens-Acropolis-4507/counter/data/default.dat).
-- Digit glyphs come from [counter-strip.gif](/Users/lewismoten/dev/Athens-Acropolis-4507/counter/counter-strip.gif), generated from the local `count.gif` look.
-- The PHP process needs write access to the `data/` folder and the `.dat` files inside it.
-- The response is a GIF image with no-cache headers, so it behaves like a classic web counter image.
-- Commas are inserted automatically, so larger values render like `1,234` or `12,345,678`.
+- Digit glyphs come from counter strips like [counter-strip.gif](/Users/lewismoten/dev/Athens-Acropolis-4507/counter/counter-strip.gif) and [@strip_blue_tea_counter.gif](/Users/lewismoten/dev/Athens-Acropolis-4507/counter/@strip_blue_tea_counter.gif).
+- GIF endpoints need server-side write access to the `data/` folder and the `.dat` files inside it.
+- JSONP endpoints update the `.dat` file server-side, then let [shoomi-visitor-counter.js](/Users/lewismoten/dev/Athens-Acropolis-4507/counter/shoomi-visitor-counter.js) render the strip in the browser.
+- Commas are inserted automatically when enabled, so larger values render like `1,234` or `12,345,678`.
 
 ## Available Implementations
 
 - [index.php](/Users/lewismoten/dev/Athens-Acropolis-4507/counter/index.php)
   PHP endpoint that reads the strip GIF directly and returns GIF.
 - [counter.php](/Users/lewismoten/dev/Athens-Acropolis-4507/counter/counter.php)
-  Preferred PHP entrypoint name. It simply loads `index.php` for compatibility with older links.
+  Preferred PHP entrypoint name. It loads `index.php` for compatibility with older links.
 - [counter.py](/Users/lewismoten/dev/Athens-Acropolis-4507/counter/counter.py)
   Python CGI-style endpoint that reads the strip GIF directly and returns GIF.
 - [counter.go](/Users/lewismoten/dev/Athens-Acropolis-4507/counter/counter.go)
@@ -66,11 +68,11 @@ Legacy-style usage is also supported:
 - [shoomi-visitor-counter.js](/Users/lewismoten/dev/Athens-Acropolis-4507/counter/shoomi-visitor-counter.js)
   Drop-in browser helper that can call `counter.pl`, `counter.rb`, `counter.asp`, or `counter.aspx` via JSONP and render the result on a canvas using the selected strip.
 
-The wrapper port for Node was removed so this folder only keeps implementations that either render the strip image directly or return a browser-renderable counter payload.
+The old Node wrapper was removed, so this folder now keeps only implementations that either render the strip image directly or return a browser-renderable counter payload.
 
 ## JSONP Endpoints
 
-Use the Perl, Ruby, Classic ASP, or ASP.NET endpoint when you want a server language that can safely update the `.dat` file and return a browser-renderable payload without doing GIF composition itself.
+Use the Perl, Ruby, Classic ASP, or ASP.NET endpoint when you want the server to update the `.dat` file but let the browser do the strip rendering.
 
 Example:
 
@@ -92,12 +94,12 @@ ShoomiVisitorCounter.mount("#visitor-counter", {
 </script>
 ```
 
-For Classic ASP, change only the endpoint:
+For Ruby, change only the endpoint:
 
 ```html
 <script>
 ShoomiVisitorCounter.mount("#visitor-counter", {
-  endpoint: "/counter/counter.asp",
+  endpoint: "/counter/counter.rb",
   params: {
     df: "lmoten(1).dat",
     strip: "counter-strip",
@@ -110,12 +112,12 @@ ShoomiVisitorCounter.mount("#visitor-counter", {
 </script>
 ```
 
-For Ruby, change only the endpoint:
+For Classic ASP, change only the endpoint:
 
 ```html
 <script>
 ShoomiVisitorCounter.mount("#visitor-counter", {
-  endpoint: "/counter/counter.rb",
+  endpoint: "/counter/counter.asp",
   params: {
     df: "lmoten(1).dat",
     strip: "counter-strip",
@@ -149,6 +151,7 @@ ShoomiVisitorCounter.mount("#visitor-counter", {
 ## Strip Metadata
 
 - A strip can optionally have a sidecar metadata file like [counter-strip.meta.json](/Users/lewismoten/dev/Athens-Acropolis-4507/counter/counter-strip.meta.json) or [@strip_blue_tea_counter.meta.json](/Users/lewismoten/dev/Athens-Acropolis-4507/counter/@strip_blue_tea_counter.meta.json).
+- [shoomi-visitor-counter.js](/Users/lewismoten/dev/Athens-Acropolis-4507/counter/shoomi-visitor-counter.js) derives the metadata filename automatically from the strip source, for example `counter-strip.gif` -> `counter-strip.meta.json`.
 - The preferred format is a compact lookup object with a `base` block and per-token overrides, for example:
 
 ```json
