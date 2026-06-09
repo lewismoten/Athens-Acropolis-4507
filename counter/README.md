@@ -57,16 +57,18 @@ Legacy-style usage is also supported:
   Go CGI-style endpoint that reads the strip GIF directly and returns GIF.
 - [counter.pl](/Users/lewismoten/dev/Athens-Acropolis-4507/counter/counter.pl)
   Perl JSON/JSONP endpoint that increments the counter and returns the new value plus the resolved render parameters.
+- [counter.rb](/Users/lewismoten/dev/Athens-Acropolis-4507/counter/counter.rb)
+  Ruby JSON/JSONP endpoint that increments the counter and returns the new value plus the resolved render parameters.
 - [counter.asp](/Users/lewismoten/dev/Athens-Acropolis-4507/counter/counter.asp)
   Classic ASP JSON/JSONP endpoint that increments the counter and returns the new value plus the resolved render parameters.
 - [shoomi-visitor-counter.js](/Users/lewismoten/dev/Athens-Acropolis-4507/counter/shoomi-visitor-counter.js)
-  Drop-in browser helper that can call `counter.pl` or `counter.asp` via JSONP and render the result on a canvas using the selected strip.
+  Drop-in browser helper that can call `counter.pl`, `counter.rb`, or `counter.asp` via JSONP and render the result on a canvas using the selected strip.
 
 The wrapper ports for Node and Ruby were removed so this folder only keeps implementations that either render the strip image directly or return a browser-renderable counter payload.
 
 ## JSONP Endpoints
 
-Use the Perl or Classic ASP endpoint when you want a server language that can safely update the `.dat` file and return a browser-renderable payload without doing GIF composition itself.
+Use the Perl, Ruby, or Classic ASP endpoint when you want a server language that can safely update the `.dat` file and return a browser-renderable payload without doing GIF composition itself.
 
 Example:
 
@@ -94,6 +96,24 @@ For Classic ASP, change only the endpoint:
 <script>
 ShoomiVisitorCounter.mount("#visitor-counter", {
   endpoint: "/counter/counter.asp",
+  params: {
+    df: "lmoten(1).dat",
+    strip: "counter-strip",
+    dd: "counter-strip|frgb=000066|comma=T|ft=0",
+    digits: "4",
+    step: "1",
+    increment: "1"
+  }
+});
+</script>
+```
+
+For Ruby, change only the endpoint:
+
+```html
+<script>
+ShoomiVisitorCounter.mount("#visitor-counter", {
+  endpoint: "/counter/counter.rb",
   params: {
     df: "lmoten(1).dat",
     strip: "counter-strip",

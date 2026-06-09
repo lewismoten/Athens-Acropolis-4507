@@ -62,7 +62,7 @@
 
   bindSyncEvents(form, onFormChanged);
   bindSyncEvents(previewModeSelect, function () {
-    if (previewModeSelect.value === "php" || previewModeSelect.value === "python" || previewModeSelect.value === "go" || previewModeSelect.value === "perl" || previewModeSelect.value === "asp") {
+    if (previewModeSelect.value === "php" || previewModeSelect.value === "python" || previewModeSelect.value === "go" || previewModeSelect.value === "perl" || previewModeSelect.value === "ruby" || previewModeSelect.value === "asp") {
       lastServerPreviewMode = previewModeSelect.value;
     }
     syncOutputsAndPreview();
@@ -133,7 +133,7 @@
     var endpoint = getSelectedServerScript(effectiveMode);
     var lines;
 
-    if (effectiveMode !== "perl" && effectiveMode !== "asp") {
+    if (effectiveMode !== "perl" && effectiveMode !== "ruby" && effectiveMode !== "asp") {
       return '<img src="' + buildServerUrl(config, false) + '" alt="counter">';
     }
 
@@ -180,7 +180,7 @@
   }
 
   function renderActivePreview() {
-    if (previewModeSelect.value === "perl" || previewModeSelect.value === "asp") {
+    if (previewModeSelect.value === "perl" || previewModeSelect.value === "ruby" || previewModeSelect.value === "asp") {
       renderJsonpPreview();
       return;
     }
@@ -318,6 +318,9 @@
     if (previewMode === "perl") {
       return "counter.pl";
     }
+    if (previewMode === "ruby") {
+      return "counter.rb";
+    }
     if (previewMode === "asp") {
       return "counter.asp";
     }
@@ -332,7 +335,7 @@
   }
 
   function getEffectiveServerMode(previewMode) {
-    if (previewMode === "php" || previewMode === "python" || previewMode === "go" || previewMode === "perl" || previewMode === "asp") {
+    if (previewMode === "php" || previewMode === "python" || previewMode === "go" || previewMode === "perl" || previewMode === "ruby" || previewMode === "asp") {
       return previewMode;
     }
 
