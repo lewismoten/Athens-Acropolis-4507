@@ -62,7 +62,7 @@
 
   bindSyncEvents(form, onFormChanged);
   bindSyncEvents(previewModeSelect, function () {
-    if (previewModeSelect.value === "php" || previewModeSelect.value === "python" || previewModeSelect.value === "go" || previewModeSelect.value === "perl" || previewModeSelect.value === "ruby" || previewModeSelect.value === "asp") {
+    if (previewModeSelect.value === "php" || previewModeSelect.value === "python" || previewModeSelect.value === "go" || previewModeSelect.value === "perl" || previewModeSelect.value === "ruby" || previewModeSelect.value === "asp" || previewModeSelect.value === "aspx") {
       lastServerPreviewMode = previewModeSelect.value;
     }
     syncOutputsAndPreview();
@@ -133,7 +133,7 @@
     var endpoint = getSelectedServerScript(effectiveMode);
     var lines;
 
-    if (effectiveMode !== "perl" && effectiveMode !== "ruby" && effectiveMode !== "asp") {
+    if (effectiveMode !== "perl" && effectiveMode !== "ruby" && effectiveMode !== "asp" && effectiveMode !== "aspx") {
       return '<img src="' + buildServerUrl(config, false) + '" alt="counter">';
     }
 
@@ -180,7 +180,7 @@
   }
 
   function renderActivePreview() {
-    if (previewModeSelect.value === "perl" || previewModeSelect.value === "ruby" || previewModeSelect.value === "asp") {
+    if (previewModeSelect.value === "perl" || previewModeSelect.value === "ruby" || previewModeSelect.value === "asp" || previewModeSelect.value === "aspx") {
       renderJsonpPreview();
       return;
     }
@@ -324,6 +324,9 @@
     if (previewMode === "asp") {
       return "counter.asp";
     }
+    if (previewMode === "aspx") {
+      return "counter.aspx";
+    }
     if (previewMode === "python") {
       return "counter.py";
     }
@@ -335,7 +338,7 @@
   }
 
   function getEffectiveServerMode(previewMode) {
-    if (previewMode === "php" || previewMode === "python" || previewMode === "go" || previewMode === "perl" || previewMode === "ruby" || previewMode === "asp") {
+    if (previewMode === "php" || previewMode === "python" || previewMode === "go" || previewMode === "perl" || previewMode === "ruby" || previewMode === "asp" || previewMode === "aspx") {
       return previewMode;
     }
 
