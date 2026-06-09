@@ -20,6 +20,8 @@ This archive has been partially modernized so the original experience can still 
 
 The reconstructed marquee engine, editor, parameters, message-file format, and mode system are documented in [marquee/README.md](marquee/README.md).
 
+The restored visitor counter, strip formats, server implementations, and JSONP/browser renderer are documented in [counter/README.md](counter/README.md).
+
 # MIDI Restoration
 The original site used an embedded MIDI file, [midi_song_newage.mid](midi_song_newage.mid), which is only about `12 KB`, but modern browsers now tend to download instead of play it. A straight browser-friendly replacement with rendered `mp3` or `ogg` files worked technically, but those full audio renders ended up being a few megabytes each, which felt out of proportion to the tiny original asset.
 
