@@ -1,17 +1,17 @@
 # Counter Service
 
-This folder contains a tiny PHP-based hit counter that stores counts in individual `.dat` files and returns a generated GIF image assembled from a classic counter strip.
+This folder contains a tiny strip-based hit counter that stores counts in individual `.dat` files and returns a generated GIF image assembled from a classic counter strip.
 
 ## Basic Usage
 
 ```html
-<img src="counter/index.php?key=home" alt="Visitor counter">
+<img src="counter/counter.php?key=home" alt="Visitor counter">
 ```
 
 Legacy-style usage is also supported:
 
 ```html
-<img src="counter/index.php?df=lmoten(1).dat&dd=lmoten(a)|frgb=000066|comma=T|ft=0" alt="counter">
+<img src="counter/counter.php?df=lmoten(1).dat&dd=counter-strip|frgb=000066|comma=T|ft=0" alt="counter">
 ```
 
 ## Query Parameters
@@ -21,9 +21,11 @@ Legacy-style usage is also supported:
 - `df`
   Legacy data-file style counter name. It maps directly to an individual `.dat` file.
 - `dd`
-  Legacy style selector. Pipe-packed options like `lmoten(a)|frgb=000066|comma=T|ft=0` are supported.
+  Legacy style selector. In the builder, this now follows the selected counter strip, so packed values look like `counter-strip|frgb=000066|comma=T|ft=0`.
 - `digits`
   Minimum number of digits to display. Default: `4`
+- `text`
+  Optional literal token string to render instead of the numeric counter, such as `12:34pm` or `06-08-26`.
 - `increment`
   Set to `0` to read without incrementing.
 - `step`
@@ -42,3 +44,39 @@ Legacy-style usage is also supported:
 - The PHP process needs write access to the `data/` folder and the `.dat` files inside it.
 - The response is a GIF image with no-cache headers, so it behaves like a classic web counter image.
 - Commas are inserted automatically, so larger values render like `1,234` or `12,345,678`.
+
+## Available Implementations
+
+- [index.php](/Users/lewismoten/dev/Athens-Acropolis-4507/counter/index.php)
+  PHP endpoint that reads the strip GIF directly and returns GIF.
+- [counter.php](/Users/lewismoten/dev/Athens-Acropolis-4507/counter/counter.php)
+  Preferred PHP entrypoint name. It simply loads `index.php` for compatibility with older links.
+- [counter.py](/Users/lewismoten/dev/Athens-Acropolis-4507/counter/counter.py)
+  Python CGI-style endpoint that reads the strip GIF directly and returns GIF.
+- [counter.go](/Users/lewismoten/dev/Athens-Acropolis-4507/counter/counter.go)
+  Go CGI-style endpoint that reads the strip GIF directly and returns GIF.
+
+The wrapper ports for Node, Perl, Ruby, and Classic ASP were removed so this folder only keeps implementations that actually read the strip image and build the counter themselves.
+
+## Strip Metadata
+
+- A strip can optionally have a sidecar metadata file like [counter-strip.meta.json](/Users/lewismoten/dev/Athens-Acropolis-4507/counter/counter-strip.meta.json) or [@strip_blue_tea_counter.meta.json](/Users/lewismoten/dev/Athens-Acropolis-4507/counter/@strip_blue_tea_counter.meta.json).
+- The preferred format is a compact lookup object with a `base` block and per-token overrides, for example:
+
+```json
+{
+  "base": {
+    "tokens": ["0", "1", "2", "3", "4", "5", "6", "7", "8", "9", ":", "am", "pm", ",", "-"],
+    "width": 15
+  },
+  ":": 10,
+  "am": 24,
+  "pm": 24,
+  ",": 11,
+  "-": 11
+}
+```
+
+- Each token override may be either a number meaning `width`, or an object like `{ "width": 29, "offset": 210, "advance": 31 }` when a strip needs non-uniform spacing.
+- The current shared token order is:
+  `0 1 2 3 4 5 6 7 8 9 : am pm , -`

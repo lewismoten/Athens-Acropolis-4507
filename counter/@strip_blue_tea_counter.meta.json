@@ -1,0 +1,15 @@
+{
+  "base": {
+    "tokens": ["0", "1", "2", "3", "4", "5", "6", "7", "8", "9", ":", "am", "pm", ",", "-"],
+    "width": 16,
+    "advance": 17
+  },
+  "0": { "width": 15, "offset": 0, "advance": 16 },
+  "1": { "width": 12, "offset": 16, "advance": 13 },
+  "4": { "width": 17, "offset": 63, "advance": 18 },
+  ":": { "width": 10, "offset": 166, "advance": 12 },
+  "am": { "width": 31, "offset": 178, "advance": 32 },
+  "pm": { "width": 29, "offset": 210, "advance": 31 },
+  ",": { "width": 9, "offset": 241, "advance": 10 },
+  "-": { "width": 11, "offset": 251 }
+}

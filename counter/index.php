@@ -3,7 +3,7 @@ declare(strict_types=1);
 
 $storageDirectory = __DIR__ . '/data';
 $legacyOptions = parseLegacyCounterOptions($_GET);
-$stripPath = resolveStripPath($legacyOptions['dd'] ?? ($_GET['dd'] ?? ''));
+$stripPath = resolveStripPath($_GET['strip'] ?? ($legacyOptions['dd'] ?? ($_GET['dd'] ?? '')));
 $counterFile = resolveCounterFilePath($storageDirectory, $_GET['key'] ?? ($legacyOptions['df'] ?? ($_GET['df'] ?? 'default')));
 $minimumDigits = clampInteger($_GET['digits'] ?? '4', 1, 12, 4);
 $shouldIncrement = ($_GET['increment'] ?? '1') !== '0';
@@ -11,12 +11,13 @@ $step = clampInteger($_GET['step'] ?? '1', 0, 1000, 1);
 $useComma = parseLegacyBoolean($legacyOptions['comma'] ?? ($_GET['comma'] ?? '1'), true);
 $frameColor = normalizeOptionalColor($legacyOptions['frgb'] ?? ($_GET['frgb'] ?? ''));
 $frameThickness = clampInteger($legacyOptions['ft'] ?? ($_GET['ft'] ?? '0'), 0, 6, 0);
+$textOverride = isset($_GET['text']) ? (string) $_GET['text'] : '';
 
 ensureStorageDirectory($storageDirectory);
 ensureCounterFile($counterFile);
 $count = readAndUpdateCount($counterFile, $shouldIncrement ? $step : 0);
 
-renderCounterImage($count, $minimumDigits, $stripPath, $useComma, $frameColor, $frameThickness);
+renderCounterImage($count, $minimumDigits, $stripPath, $useComma, $frameColor, $frameThickness, $textOverride);
 
 function normalizeCounterKey(string $value): string
 {
@@ -114,12 +115,14 @@ function renderCounterImage(
     string $stripPath,
     bool $useComma,
     ?string $frameColor,
-    int $frameThickness
+    int $frameThickness,
+    string $textOverride
 ): void
 {
+    $layout = loadStripLayout($stripPath);
     $text = formatCounterText($count, $minimumDigits, $useComma);
+    $tokens = tokenizeDisplayText($textOverride !== '' ? $textOverride : $text, $layout['tokens']);
     $strip = loadCounterStrip($stripPath);
-    $glyphs = getStripGlyphMap();
 
     if ($strip === false) {
         http_response_code(500);
@@ -128,9 +131,17 @@ function renderCounterImage(
         return;
     }
 
-    $glyphWidth = (int) imagesx($strip) / count($glyphs);
     $glyphHeight = imagesy($strip);
-    $image = imagecreate($glyphWidth * strlen($text), $glyphHeight);
+    $tokenIndex = array_flip($layout['tokens']);
+    $defaultIndex = $tokenIndex['0'] ?? 0;
+    $imageWidth = 0;
+
+    foreach ($tokens as $token) {
+        $glyphIndex = $tokenIndex[$token] ?? $defaultIndex;
+        $imageWidth += $layout['widths'][$glyphIndex];
+    }
+
+    $image = imagecreate($imageWidth, $glyphHeight);
 
     if ($image === false) {
         imagedestroy($strip);
@@ -140,28 +151,31 @@ function renderCounterImage(
         return;
     }
 
-    for ($index = 0; $index < strlen($text); $index += 1) {
-        $character = $text[$index];
-        $sourceIndex = $glyphs[$character] ?? $glyphs['0'];
+    $left = 0;
+
+    foreach ($tokens as $token) {
+        $sourceIndex = $tokenIndex[$token] ?? $defaultIndex;
+        $sourceLeft = $layout['offsets'][$sourceIndex];
+        $glyphWidth = $layout['widths'][$sourceIndex];
 
         imagecopy(
             $image,
             $strip,
-            $index * $glyphWidth,
+            $left,
             0,
-            $sourceIndex * $glyphWidth,
+            $sourceLeft,
             0,
             $glyphWidth,
             $glyphHeight
         );
-    }
 
-    if ($frameColor !== null) {
-        tintFramePixels($image, $frameColor);
+        $left += $glyphWidth;
     }
 
     if ($frameThickness > 0) {
-        applyFrameThickness($image, $glyphWidth, $glyphHeight, $frameColor ?? '#666666', $frameThickness);
+        $framed = applyFrameThickness($image, $frameColor ?? '#666666', $frameThickness);
+        imagedestroy($image);
+        $image = $framed;
     }
 
     header('Content-Type: image/gif');
@@ -201,21 +215,135 @@ function loadCounterStrip(string $stripPath)
     return @imagecreatefromgif($stripPath);
 }
 
-function getStripGlyphMap(): array
+function loadStripLayout(string $stripPath): array
 {
+    $metadataPath = preg_replace('/\.gif$/i', '.meta.json', $stripPath) ?: ($stripPath . '.meta.json');
+
+    if (is_file($metadataPath)) {
+        $json = file_get_contents($metadataPath);
+        $data = json_decode((string) $json, true);
+        $layout = parseStripMetadata($data);
+
+        if ($layout !== null) {
+            return $layout;
+        }
+    }
+
+    $tokens = ['0', '1', '2', '3', '4', '5', '6', '7', '8', '9', ','];
+    $width = 15;
+    $offsets = [];
+
+    for ($index = 0; $index < count($tokens); $index += 1) {
+        $offsets[] = $index * $width;
+    }
+
     return [
-        '0' => 0,
-        '1' => 1,
-        '2' => 2,
-        '3' => 3,
-        '4' => 4,
-        '5' => 5,
-        '6' => 6,
-        '7' => 7,
-        '8' => 8,
-        '9' => 9,
-        ',' => 10,
+        'tokens' => $tokens,
+        'widths' => array_fill(0, count($tokens), $width),
+        'offsets' => $offsets,
     ];
+}
+
+function parseStripMetadata($data): ?array
+{
+    if (!is_array($data)) {
+        return null;
+    }
+
+    if (isset($data['tokens'], $data['widths']) && is_array($data['tokens']) && is_array($data['widths']) && count($data['tokens']) === count($data['widths'])) {
+        $offsets = isset($data['offsets']) && is_array($data['offsets']) ? array_map('intval', array_values($data['offsets'])) : [];
+
+        if (count($offsets) !== count($data['widths'])) {
+            $offsets = [];
+            $left = 0;
+
+            foreach ($data['widths'] as $width) {
+                $offsets[] = $left;
+                $left += (int) $width;
+            }
+        }
+
+        return [
+            'tokens' => array_values($data['tokens']),
+            'widths' => array_map('intval', array_values($data['widths'])),
+            'offsets' => $offsets,
+        ];
+    }
+
+    if (!isset($data['base']) || !is_array($data['base']) || !isset($data['base']['tokens']) || !is_array($data['base']['tokens'])) {
+        return null;
+    }
+
+    $tokens = array_values($data['base']['tokens']);
+    $baseWidth = (int) ($data['base']['width'] ?? 0);
+
+    if ($tokens === [] || $baseWidth <= 0) {
+        return null;
+    }
+
+    $baseAdvance = (int) ($data['base']['advance'] ?? $baseWidth);
+    $left = (int) ($data['base']['offset'] ?? 0);
+    $widths = [];
+    $offsets = [];
+
+    foreach ($tokens as $token) {
+        $entry = $data[$token] ?? null;
+        $width = $baseWidth;
+        $offset = $left;
+        $advance = $baseAdvance;
+
+        if (is_int($entry) || is_float($entry) || (is_string($entry) && is_numeric($entry))) {
+            $width = (int) $entry;
+            $advance = $width;
+        } elseif (is_array($entry)) {
+            $width = (int) ($entry['width'] ?? $baseWidth);
+            $offset = (int) ($entry['offset'] ?? $left);
+            $advance = (int) ($entry['advance'] ?? $width);
+        }
+
+        $widths[] = $width;
+        $offsets[] = $offset;
+        $left = $offset + $advance;
+    }
+
+    return [
+        'tokens' => $tokens,
+        'widths' => $widths,
+        'offsets' => $offsets,
+    ];
+}
+
+function tokenizeDisplayText(string $text, array $availableTokens): array
+{
+    $tokens = [];
+    $text = (string) $text;
+    $index = 0;
+    $tokenLookup = array_fill_keys($availableTokens, true);
+    $length = strlen($text);
+
+    while ($index < $length) {
+        $pair = strtolower(substr($text, $index, 2));
+
+        if (($pair === 'am' || $pair === 'pm') && isset($tokenLookup[$pair])) {
+            $tokens[] = $pair;
+            $index += 2;
+            continue;
+        }
+
+        $character = $text[$index];
+
+        if (isset($tokenLookup[$character])) {
+            $tokens[] = $character;
+        }
+
+        $index += 1;
+    }
+
+    if ($tokens === []) {
+        $tokens[] = in_array('0', $availableTokens, true) ? '0' : $availableTokens[0];
+    }
+
+    return $tokens;
 }
 
 function parseLegacyCounterOptions(array $query): array
@@ -295,11 +423,15 @@ function resolveStripPath(string $style): string
 {
     $basePath = __DIR__ . '/counter-strip.gif';
     $style = trim($style);
-    $normalized = preg_replace('/[^a-z0-9()_\-]+/i', '', strtolower($style)) ?? '';
+    $normalized = preg_replace('/[^@a-z0-9()_\-]+/i', '', strtolower($style)) ?? '';
     $candidateNames = [];
 
     if ($normalized !== '') {
-        $candidateNames[] = $normalized . '.gif';
+        if (substr($normalized, -4) !== '.gif') {
+            $candidateNames[] = $normalized . '.gif';
+        } else {
+            $candidateNames[] = $normalized;
+        }
         $candidateNames[] = str_replace(['(', ')'], ['', ''], $normalized) . '.gif';
     }
 
@@ -313,60 +445,26 @@ function resolveStripPath(string $style): string
     return $basePath;
 }
 
-function tintFramePixels($image, string $hexColor): void
+function applyFrameThickness($image, string $hexColor, int $thickness)
 {
+    $sourceWidth = imagesx($image);
+    $sourceHeight = imagesy($image);
+    $framedWidth = $sourceWidth + ($thickness * 2);
+    $framedHeight = $sourceHeight + ($thickness * 2);
+    $framed = imagecreate($framedWidth, $framedHeight);
     [$red, $green, $blue] = hexToRgb($hexColor);
-    $width = imagesx($image);
-    $height = imagesy($image);
-    $protected = [
-        '0,0,0' => true,
-        '232,232,232' => true,
-        '252,252,252' => true,
-        '168,168,168' => true,
-    ];
-    $palette = [];
+    $transparent = imagecolorallocate($framed, 255, 0, 255);
+    $color = imagecolorallocate($framed, $red, $green, $blue);
 
-    for ($y = 0; $y < $height; $y += 1) {
-        for ($x = 0; $x < $width; $x += 1) {
-            $index = imagecolorat($image, $x, $y);
-            $color = imagecolorsforindex($image, $index);
-            $key = $color['red'] . ',' . $color['green'] . ',' . $color['blue'];
-            $gray = $color['red'];
+    imagefill($framed, 0, 0, $transparent);
+    imagecolortransparent($framed, $transparent);
+    imagecopy($framed, $image, $thickness, $thickness, 0, 0, $sourceWidth, $sourceHeight);
 
-            if (isset($protected[$key]) || $color['red'] !== $color['green'] || $color['green'] !== $color['blue']) {
-                continue;
-            }
-
-            if (!isset($palette[$key])) {
-                $palette[$key] = imagecolorallocate(
-                    $image,
-                    (int) round(($gray / 255) * $red),
-                    (int) round(($gray / 255) * $green),
-                    (int) round(($gray / 255) * $blue)
-                );
-            }
-
-            imagesetpixel($image, $x, $y, $palette[$key]);
-        }
+    for ($line = 0; $line < $thickness; $line += 1) {
+        imagerectangle($framed, $line, $line, $framedWidth - 1 - $line, $framedHeight - 1 - $line, $color);
     }
-}
 
-function applyFrameThickness($image, int $glyphWidth, int $glyphHeight, string $hexColor, int $thickness): void
-{
-    [$red, $green, $blue] = hexToRgb($hexColor);
-    $color = imagecolorallocate($image, $red, $green, $blue);
-    $cells = intdiv(imagesx($image), $glyphWidth);
-
-    for ($cell = 0; $cell < $cells; $cell += 1) {
-        $left = $cell * $glyphWidth;
-        $top = 0;
-        $right = $left + $glyphWidth - 1;
-        $bottom = $glyphHeight - 1;
-
-        for ($line = 0; $line < $thickness; $line += 1) {
-            imagerectangle($image, $left + $line, $top + $line, $right - $line, $bottom - $line, $color);
-        }
-    }
+    return $framed;
 }
 
 function hexToRgb(string $hexColor): array

@@ -138,6 +138,13 @@
       display: block;
     }
 
+    .preview-error {
+      color: #ffcccc;
+      font-size: 14px;
+      line-height: 1.4;
+      white-space: pre-wrap;
+    }
+
     .code-output {
       width: 100%;
       min-height: 92px;
@@ -174,15 +181,18 @@
       <H1>Shoomi's Visitor Counter</H1>
     </DIV>
     <DIV CLASS="helper">
-      Build an old-style counter URL like <CODE>df=lmoten(1).dat&amp;dd=lmoten(a)|frgb=000066|comma=T|ft=0</CODE>,
-      then preview it through the PHP service or render it locally on a canvas from the strip.
+      Build an old-style counter URL like <CODE>df=lmoten(1).dat&amp;dd=counter-strip|frgb=000066|comma=T|ft=0</CODE>,
+      then preview it through PHP, Python, or render it locally on a canvas from the strip. The selected
+      <CODE>Counter Strip</CODE> is the visual style and now directly drives the legacy <CODE>dd</CODE> value.
     </DIV>
     <DIV CLASS="preview-controls">
       <LABEL CLASS="field">
         <SPAN CLASS="field-label">Preview Mode</SPAN>
         <SELECT ID="preview-mode" NAME="previewMode" CLASS="field-select">
-          <OPTION VALUE="canvas" SELECTED>JavaScript Canvas</OPTION>
-          <OPTION VALUE="php">PHP Image</OPTION>
+          <OPTION VALUE="canvas" SELECTED>Client-Side JavaScript</OPTION>
+          <OPTION VALUE="php">Server-Side PHP</OPTION>
+          <OPTION VALUE="python">Server-Side Python</OPTION>
+          <OPTION VALUE="go">Server-Side Go</OPTION>
         </SELECT>
       </LABEL>
     </DIV>
@@ -198,8 +208,11 @@
       </LABEL>
 
       <LABEL CLASS="field">
-        <SPAN CLASS="field-label">Style / `dd` Base</SPAN>
-        <INPUT ID="counter-dd" NAME="dd_base" CLASS="field-input" TYPE="text" VALUE="lmoten(a)">
+        <SPAN CLASS="field-label">Counter Strip / `dd`</SPAN>
+        <SELECT ID="counter-strip" NAME="strip" CLASS="field-select">
+          <OPTION VALUE="counter-strip" SELECTED>Odometer</OPTION>
+          <OPTION VALUE="@strip_blue_tea_counter">Blue Tea</OPTION>
+        </SELECT>
       </LABEL>
 
       <LABEL CLASS="field">
@@ -231,7 +244,7 @@
       </LABEL>
 
       <LABEL CLASS="field">
-        <SPAN CLASS="field-label">Increment on PHP Preview</SPAN>
+        <SPAN CLASS="field-label">Increment on Server Preview</SPAN>
         <SPAN CLASS="field-inline">
           <INPUT ID="counter-increment" NAME="increment" CLASS="field-checkbox" TYPE="checkbox" CHECKED>
           <SPAN>Increment stored count</SPAN>
