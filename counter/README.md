@@ -55,8 +55,36 @@ Legacy-style usage is also supported:
   Python CGI-style endpoint that reads the strip GIF directly and returns GIF.
 - [counter.go](/Users/lewismoten/dev/Athens-Acropolis-4507/counter/counter.go)
   Go CGI-style endpoint that reads the strip GIF directly and returns GIF.
+- [counter.pl](/Users/lewismoten/dev/Athens-Acropolis-4507/counter/counter.pl)
+  Perl JSON/JSONP endpoint that increments the counter and returns the new value plus the resolved render parameters.
+- [shoomi-visitor-counter.js](/Users/lewismoten/dev/Athens-Acropolis-4507/counter/shoomi-visitor-counter.js)
+  Drop-in browser helper that can call `counter.pl` via JSONP and render the result on a canvas using the selected strip.
 
-The wrapper ports for Node, Perl, Ruby, and Classic ASP were removed so this folder only keeps implementations that actually read the strip image and build the counter themselves.
+The wrapper ports for Node, Ruby, and Classic ASP were removed so this folder only keeps implementations that either render the strip image directly or return a browser-renderable counter payload.
+
+## Perl JSONP
+
+Use the Perl endpoint when you want a server language that can safely update the `.dat` file and return a browser-renderable payload without doing GIF composition itself.
+
+Example:
+
+```html
+<div id="visitor-counter"></div>
+<script src="/counter/shoomi-visitor-counter.js"></script>
+<script>
+ShoomiVisitorCounter.mount("#visitor-counter", {
+  endpoint: "/counter/counter.pl",
+  params: {
+    df: "lmoten(1).dat",
+    strip: "counter-strip",
+    dd: "counter-strip|frgb=000066|comma=T|ft=0",
+    digits: "4",
+    step: "1",
+    increment: "1"
+  }
+});
+</script>
+```
 
 ## Strip Metadata
 

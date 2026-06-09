@@ -62,7 +62,7 @@
 
   bindSyncEvents(form, onFormChanged);
   bindSyncEvents(previewModeSelect, function () {
-    if (previewModeSelect.value === "php" || previewModeSelect.value === "python" || previewModeSelect.value === "go") {
+    if (previewModeSelect.value === "php" || previewModeSelect.value === "python" || previewModeSelect.value === "go" || previewModeSelect.value === "perl") {
       lastServerPreviewMode = previewModeSelect.value;
     }
     syncOutputsAndPreview();
@@ -103,13 +103,11 @@
   function buildServerUrl(config, cacheBuster) {
     var params = new URLSearchParams();
     var scriptName = getSelectedServerScript(getEffectiveServerMode(config.previewMode));
+    var values = buildServerParams(config);
 
-    params.set("df", config.df);
-    params.set("strip", config.strip);
-    params.set("dd", buildLegacyDdValue(config));
-    params.set("digits", String(config.digits));
-    params.set("step", String(config.step));
-    params.set("increment", config.increment ? "1" : "0");
+    Object.keys(values).forEach(function (key) {
+      params.set(key, values[key]);
+    });
 
     if (cacheBuster) {
       params.set("_ts", String(Date.now()));
@@ -118,8 +116,43 @@
     return scriptName + "?" + params.toString();
   }
 
+  function buildServerParams(config) {
+    return {
+      df: config.df,
+      strip: config.strip,
+      dd: buildLegacyDdValue(config),
+      digits: String(config.digits),
+      step: String(config.step),
+      increment: config.increment ? "1" : "0"
+    };
+  }
+
+  function buildEmbedCode(config) {
+    var effectiveMode = getEffectiveServerMode(config.previewMode);
+    var params = buildServerParams(config);
+    var endpoint = getSelectedServerScript(effectiveMode);
+    var lines;
+
+    if (effectiveMode !== "perl") {
+      return '<img src="' + buildServerUrl(config, false) + '" alt="counter">';
+    }
+
+    lines = [
+      '<div id="visitor-counter"></div>',
+      '<script src="shoomi-visitor-counter.js"><' + '/script>',
+      '<script>',
+      'ShoomiVisitorCounter.mount("#visitor-counter", {',
+      '  endpoint: "' + endpoint + '",',
+      '  params: ' + JSON.stringify(params, null, 2).replace(/\n/g, '\n  '),
+      '});',
+      '<' + '/script>'
+    ];
+
+    return lines.join("\n");
+  }
+
   function buildImgTag(config) {
-    return '<img src="' + buildServerUrl(config, false) + '" alt="counter">';
+    return buildEmbedCode(config);
   }
 
   function updateOutputs() {
@@ -147,6 +180,11 @@
   }
 
   function renderActivePreview() {
+    if (previewModeSelect.value === "perl") {
+      renderPerlPreview();
+      return;
+    }
+
     if (previewModeSelect.value === "php" || previewModeSelect.value === "python" || previewModeSelect.value === "go") {
       renderServerPreview();
       return;
@@ -277,6 +315,9 @@
   }
 
   function getSelectedServerScript(previewMode) {
+    if (previewMode === "perl") {
+      return "counter.pl";
+    }
     if (previewMode === "python") {
       return "counter.py";
     }
@@ -288,11 +329,31 @@
   }
 
   function getEffectiveServerMode(previewMode) {
-    if (previewMode === "php" || previewMode === "python" || previewMode === "go") {
+    if (previewMode === "php" || previewMode === "python" || previewMode === "go" || previewMode === "perl") {
       return previewMode;
     }
 
     return lastServerPreviewMode || "php";
+  }
+
+  function renderPerlPreview() {
+    var config = getConfig();
+
+    clearPreviewMedia();
+    previewBox.textContent = "Loading server preview...";
+
+    if (!window.ShoomiVisitorCounter || typeof window.ShoomiVisitorCounter.mount !== "function") {
+      showPreviewError("shoomi-visitor-counter.js is required to preview the Perl JSONP counter.");
+      return;
+    }
+
+    window.ShoomiVisitorCounter.mount(previewBox, {
+      endpoint: "counter.pl",
+      params: buildServerParams(config),
+      basePath: ""
+    }).catch(function (error) {
+      showPreviewError(error && error.message ? error.message : "Unable to load the Perl JSONP preview.");
+    });
   }
 
   function renderCanvasPreview() {
