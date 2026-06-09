@@ -57,18 +57,15 @@
       return;
     }
 
-    field.addEventListener("input", onFormChanged);
-    field.addEventListener("change", onFormChanged);
+    bindSyncEvents(field, onFormChanged);
   });
 
-  form.addEventListener("input", onFormChanged);
-  form.addEventListener("change", onFormChanged);
-  previewModeSelect.addEventListener("change", function () {
+  bindSyncEvents(form, onFormChanged);
+  bindSyncEvents(previewModeSelect, function () {
     if (previewModeSelect.value === "php" || previewModeSelect.value === "python" || previewModeSelect.value === "go") {
       lastServerPreviewMode = previewModeSelect.value;
     }
-    updateOutputs();
-    renderActivePreview();
+    syncOutputsAndPreview();
   });
   copyUrlButton.addEventListener("click", function () {
     copyText(urlOutput.value);
@@ -77,8 +74,7 @@
     copyText(tagOutput.value);
   });
 
-  updateOutputs();
-  renderActivePreview();
+  syncOutputsAndPreview();
 
   function getConfig() {
     return {
@@ -133,11 +129,21 @@
     tagOutput.value = buildImgTag(config);
   }
 
+  function syncOutputsAndPreview() {
+    updateOutputs();
+    renderActivePreview();
+  }
+
   function onFormChanged() {
     setStripImageSource(fields.strip.value);
     ensureStripLayout(fields.strip.value);
-    updateOutputs();
-    renderActivePreview();
+    syncOutputsAndPreview();
+  }
+
+  function bindSyncEvents(target, handler) {
+    ["input", "change", "keyup", "click", "paste"].forEach(function (eventName) {
+      target.addEventListener(eventName, handler);
+    });
   }
 
   function renderActivePreview() {
