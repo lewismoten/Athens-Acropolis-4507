@@ -62,7 +62,7 @@
 
   bindSyncEvents(form, onFormChanged);
   bindSyncEvents(previewModeSelect, function () {
-    if (previewModeSelect.value === "php" || previewModeSelect.value === "python" || previewModeSelect.value === "go" || previewModeSelect.value === "perl") {
+    if (previewModeSelect.value === "php" || previewModeSelect.value === "python" || previewModeSelect.value === "go" || previewModeSelect.value === "perl" || previewModeSelect.value === "asp") {
       lastServerPreviewMode = previewModeSelect.value;
     }
     syncOutputsAndPreview();
@@ -133,7 +133,7 @@
     var endpoint = getSelectedServerScript(effectiveMode);
     var lines;
 
-    if (effectiveMode !== "perl") {
+    if (effectiveMode !== "perl" && effectiveMode !== "asp") {
       return '<img src="' + buildServerUrl(config, false) + '" alt="counter">';
     }
 
@@ -180,8 +180,8 @@
   }
 
   function renderActivePreview() {
-    if (previewModeSelect.value === "perl") {
-      renderPerlPreview();
+    if (previewModeSelect.value === "perl" || previewModeSelect.value === "asp") {
+      renderJsonpPreview();
       return;
     }
 
@@ -318,6 +318,9 @@
     if (previewMode === "perl") {
       return "counter.pl";
     }
+    if (previewMode === "asp") {
+      return "counter.asp";
+    }
     if (previewMode === "python") {
       return "counter.py";
     }
@@ -329,30 +332,31 @@
   }
 
   function getEffectiveServerMode(previewMode) {
-    if (previewMode === "php" || previewMode === "python" || previewMode === "go" || previewMode === "perl") {
+    if (previewMode === "php" || previewMode === "python" || previewMode === "go" || previewMode === "perl" || previewMode === "asp") {
       return previewMode;
     }
 
     return lastServerPreviewMode || "php";
   }
 
-  function renderPerlPreview() {
+  function renderJsonpPreview() {
     var config = getConfig();
+    var endpoint = getSelectedServerScript(getEffectiveServerMode(config.previewMode));
 
     clearPreviewMedia();
     previewBox.textContent = "Loading server preview...";
 
     if (!window.ShoomiVisitorCounter || typeof window.ShoomiVisitorCounter.mount !== "function") {
-      showPreviewError("shoomi-visitor-counter.js is required to preview the Perl JSONP counter.");
+      showPreviewError("shoomi-visitor-counter.js is required to preview the JSONP counter.");
       return;
     }
 
     window.ShoomiVisitorCounter.mount(previewBox, {
-      endpoint: "counter.pl",
+      endpoint: endpoint,
       params: buildServerParams(config),
       basePath: ""
     }).catch(function (error) {
-      showPreviewError(error && error.message ? error.message : "Unable to load the Perl JSONP preview.");
+      showPreviewError(error && error.message ? error.message : "Unable to load the JSONP preview.");
     });
   }
 
