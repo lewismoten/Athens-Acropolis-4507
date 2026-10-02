@@ -1,6 +1,6 @@
 # Athens-Acropolis-4507
 
-![GeoCities Banner: Shoomi - The Beginning of All Dreams](banner_geocities.gif)
+![Shoomi's HomePage: The Beginning of All Dreams](./docs/social-preview.jpg)
 
 I got a GeoCities web page in the 90's. This was my first web page. My account was `moonhalo`, and I went by `Shoomi` as the online persona.
 
